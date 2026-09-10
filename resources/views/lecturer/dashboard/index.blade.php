@@ -31,8 +31,7 @@
                     class="font-mono text-[10.5px] uppercase tracking-[0.1em] border border-white/30 px-4 py-2.5 text-white/80 hover:bg-surface hover:text-fg hover:border-blue transition rounded-lg">
                     Gradebook
                 </a>
-                <a href="{{ route('lecturer.case.create') }}"
-                    class="bg-blue text-white text-[13px] font-semibold px-4 py-2.5 hover:bg-surface hover:text-blue border border-blue transition rounded-lg">
+                <a href="{{ route('lecturer.case.create') }}" class="btn-primary text-[13px]">
                     New case
                 </a>
             </div>
@@ -42,8 +41,7 @@
         <div class="bg-surface border border-edge px-6 py-16 text-center">
             <p class="font-display text-[16px] font-semibold text-fg">No cases yet</p>
             <p class="text-[13px] text-fg-2 mt-1.5 mb-5">Author a case manually, or let the AI generator draft one for you.</p>
-            <a href="{{ route('lecturer.case.create') }}"
-                class="inline-block bg-black text-white text-[13px] font-medium px-5 py-2.5 hover:bg-blue transition rounded-lg">
+            <a href="{{ route('lecturer.case.create') }}" class="btn-primary inline-flex text-[13px]">
                 Create your first case
             </a>
         </div>
@@ -99,8 +97,7 @@
 
                     {{-- Actions --}}
                     <div class="flex items-center gap-px flex-shrink-0">
-                        <a href="{{ route('lecturer.report.index', $case) }}"
-                            class="font-mono text-[10px] uppercase tracking-[0.1em] bg-black text-white px-3 py-2 hover:bg-blue transition rounded-lg">
+                        <a href="{{ route('lecturer.report.index', $case) }}" class="btn-ai text-[11.5px]">
                             Reports {{ $case->submitted_count > 0 ? '('.$case->submitted_count.')' : '' }}
                         </a>
                         <form method="POST" action="{{ route('lecturer.case.toggle-publish', $case) }}">

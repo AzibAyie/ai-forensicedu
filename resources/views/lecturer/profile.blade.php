@@ -5,7 +5,7 @@
 <div class="py-4 max-w-2xl">
     <div class="bg-surface  border border-edge shadow-sm p-6">
         <div class="flex items-center gap-4 mb-6 pb-6 border-b">
-            <div class="w-16 h-16  bg-blue flex items-center justify-center text-white text-xl font-bold rounded-full">
+            <div class="w-16 h-16  bg-blue flex items-center justify-center text-base text-xl font-bold rounded-full">
                 {{ strtoupper(substr($user->name, 0, 2)) }}
             </div>
             <div>
@@ -19,7 +19,7 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2">
                     <label class="block text-xs font-medium text-fg-2 mb-1">Full Name</label>
-                    <input type="text" name="name" value="{{ $user->name }}" required class="w-full border border-edge  px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue">
+                    <input type="text" name="name" value="{{ $user->name }}" required class="w-full border border-edge bg-input text-fg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-fg-2 mb-1">Staff ID</label>
@@ -27,14 +27,14 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-fg-2 mb-1">Phone</label>
-                    <input type="text" name="phone" value="{{ $user->phone }}" class="w-full border border-edge  px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue">
+                    <input type="text" name="phone" value="{{ $user->phone }}" class="w-full border border-edge bg-input text-fg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue">
                 </div>
                 <div class="col-span-2">
                     <label class="block text-xs font-medium text-fg-2 mb-1">Faculty</label>
-                    <input type="text" name="faculty" value="{{ $user->faculty }}" class="w-full border border-edge  px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue">
+                    <input type="text" name="faculty" value="{{ $user->faculty }}" class="w-full border border-edge bg-input text-fg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:border-blue">
                 </div>
             </div>
-            <button type="submit" class="bg-black hover:bg-blue text-white px-5 py-2  text-sm font-medium transition rounded-lg">Update Profile</button>
+            <button type="submit" class="btn-primary">Update Profile</button>
         </form>
     </div>
 </div>

@@ -8,7 +8,7 @@
     <div class="hidden lg:flex lg:w-[46%] bg-black flex-col justify-between p-12">
         <div class="flex items-center gap-3">
             <div class="w-9 h-9 bg-blue flex items-center justify-center rounded-lg">
-                <span class="font-display font-bold text-[14px] text-white">FE</span>
+                <span class="font-display font-bold text-[14px] text-base">FE</span>
             </div>
             <p class="font-display text-[15px] font-semibold text-white">AI-ForensicEdu</p>
         </div>
@@ -35,7 +35,7 @@
 
             <div class="lg:hidden flex items-center gap-3 mb-9">
                 <div class="w-9 h-9 bg-blue flex items-center justify-center rounded-lg">
-                    <span class="font-display font-bold text-[14px] text-white">FE</span>
+                    <span class="font-display font-bold text-[14px] text-base">FE</span>
                 </div>
                 <p class="font-display text-[15px] font-semibold text-fg">AI-ForensicEdu</p>
             </div>
@@ -65,8 +65,7 @@
                     <input type="checkbox" name="remember" class="accent-blue">
                     <span class="text-[12.5px] text-fg-2">Keep me signed in</span>
                 </label>
-                <button type="submit"
-                    class="w-full bg-black text-white font-semibold text-[13.5px] py-3 hover:bg-blue transition mt-2 rounded-lg">
+                <button type="submit" class="btn-primary w-full mt-2">
                     Sign in
                 </button>
             </form>

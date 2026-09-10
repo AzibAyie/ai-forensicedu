@@ -9,15 +9,15 @@
     {{-- BADGE UNLOCK CELEBRATION --}}
     @if(count($newlyEarned))
     <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 6000)" x-transition
-        class="bg-blue text-white px-6 py-4 flex items-center gap-4 rounded-2xl">
-        <span class="seal seal-active !bg-white !text-blue !border-white">Unlocked</span>
+        class="bg-blue text-base px-6 py-4 flex items-center gap-4 rounded-2xl">
+        <span class="seal seal-active !bg-base !text-blue !border-base">Unlocked</span>
         <div class="flex-1">
             <p class="font-display text-[14px] font-semibold">
                 {{ collect($newlyEarned)->pluck('name')->implode(', ') }}
             </p>
-            <p class="text-[12px] text-white/80 mt-0.5">New milestone{{ count($newlyEarned) > 1 ? 's' : '' }} earned. Nice work.</p>
+            <p class="text-[12px] text-base/70 mt-0.5">New milestone{{ count($newlyEarned) > 1 ? 's' : '' }} earned. Nice work.</p>
         </div>
-        <button @click="show = false" class="text-white/70 hover:text-white text-[13px]">✕</button>
+        <button @click="show = false" class="text-base/70 hover:text-black text-[13px]">✕</button>
     </div>
     @endif
 
@@ -155,11 +155,11 @@ document.addEventListener('DOMContentLoaded', () => {
             datasets: [{
                 label: 'Score (%)',
                 data: @json(array_column($scoreHistory, 'score')),
-                borderColor: '#2151E5',
-                backgroundColor: 'rgba(33,81,229,0.12)',
+                borderColor: '#00c2ff',
+                backgroundColor: 'rgba(0,194,255,0.14)',
                 borderWidth: 2,
-                pointBackgroundColor: '#FFFFFF',
-                pointBorderColor: '#2151E5',
+                pointBackgroundColor: '#111d2e',
+                pointBorderColor: '#00c2ff',
                 pointBorderWidth: 2,
                 pointRadius: 4,
                 pointHoverRadius: 6,
@@ -174,12 +174,12 @@ document.addEventListener('DOMContentLoaded', () => {
             scales: {
                 y: {
                     beginAtZero: true, max: 100,
-                    grid: { color: '#D6DEEC' },
-                    ticks: { font: { family: 'IBM Plex Mono', size: 10 }, color: 'rgba(0,0,0,0.5)', stepSize: 25 }
+                    grid: { color: 'rgba(234,242,255,0.08)' },
+                    ticks: { font: { family: 'Inter', size: 10 }, color: 'rgba(234,242,255,0.55)', stepSize: 25 }
                 },
                 x: {
                     grid: { display: false },
-                    ticks: { font: { family: 'IBM Plex Mono', size: 10 }, color: 'rgba(0,0,0,0.5)' }
+                    ticks: { font: { family: 'Inter', size: 10 }, color: 'rgba(234,242,255,0.55)' }
                 }
             }
         }

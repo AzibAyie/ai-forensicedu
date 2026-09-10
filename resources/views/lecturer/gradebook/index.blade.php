@@ -7,26 +7,26 @@
 <style>
     .gb-wrap { overflow-x: auto; }
     .gb { border-collapse: separate; border-spacing: 0; min-width: 100%; }
-    .gb th, .gb td { border-right: 1px solid #D6DEEC; border-bottom: 1px solid #D6DEEC; }
+    .gb th, .gb td { border-right: 1px solid #263a55; border-bottom: 1px solid #263a55; }
 
     /* Frozen learner column */
     .gb .frz {
         position: sticky; left: 0; z-index: 3;
-        background: #FFFFFF;
-        box-shadow: 1px 0 0 #D6DEEC;
+        background: #111d2e;
+        box-shadow: 1px 0 0 #263a55;
         min-width: 230px; max-width: 230px;
     }
-    .gb thead .frz { z-index: 5; background: #EAF1FE; }
-    .gb tbody tr:hover .frz { background: #EAF1FE; }
+    .gb thead .frz { z-index: 5; background: #172a43; }
+    .gb tbody tr:hover .frz { background: #172a43; }
 
-    .gb thead th { position: sticky; top: 0; z-index: 2; background: #EAF1FE; }
-    .gb-group { background: #000000 !important; color: #fff; z-index: 4 !important; }
+    .gb thead th { position: sticky; top: 0; z-index: 2; background: #172a43; }
+    .gb-group { background: #05080C !important; color: #fff; z-index: 4 !important; }
 
-    .cell-graded    { background: #E3EDFF; }
-    .cell-submitted { background: #FFFFFF; }
-    .cell-progress  { background: #FAFBFC; }
-    .cell-none      { background: #FFFFFF; }
-    .cell-low       { background: #FDE4E4; }
+    .cell-graded    { background: rgba(0,194,255,0.10); }
+    .cell-submitted { background: #111d2e; }
+    .cell-progress  { background: #15243a; }
+    .cell-none      { background: #111d2e; }
+    .cell-low       { background: rgba(239,68,68,0.12); }
 
     .gb td.num { min-width: 118px; }
 </style>
@@ -54,8 +54,7 @@
             </select>
         </div>
 
-        <button type="submit"
-            class="bg-black text-white text-[12.5px] font-semibold px-4 py-2 hover:bg-blue transition rounded-lg">
+        <button type="submit" class="btn-primary text-[12.5px]">
             Apply
         </button>
 
@@ -67,7 +66,7 @@
         @endif
 
         <a href="{{ route('lecturer.gradebook.export') }}"
-            class="ml-auto font-mono text-[10.5px] uppercase tracking-[0.1em] text-blue border border-blue px-3 py-2 hover:bg-blue hover:text-white transition">
+            class="ml-auto font-mono text-[10.5px] uppercase tracking-[0.1em] text-blue border border-blue px-3 py-2 hover:bg-blue hover:text-base transition">
             Export CSV
         </a>
     </form>
@@ -185,7 +184,7 @@
                         @elseif($c['state'] === 'submitted')
                         <td class="num px-3 py-3 cell-submitted">
                             <a href="{{ route('lecturer.report.show', [$case, $c['enrollment']]) }}" class="block group">
-                                <span class="seal seal-open group-hover:bg-blue group-hover:text-fg transition">Grade</span>
+                                <span class="seal seal-open group-hover:bg-blue group-hover:text-base transition">Grade</span>
                                 <p class="font-mono text-[9.5px] text-fg-3 mt-1">{{ $c['date']?->format('d M Y') }}</p>
                             </a>
                         </td>
@@ -211,7 +210,7 @@
                 {{-- Column averages --}}
                 <tfoot>
                     <tr class="bg-base">
-                        <td class="frz px-4 py-3" style="background:#EAF1FE;">
+                        <td class="frz px-4 py-3" style="background:#172a43;">
                             <span class="eyebrow">Case average</span>
                         </td>
                         <td colspan="3"></td>
@@ -247,7 +246,7 @@
 
                 @foreach(range(1, $students->lastPage()) as $p)
                     @if($p == $students->currentPage())
-                        <span class="font-mono text-[10.5px] border border-blue bg-blue text-white px-3 py-1.5 rounded-md">{{ $p }}</span>
+                        <span class="font-mono text-[10.5px] border border-blue bg-blue text-base px-3 py-1.5 rounded-md">{{ $p }}</span>
                     @elseif(abs($p - $students->currentPage()) <= 2 || $p == 1 || $p == $students->lastPage())
                         <a href="{{ $students->url($p) }}"
                             class="font-mono text-[10.5px] border border-edge px-3 py-1.5 text-fg-2 hover:bg-surface hover:text-fg hover:border-blue transition rounded-md">{{ $p }}</a>
@@ -269,10 +268,10 @@
 
     {{-- Legend --}}
     <div class="flex flex-wrap items-center gap-5 font-mono text-[10px] text-white/60 uppercase tracking-[0.1em]">
-        <span class="flex items-center gap-2"><span class="w-3 h-3 border border-white/30" style="background:#E3EDFF"></span> Graded</span>
+        <span class="flex items-center gap-2"><span class="w-3 h-3 border border-white/30" style="background:rgba(0,194,255,0.10)"></span> Graded</span>
         <span class="flex items-center gap-2"><span class="w-3 h-3 border border-white/30 bg-surface"></span> Awaiting grade</span>
-        <span class="flex items-center gap-2"><span class="w-3 h-3 border border-white/30" style="background:#FAFBFC"></span> In progress</span>
-        <span class="flex items-center gap-2"><span class="w-3 h-3 border border-white/30" style="background:#FDE4E4"></span> Below 50%</span>
+        <span class="flex items-center gap-2"><span class="w-3 h-3 border border-white/30" style="background:#15243a"></span> In progress</span>
+        <span class="flex items-center gap-2"><span class="w-3 h-3 border border-white/30" style="background:rgba(239,68,68,0.12)"></span> Below 50%</span>
         <span class="ml-auto normal-case tracking-normal text-[11px] text-white/60">Click any score to open that report.</span>
     </div>
 

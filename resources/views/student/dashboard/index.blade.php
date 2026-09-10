@@ -32,7 +32,7 @@
 
             <div class="flex flex-wrap items-center gap-3">
                 <a href="{{ route('student.case.show', $ac) }}"
-                    class="bg-blue text-white font-semibold text-[13px] px-5 py-2.5 hover:bg-white hover:text-blue transition rounded-lg">
+                    class="bg-blue text-base font-semibold text-[13px] px-5 py-2.5 hover:bg-white hover:text-black transition rounded-lg">
                     Resume investigation
                 </a>
                 <a href="{{ route('student.report.show', $ac) }}"
@@ -126,16 +126,15 @@
                         <p class="font-mono text-[10.5px] text-fg-3 text-center py-2.5 border border-edge">Locked — case in progress</p>
                     @elseif($case->is_locked)
                         <div x-show="!pwd">
-                            <button @click="pwd = true"
-                                class="w-full bg-black text-white text-[13px] font-medium py-2.5 hover:bg-blue transition rounded-lg">
+                            <button @click="pwd = true" class="btn-primary w-full text-[13px]">
                                 Enter case password
                             </button>
                         </div>
                         <form x-show="pwd" x-cloak x-transition method="POST" action="{{ route('student.case.unlock', $case) }}" class="flex">
                             @csrf
                             <input type="password" name="password" required autofocus placeholder="Password"
-                                class="flex-1 min-w-0 border border-edge border-r-0 px-3 py-2.5 text-[13px] font-mono focus:outline-none focus:border-blue !rounded-r-none">
-                            <button type="submit" class="bg-blue text-white font-semibold text-[13px] px-4 hover:bg-blue-deep transition rounded-lg !rounded-l-none">
+                                class="flex-1 min-w-0 border border-edge border-r-0 bg-input text-fg px-3 py-2.5 text-[13px] font-mono focus:outline-none focus:border-blue !rounded-r-none">
+                            <button type="submit" class="bg-blue text-base font-semibold text-[13px] px-4 hover:bg-blue-deep transition rounded-lg !rounded-l-none">
                                 Unlock
                             </button>
                         </form>
@@ -143,7 +142,7 @@
                         <form method="POST" action="{{ route('student.case.unlock', $case) }}">
                             @csrf
                             <button type="submit"
-                                class="w-full bg-blue text-white text-[13px] font-semibold py-2.5 hover:bg-surface hover:text-fg transition rounded-lg">
+                                class="w-full bg-blue text-base text-[13px] font-semibold py-2.5 hover:bg-surface hover:text-fg transition rounded-lg">
                                 Open case file
                             </button>
                         </form>

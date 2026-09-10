@@ -10,14 +10,13 @@
     <div class="flex items-center gap-3 mb-5">
         <a href="{{ route('lecturer.report.index', $forensicCase) }}" class="text-sm text-white/70 hover:text-white">← Back to Reports</a>
         <div class="ml-auto flex gap-2">
-            <button @click="runAI()" :disabled="aiLoading"
-                class="btn-primary px-4 py-2.5 text-sm disabled:opacity-50 flex items-center gap-2">
-                <span x-show="!aiLoading">🤖 AI Evaluate</span>
-                <span x-show="aiLoading">⏳ Analysing...</span>
+            <button @click="runAI()" :disabled="aiLoading" class="btn-ai text-sm disabled:opacity-50">
+                <span x-show="!aiLoading">AI Evaluate</span>
+                <span x-show="aiLoading">Analysing...</span>
             </button>
             <a href="{{ route('lecturer.report.export-pdf', [$forensicCase, $enrollment]) }}"
-                class="px-4 py-2.5 normal-case tracking-normal font-sans text-sm border border-white/30 text-white/85 hover:bg-white hover:text-fg transition rounded-lg">
-                📄 Export PDF
+                class="px-4 py-2.5 normal-case tracking-normal font-sans text-sm border border-white/30 text-white/85 hover:bg-white hover:text-black transition rounded-lg">
+                Export PDF
             </a>
         </div>
     </div>
@@ -96,31 +95,31 @@
         <div class="space-y-4">
 
             {{-- AI Feedback --}}
-            <div x-show="aiResult" class="bg-blue-soft border border-blue  p-4">
-                <p class="text-xs font-semibold text-blue mb-2">🤖 AI Evaluation</p>
+            <div x-show="aiResult" class="bg-ai-soft border border-ai  p-4">
+                <p class="text-xs font-semibold text-ai mb-2">AI Evaluation</p>
                 <div class="text-center mb-3">
-                    <p class="text-3xl font-bold text-blue" x-text="aiResult?.overall_score + '%'"></p>
+                    <p class="text-3xl font-bold text-ai" x-text="aiResult?.overall_score + '%'"></p>
                     <p class="text-xs text-fg-2" x-text="'Grade: ' + (aiResult?.grade || '')"></p>
                 </div>
                 <p class="text-xs text-fg-2 mb-2 font-medium">Strengths:</p>
                 <ul class="text-xs text-fg-2 space-y-1 mb-3">
-                    <template x-for="s in aiResult?.strengths || []"><li class="flex gap-1"><span class="text-blue">✓</span><span x-text="s"></span></li></template>
+                    <template x-for="s in aiResult?.strengths || []"><li class="flex gap-1"><span class="text-success">✓</span><span x-text="s"></span></li></template>
                 </ul>
                 <p class="text-xs text-fg-2 mb-2 font-medium">Areas to improve:</p>
                 <ul class="text-xs text-fg-2 space-y-1 mb-3">
                     <template x-for="w in aiResult?.weaknesses || []"><li class="flex gap-1"><span class="text-red">!</span><span x-text="w"></span></li></template>
                 </ul>
                 <p class="text-xs text-fg-2 leading-relaxed" x-text="aiResult?.detailed_feedback"></p>
-                <button @click="applyAIScore()" class="mt-3 w-full text-xs bg-blue text-white py-1.5  hover:bg-blue-deep transition rounded-lg">
+                <button @click="applyAIScore()" class="mt-3 w-full text-xs bg-ai text-white py-1.5  hover:bg-ai-hover transition rounded-lg">
                     Apply AI Score ({{ '' }}<span x-text="aiResult?.overall_score"></span>%)
                 </button>
             </div>
 
             @if($report->ai_feedback && !isset($aiResult))
-            <div class="bg-blue-soft border border-blue  p-4">
-                <p class="text-xs font-semibold text-blue mb-2">🤖 Previous AI Evaluation</p>
+            <div class="bg-ai-soft border border-ai  p-4">
+                <p class="text-xs font-semibold text-ai mb-2">Previous AI Evaluation</p>
                 @if($report->ai_suggested_marks !== null)
-                <p class="text-sm text-blue font-bold mb-2">Suggested: {{ $report->ai_suggested_marks }}/{{ $forensicCase->total_marks }}</p>
+                <p class="text-sm text-ai font-bold mb-2">Suggested: {{ $report->ai_suggested_marks }}/{{ $forensicCase->total_marks }}</p>
                 @endif
                 <p class="text-xs text-fg-2 leading-relaxed">{{ $report->ai_feedback }}</p>
             </div>
@@ -225,16 +224,16 @@
                             <input type="number" name="marks" id="marksInput"
                                 value="{{ $report->marks ?? $report->ai_suggested_marks ?? '' }}"
                                 min="0" max="{{ $forensicCase->total_marks }}" required
-                                class="w-full border border-edge  px-3 py-2 text-sm focus:outline-none focus:border-blue">
+                                class="w-full border border-edge bg-input text-fg px-3 py-2 text-sm focus:outline-none focus:border-blue">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-fg-2 mb-1">Feedback to Student *</label>
                             <textarea name="lecturer_feedback" required rows="6"
-                                class="w-full border border-edge  px-3 py-2 text-sm focus:outline-none focus:border-blue resize-none"
+                                class="w-full border border-edge bg-input text-fg px-3 py-2 text-sm focus:outline-none focus:border-blue resize-none"
                                 placeholder="Write your feedback...">{{ $report->lecturer_feedback }}</textarea>
                         </div>
-                        <button type="submit" class="w-full bg-black hover:bg-blue text-white py-2  text-sm font-semibold transition rounded-lg">
-                            ✅ {{ $enrollment->status === 'graded' ? 'Update Grade' : 'Submit Grade' }}
+                        <button type="submit" class="btn-primary w-full">
+                            {{ $enrollment->status === 'graded' ? 'Update Grade' : 'Submit Grade' }}
                         </button>
                     </div>
                 </form>

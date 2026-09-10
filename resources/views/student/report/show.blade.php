@@ -141,7 +141,7 @@
                 <label class="font-display text-[14px] font-semibold text-fg block mb-1">Completed answer sheet</label>
                 <p class="text-[12px] text-fg-3 mb-3">Attach your answers to the question sheet as a PDF. Maximum 10 MB.</p>
                 <input type="file" name="answer_pdf" accept="application/pdf"
-                    class="fld file:mr-3 file:border-0 file:bg-blue file:text-white file:px-3 file:py-1.5 file:text-[12px] file:font-semibold file:cursor-pointer">
+                    class="fld file:mr-3 file:border-0 file:bg-blue file:text-base file:px-3 file:py-1.5 file:text-[12px] file:font-semibold file:cursor-pointer">
             </section>
             @endif
 

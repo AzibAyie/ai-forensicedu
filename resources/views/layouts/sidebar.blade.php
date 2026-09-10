@@ -1,15 +1,15 @@
 @php $role = auth()->user()->role; @endphp
 
-<aside class="bg-maroon border-r border-maroon-deep w-60 flex-shrink-0 flex flex-col">
+<aside class="bg-sidebar border-r border-edge w-60 flex-shrink-0 flex flex-col">
 
-    <div class="px-5 py-5 border-b border-white/15">
+    <div class="px-5 py-5 border-b border-white/10">
         <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 bg-blue flex items-center justify-center flex-shrink-0 rounded-lg">
-                <span class="font-display font-bold text-[13px] text-white">FE</span>
+                <span class="font-display font-bold text-[13px] text-base">FE</span>
             </div>
             <div class="leading-tight">
-                <p class="font-display text-[13.5px] font-semibold text-white">ForensicEdu</p>
-                <p class="font-mono text-[9px] text-white/60 uppercase tracking-[0.14em]">{{ $role }} console</p>
+                <p class="font-display text-[13.5px] font-semibold text-white">AI-ForensicEDU</p>
+                <p class="text-[9px] font-semibold text-white/55 uppercase tracking-[0.08em]">{{ $role }} console</p>
             </div>
         </div>
     </div>

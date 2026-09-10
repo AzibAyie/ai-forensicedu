@@ -95,7 +95,7 @@
                         @if($enrollment->report)
                         <a href="{{ route('lecturer.report.show', [$forensicCase, $enrollment]) }}"
                             class="text-xs bg-blue-soft text-blue border border-blue px-3 py-1.5  hover:bg-blue-soft transition font-medium">
-                            {{ $enrollment->status === 'graded' ? '👁 View' : '📋 Grade' }}
+                            {{ $enrollment->status === 'graded' ? 'View' : 'Grade' }}
                         </a>
                         @else
                         <span class="text-xs text-fg-3">No report</span>

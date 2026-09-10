@@ -8,7 +8,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -16,30 +16,37 @@
             theme: {
                 extend: {
                     colors: {
-                        // Page background is a light neutral so white cards read
-                        // clearly as distinct boxes rather than blending into it.
-                        base:    '#F0F2F5',   // page background
-                        surface: '#FFFFFF',   // cards, panels — the "boxes"
-                        raised:  '#EAF1FE',   // hover, nested panels — blue-tinted
-                        edge:    '#D6DEEC',   // borders — faint blue-grey
-                        // Text — solid black, varied by opacity for hierarchy
-                        fg:      { DEFAULT: '#000000', 2: 'rgba(0,0,0,0.72)', 3: 'rgba(0,0,0,0.52)' },
-                        // Accents — pushed bolder/more saturated
-                        blue:    { DEFAULT: '#2151E5', dim: 'rgba(33,81,229,0.14)', deep: '#1638B0', soft: '#E3EDFF' },
-                        red:     { DEFAULT: '#E22323', deep: '#B0161B', soft: '#FDE4E4' },
-                        // Sidebar / page-canvas accents
-                        maroon:  { DEFAULT: '#7A1220', deep: '#560D16', light: '#9A2233' },
-                        navy:    { DEFAULT: '#0B1E3D', deep: '#071630', light: '#16305C' },
+                        // Digital-forensics dashboard palette — dark navy surfaces
+                        // with cyan highlights (see design.md for the full spec).
+                        base:     '#08111f',   // page background
+                        sidebar:  '#0b1728',   // sidebar background
+                        surface:  '#111d2e',   // cards, panels — the "boxes"
+                        raised:   '#172a43',   // hover / nested panels
+                        elevated: '#15243a',   // elevated panels
+                        input:    '#0d1a2b',   // form field background
+                        edge:     { DEFAULT: '#263a55', hover: '#365170' },
+                        // Text — light on dark, varied by opacity for hierarchy
+                        fg:       { DEFAULT: '#eaf2ff', 2: 'rgba(234,242,255,0.72)', 3: 'rgba(234,242,255,0.52)' },
+                        heading:  '#f8fafc',
+                        // Brand and actions — cyan primary; purple reserved for AI
+                        blue:     { DEFAULT: '#00c2ff', hover: '#38d2ff', deep: '#0891b2', soft: 'rgba(0,194,255,0.14)' },
+                        secondary:'#2563eb',
+                        ai:       { DEFAULT: '#8b5cf6', hover: '#a78bfa', soft: 'rgba(139,92,246,0.14)' },
+                        // Status
+                        success:  { DEFAULT: '#22c55e', soft: 'rgba(34,197,94,0.14)' },
+                        warning:  { DEFAULT: '#f59e0b', soft: 'rgba(245,158,11,0.14)' },
+                        red:      { DEFAULT: '#ef4444', deep: '#b91c1c', soft: 'rgba(239,68,68,0.14)' },
+                        info:     { DEFAULT: '#3b82f6', soft: 'rgba(59,130,246,0.14)' },
                     },
                     fontFamily: {
-                        display: ['"Space Grotesk"', 'sans-serif'],
-                        sans:    ['"IBM Plex Sans"', 'sans-serif'],
+                        display: ['"Inter"', 'Arial', 'sans-serif'],
+                        sans:    ['"Inter"', 'Arial', 'sans-serif'],
                         mono:    ['"IBM Plex Mono"', 'monospace'],
                     },
                     boxShadow: {
-                        glow:     '0 0 0 1px rgba(33,81,229,0.5), 0 10px 30px -10px rgba(33,81,229,0.45)',
-                        'glow-sm':'0 0 0 3px rgba(33,81,229,0.16)',
-                        'glow-red':'0 0 0 1px rgba(226,35,35,0.5), 0 10px 30px -10px rgba(226,35,35,0.45)',
+                        glow:     '0 0 0 1px rgba(0,194,255,0.5), 0 10px 30px -10px rgba(0,194,255,0.45)',
+                        'glow-sm':'0 0 0 3px rgba(0,194,255,0.16)',
+                        'glow-red':'0 0 0 1px rgba(239,68,68,0.5), 0 10px 30px -10px rgba(239,68,68,0.45)',
                     },
                 }
             }
@@ -52,79 +59,79 @@
     <style>
         [x-cloak] { display: none !important; }
         body {
-            font-family: 'IBM Plex Sans', sans-serif;
-            background: #0B1E3D; color: #000000;
+            font-family: 'Inter', Arial, sans-serif;
+            background: #08111f; color: #eaf2ff;
             background-image:
-                radial-gradient(circle at 8% 0%, rgba(22,48,92,0.9), transparent 55%),
-                radial-gradient(circle at 100% 100%, rgba(7,22,48,0.9), transparent 55%);
+                radial-gradient(circle at 8% 0%, rgba(21,36,58,0.9), transparent 55%),
+                radial-gradient(circle at 100% 100%, rgba(11,23,40,0.9), transparent 55%);
             background-attachment: fixed;
         }
-        h1,h2,h3,h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.015em; }
+        h1,h2,h3,h4 { font-family: 'Inter', Arial, sans-serif; font-weight: 700; letter-spacing: -0.01em; color: #f8fafc; }
 
         .eyebrow {
-            font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600;
-            letter-spacing: 0.14em; text-transform: uppercase; color: rgba(0,0,0,0.5);
+            font-family: 'Inter', Arial, sans-serif; font-size: 12px; font-weight: 600;
+            letter-spacing: 0.04em; text-transform: uppercase; color: rgba(234,242,255,0.52);
         }
 
         .seal {
-            font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-weight: 600;
-            letter-spacing: 0.16em; text-transform: uppercase;
-            padding: 3px 7px; border: 1px solid currentColor; display: inline-block; line-height: 1;
-            border-radius: 5px;
+            font-family: 'Inter', Arial, sans-serif; font-size: 11px; font-weight: 600;
+            letter-spacing: 0.02em;
+            padding: 4px 10px; border: 1px solid currentColor; display: inline-flex; align-items: center; gap: 6px; line-height: 1;
+            border-radius: 999px;
         }
-        .seal-open   { color: #1638B0; background: rgba(33,81,229,0.13); }
-        .seal-active { color: #FFFFFF; background: #2151E5; border-color: #2151E5; }
-        .seal-graded { color: #1638B0; background: rgba(33,81,229,0.13); }
-        .seal-draft  { color: rgba(0,0,0,0.55); background: rgba(0,0,0,0.05); }
-        .seal-alert  { color: #B0161B; background: rgba(226,35,35,0.13); }
+        .seal-open   { color: #00c2ff; background: rgba(0,194,255,0.14); }
+        .seal-active { color: #08111f; background: #00c2ff; border-color: #00c2ff; }
+        .seal-graded { color: #22c55e; background: rgba(34,197,94,0.14); }
+        .seal-draft  { color: rgba(234,242,255,0.55); background: rgba(234,242,255,0.08); }
+        .seal-alert  { color: #ef4444; background: rgba(239,68,68,0.14); }
 
-        .diff { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600;
-                letter-spacing: 0.08em; text-transform: uppercase; }
-        .diff-beginner     { color: #1638B0; }
-        .diff-intermediate { color: rgba(0,0,0,0.55); }
-        .diff-advanced     { color: #B0161B; }
+        .diff { font-family: 'Inter', Arial, sans-serif; font-size: 11px; font-weight: 600;
+                letter-spacing: 0.02em; text-transform: uppercase; }
+        .diff-beginner     { color: #00c2ff; }
+        .diff-intermediate { color: #f59e0b; }
+        .diff-advanced     { color: #ef4444; }
 
-        /* Cards — soften the boxy look with rounded corners + a soft resting shadow.
+        /* Cards — rounded corners on the dark card surface.
            Tables are excluded: their sticky/frozen headers depend on the card being
            a plain overflow:visible box, and rounding would clip square header
            corners without it. */
         .bg-surface.border:not(:has(table)) {
-            border-radius: 16px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 1px 10px -4px rgba(0,0,0,0.06);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
         }
 
         /* Terminal */
         .evidence-panel { background: #05080C; color: #C5CBD6; border-radius: 10px; }
         .log-line { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
-                    line-height: 1.9; border-bottom: 1px solid #141B25; padding: 2px 12px; }
-        .log-line:hover { background: rgba(33,81,229,0.08); }
+                    line-height: 1.9; border-bottom: 1px solid #16223a; padding: 2px 12px; }
+        .log-line:hover { background: rgba(0,194,255,0.08); }
 
-        /* Sidebar — maroon background, so nav text runs light-on-dark */
+        /* Sidebar nav */
         .nav-link {
             display: flex; align-items: center; gap: 10px;
-            padding: 9px 12px; font-size: 13.5px; font-weight: 500;
-            color: rgba(255,255,255,0.68); border-left: 2px solid transparent; transition: all 140ms ease;
-            border-radius: 8px;
+            min-height: 52px; padding: 0 16px; font-size: 13.5px; font-weight: 500;
+            color: rgba(234,242,255,0.62); border-left: 3px solid transparent; transition: all 200ms ease;
+            border-radius: 0 8px 8px 0;
         }
-        .nav-link:hover { color: #FFFFFF; background: rgba(255,255,255,0.08); transform: translateX(2px); }
-        .nav-link.active { color: #FFFFFF; background: rgba(255,255,255,0.14); border-left-color: #FFFFFF; font-weight: 600; }
+        .nav-link:hover { color: #f8fafc; background: rgba(0,194,255,0.10); border-left-color: #00c2ff; transform: translateX(2px); }
+        .nav-link.active { color: #f8fafc; background: rgba(0,194,255,0.14); border-left-color: #00c2ff; font-weight: 600;
+            box-shadow: inset 0 0 18px rgba(0,194,255,0.08); }
 
         /* Interactive surfaces — cards that feel clickable, HTB-style */
         .card-interactive {
-            border-radius: 14px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            border-radius: 12px;
             transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
         }
         .card-interactive:hover {
-            transform: translateY(-3px);
-            border-color: #2151E5;
-            box-shadow: 0 0 0 1px rgba(33,81,229,0.35), 0 14px 30px -12px rgba(33,81,229,0.4);
+            transform: translateY(-2px);
+            border-color: #00c2ff;
+            box-shadow: 0 0 0 1px rgba(0,194,255,0.35), 0 14px 30px -12px rgba(0,194,255,0.35);
             z-index: 1; position: relative;
         }
 
         @keyframes glow-pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(33,81,229,0.45); }
-            50%      { box-shadow: 0 0 0 7px rgba(33,81,229,0); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,194,255,0.45); }
+            50%      { box-shadow: 0 0 0 7px rgba(0,194,255,0); }
         }
         .flash-once { animation: glow-pulse 900ms ease-out 2; }
 
@@ -136,13 +143,14 @@
 
         /* Form controls */
         .fld {
-            width: 100%; background: #FFFFFF; border: 1px solid #D6DEEC; color: #000000;
-            padding: 10px 12px; font-size: 13.5px; transition: border-color 140ms ease, box-shadow 140ms ease;
-            border-radius: 9px;
+            width: 100%; background: #0d1a2b; border: 1px solid #263a55; color: #eaf2ff;
+            padding: 10px 14px; font-size: 13.5px; min-height: 44px; transition: border-color 150ms ease, box-shadow 150ms ease;
+            border-radius: 8px;
         }
-        .fld:focus { outline: none; border-color: #2151E5; box-shadow: 0 0 0 3px rgba(33,81,229,0.12); }
-        .fld::placeholder { color: rgba(0,0,0,0.4); }
-        select.fld option { background: #FFFFFF; }
+        .fld:hover { border-color: #365170; }
+        .fld:focus { outline: none; border-color: #00c2ff; box-shadow: 0 0 0 3px rgba(0,194,255,0.14); }
+        .fld::placeholder { color: rgba(234,242,255,0.4); }
+        select.fld option { background: #0d1a2b; color: #eaf2ff; }
 
         /* Raw (non-.fld) text inputs/selects/textareas used in a few older forms —
            round them too so every field in the app looks consistent. */
@@ -157,29 +165,43 @@
             border-radius: 9999px;
         }
 
-        .btn-primary { background: #2151E5; color: #fff; font-weight: 600; border-radius: 9px; transition: background 140ms ease, box-shadow 140ms ease, transform 140ms ease; }
-        .btn-primary:hover { background: #1638B0; box-shadow: 0 0 0 3px rgba(33,81,229,0.18); transform: translateY(-1px); }
-        .btn-ghost {
-            border: 1px solid #D6DEEC; color: rgba(0,0,0,0.65); border-radius: 9px;
-            font-family: 'IBM Plex Mono', monospace; font-size: 10px;
-            letter-spacing: 0.1em; text-transform: uppercase; transition: all 140ms ease;
+        .btn-primary {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            min-height: 42px; padding: 10px 18px;
+            background: #00c2ff; color: #08111f; font-weight: 600; border-radius: 8px;
+            transition: background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
         }
-        .btn-ghost:hover { border-color: #2151E5; color: #000000; background: rgba(33,81,229,0.08); transform: translateY(-1px); }
-        .btn-danger { border: 1px solid #D6DEEC; color: #E22323; border-radius: 9px;
-            font-family: 'IBM Plex Mono', monospace; font-size: 10px;
-            letter-spacing: 0.1em; text-transform: uppercase; transition: all 140ms ease; }
-        .btn-danger:hover { background: #B0161B; color: #fff; border-color: #B0161B; }
+        .btn-primary:hover { background: #38d2ff; box-shadow: 0 0 16px rgba(0,194,255,0.35); transform: translateY(-2px); }
+
+        .btn-ai {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            min-height: 42px; padding: 10px 18px;
+            background: #8b5cf6; color: #fff; font-weight: 600; border-radius: 8px;
+            transition: background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+        }
+        .btn-ai:hover { background: #a78bfa; box-shadow: 0 0 16px rgba(139,92,246,0.35); transform: translateY(-2px); }
+
+        .btn-ghost {
+            border: 1px solid #263a55; color: rgba(234,242,255,0.75); border-radius: 8px;
+            font-family: 'Inter', Arial, sans-serif; font-size: 13px; font-weight: 600;
+            padding: 10px 16px; transition: all 150ms ease;
+        }
+        .btn-ghost:hover { border-color: #00c2ff; color: #f8fafc; background: rgba(0,194,255,0.08); transform: translateY(-1px); }
+        .btn-danger { border: 1px solid #ef4444; color: #ef4444; border-radius: 8px;
+            font-family: 'Inter', Arial, sans-serif; font-size: 13px; font-weight: 600;
+            padding: 10px 16px; transition: all 150ms ease; }
+        .btn-danger:hover { background: #ef4444; color: #fff; box-shadow: 0 0 14px rgba(239,68,68,0.3); }
 
         .progress-bar { border-radius: 999px; transition: width 600ms cubic-bezier(0.22,1,0.36,1); }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
         .blink { animation: blink 2.2s ease-in-out infinite; }
 
         ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-track { background: #EAF1FE; }
-        ::-webkit-scrollbar-thumb { background: #B9CCEE; }
-        ::-webkit-scrollbar-thumb:hover { background: #2151E5; }
+        ::-webkit-scrollbar-track { background: #0b1728; }
+        ::-webkit-scrollbar-thumb { background: #263a55; border-radius: 999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00c2ff; }
 
-        :focus-visible { outline: 2px solid #2151E5; outline-offset: 2px; }
+        :focus-visible { outline: 2px solid #00c2ff; outline-offset: 2px; }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
         }
@@ -272,7 +294,7 @@
         </div>
         <form method="POST" action="{{ route('impersonate.stop') }}">
             @csrf
-            <button class="bg-white text-red font-semibold text-[12px] px-4 py-1.5 hover:bg-fg transition">
+            <button class="bg-white text-red font-semibold text-[12px] px-4 py-1.5 hover:opacity-85 transition">
                 Exit view-as
             </button>
         </form>

@@ -42,7 +42,7 @@
                  an answer, so copies from here are marked as in-app, not external. --}}
             <div class="bg-surface  border border-edge  overflow-hidden" x-init="markInternalCopySource($el)">
                 <div class="border-b border-edge flex">
-                    @foreach(['scenario' => '📋 Scenario', 'evidence' => '🔍 Evidence', 'instructions' => '📌 Instructions'] as $tab => $label)
+                    @foreach(['scenario' => 'Scenario', 'evidence' => 'Evidence', 'instructions' => 'Instructions'] as $tab => $label)
                     <button @click="activeTab = '{{ $tab }}'"
                         :class="activeTab === '{{ $tab }}' ? 'border-b-2 border-blue text-blue bg-blue-soft' : 'text-fg-2 hover:text-fg'"
                         class="px-5 py-3 text-sm font-medium transition flex-1 text-center"
@@ -82,27 +82,27 @@
                             @if(!empty($evidence['audit_logs']))
                             <button @click="evidenceTab = 'audit_logs'; logActivity('EVIDENCE_OPENED', 'Opened audit logs')"
                                 :class="evidenceTab === 'audit_logs' ? 'text-blue bg-surface border-b-2 border-blue' : 'text-fg-2'"
-                                class="px-4 py-2 text-xs font-medium">📋 Audit Logs ({{ count($evidence['audit_logs']) }})</button>
+                                class="px-4 py-2 text-xs font-medium">Audit Logs ({{ count($evidence['audit_logs']) }})</button>
                             @endif
                             @if(!empty($evidence['database_records']))
                             <button @click="evidenceTab = 'db_records'; logActivity('EVIDENCE_OPENED', 'Opened database records')"
                                 :class="evidenceTab === 'db_records' ? 'text-blue bg-surface border-b-2 border-blue' : 'text-fg-2'"
-                                class="px-4 py-2 text-xs font-medium">🗄️ DB Records</button>
+                                class="px-4 py-2 text-xs font-medium">DB Records</button>
                             @endif
                             @if(!empty($evidence['network_logs']))
                             <button @click="evidenceTab = 'network'; logActivity('EVIDENCE_OPENED', 'Opened network logs')"
                                 :class="evidenceTab === 'network' ? 'text-blue bg-surface border-b-2 border-blue' : 'text-fg-2'"
-                                class="px-4 py-2 text-xs font-medium">🌐 Network Logs</button>
+                                class="px-4 py-2 text-xs font-medium">Network Logs</button>
                             @endif
                             @if(!empty($forensicCase->timeline_events))
                             <button @click="evidenceTab = 'timeline'; logActivity('EVIDENCE_OPENED', 'Opened incident timeline')"
                                 :class="evidenceTab === 'timeline' ? 'text-blue bg-surface border-b-2 border-blue' : 'text-fg-3'"
-                                class="px-4 py-2 text-xs font-medium">⏱ Timeline</button>
+                                class="px-4 py-2 text-xs font-medium">Timeline</button>
                             @endif
                             @if(!empty($evidence['system_info']))
                             <button @click="evidenceTab = 'system'; logActivity('EVIDENCE_OPENED', 'Opened system info')"
                                 :class="evidenceTab === 'system' ? 'text-blue bg-surface border-b-2 border-blue' : 'text-fg-2'"
-                                class="px-4 py-2 text-xs font-medium">💻 System Info</button>
+                                class="px-4 py-2 text-xs font-medium">System Info</button>
                             @endif
                         </div>
 
@@ -227,7 +227,7 @@
                             <span class="text-xs text-fg-3 bg-base px-2 py-1  ml-2 flex-shrink-0">{{ $question->marks }} marks</span>
                         </div>
                         <textarea
-                            class="w-full border border-edge  p-3 text-sm text-fg focus:outline-none focus:border-blue resize-none"
+                            class="w-full border border-edge bg-input p-3 text-sm text-fg focus:outline-none focus:border-blue resize-none"
                             rows="4"
                             placeholder="Write your investigation findings here..."
                             @blur="saveAnswer({{ $question->id }}, $el.value)"
@@ -253,8 +253,8 @@
 
                 <div class="px-5 pb-5">
                     <a href="{{ route('student.report.show', $forensicCase) }}"
-                        class="inline-flex items-center gap-2 bg-blue hover:bg-blue-deep text-white px-6 py-2.5  text-sm font-semibold transition">
-                        📄 Proceed to Write Report
+                        class="inline-flex items-center gap-2 bg-blue hover:bg-blue-deep text-base px-6 py-2.5  text-sm font-semibold transition">
+                        Proceed to Write Report
                     </a>
                 </div>
             </div>

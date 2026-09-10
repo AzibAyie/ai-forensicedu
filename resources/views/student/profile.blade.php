@@ -55,8 +55,7 @@
                 </div>
             </div>
 
-            <button type="submit"
-                class="bg-black text-white text-[13px] font-semibold px-5 py-2.5 hover:bg-blue transition rounded-lg">
+            <button type="submit" class="btn-primary text-[13px]">
                 Save changes
             </button>
         </form>

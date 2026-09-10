@@ -7,7 +7,7 @@
 
         <div class="flex items-center gap-3 mb-8">
             <div class="w-9 h-9 bg-blue flex items-center justify-center rounded-lg">
-                <span class="font-display font-bold text-[14px] text-white">FE</span>
+                <span class="font-display font-bold text-[14px] text-base">FE</span>
             </div>
             <p class="font-display text-[15px] font-semibold text-fg">AI-ForensicEdu</p>
         </div>
@@ -32,7 +32,7 @@
                 <div class="grid grid-cols-2 gap-px bg-edge border border-edge rounded-xl overflow-hidden">
                     <label class="cursor-pointer">
                         <input type="radio" name="role" value="student" x-model="role" class="sr-only">
-                        <div :class="role === 'student' ? 'bg-blue text-white' : 'bg-surface text-fg-2'"
+                        <div :class="role === 'student' ? 'bg-blue text-base' : 'bg-surface text-fg-2'"
                             class="px-4 py-3.5 transition">
                             <p class="font-display text-[14px] font-semibold">Student</p>
                             <p class="text-[11.5px] opacity-70 mt-0.5">Investigate cases, file reports</p>
@@ -40,7 +40,7 @@
                     </label>
                     <label class="cursor-pointer">
                         <input type="radio" name="role" value="lecturer" x-model="role" class="sr-only">
-                        <div :class="role === 'lecturer' ? 'bg-blue text-white' : 'bg-surface text-fg-2'"
+                        <div :class="role === 'lecturer' ? 'bg-blue text-base' : 'bg-surface text-fg-2'"
                             class="px-4 py-3.5 transition">
                             <p class="font-display text-[14px] font-semibold">Lecturer</p>
                             <p class="text-[11.5px] opacity-70 mt-0.5">Author cases, grade reports</p>
@@ -94,8 +94,7 @@
                 </div>
             </div>
 
-            <button type="submit"
-                class="w-full bg-black text-white font-semibold text-[13.5px] py-3 hover:bg-blue transition rounded-lg">
+            <button type="submit" class="btn-primary w-full">
                 Create account
             </button>
         </form>

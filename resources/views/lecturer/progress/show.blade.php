@@ -40,7 +40,7 @@
                     <div class="flex-1 w-full space-y-2.5">
                         @foreach($stageCounts as $stage => $count)
                         <div class="flex items-center gap-2.5">
-                            <span class="w-2.5 h-2.5 flex-shrink-0" style="background: {{ ['Graded'=>'#2151E5','Awaiting grade'=>'#E22323','In progress'=>'#000000','Not started'=>'#D6DEEC'][$stage] }}"></span>
+                            <span class="w-2.5 h-2.5 flex-shrink-0" style="background: {{ ['Graded'=>'#22c55e','Awaiting grade'=>'#f59e0b','In progress'=>'#00c2ff','Not started'=>'#365170'][$stage] }}"></span>
                             <span class="text-[12.5px] text-fg flex-1">{{ $stage }}</span>
                             <span class="font-mono text-[12px] text-fg-3">{{ $count }}</span>
                         </div>
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = document.getElementById('studentProgressChart');
     if (!ctx) return;
     const stageCounts = @json($stageCounts);
-    const colors = { 'Graded': '#2151E5', 'Awaiting grade': '#E22323', 'In progress': '#000000', 'Not started': '#D6DEEC' };
+    const colors = { 'Graded': '#22c55e', 'Awaiting grade': '#f59e0b', 'In progress': '#00c2ff', 'Not started': '#365170' };
     const labels = Object.keys(stageCounts).filter(k => stageCounts[k] > 0);
 
     new Chart(ctx, {
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             datasets: [{
                 data: labels.map(l => stageCounts[l]),
                 backgroundColor: labels.map(l => colors[l]),
-                borderColor: '#FFFFFF',
+                borderColor: '#111d2e',
                 borderWidth: 2,
             }]
         },
