@@ -55,6 +55,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.js"></script>
 
     <style>
         [x-cloak] { display: none !important; }
@@ -108,13 +109,14 @@
 
         /* Sidebar nav */
         .nav-link {
-            display: flex; align-items: center; gap: 10px;
-            min-height: 52px; padding: 0 16px; font-size: 13.5px; font-weight: 500;
+            display: flex; align-items: center; gap: 11px;
+            min-height: 44px; padding: 0 14px; margin: 0 10px; font-size: 13.5px; font-weight: 500;
             color: rgba(234,242,255,0.62); border-left: 3px solid transparent; transition: all 200ms ease;
-            border-radius: 0 8px 8px 0;
+            border-radius: 8px;
         }
+        .nav-link svg { width: 18px; height: 18px; flex-shrink: 0; }
         .nav-link:hover { color: #f8fafc; background: rgba(0,194,255,0.10); border-left-color: #00c2ff; transform: translateX(2px); }
-        .nav-link.active { color: #f8fafc; background: rgba(0,194,255,0.14); border-left-color: #00c2ff; font-weight: 600;
+        .nav-link.active { color: #00c2ff; background: rgba(0,194,255,0.14); border-left-color: #00c2ff; font-weight: 600;
             box-shadow: inset 0 0 18px rgba(0,194,255,0.08); }
 
         /* Interactive surfaces — cards that feel clickable, HTB-style */
@@ -332,19 +334,32 @@
     @include('layouts.sidebar')
 
     <div class="flex-1 flex flex-col overflow-hidden">
-        <header class="bg-surface border-b border-edge px-7 py-3.5 flex items-center justify-between flex-shrink-0">
-            <div>
-                <p class="eyebrow mb-0.5">@yield('eyebrow', 'AI-ForensicEdu')</p>
-                <h1 class="text-[17px] font-semibold text-fg leading-tight">@yield('page-title', 'Dashboard')</h1>
+        <header class="relative bg-surface border-b border-edge px-7 py-5 flex items-center justify-between flex-shrink-0 gap-6 overflow-hidden">
+            <i data-lucide="fingerprint" class="pointer-events-none absolute -right-6 -top-10 w-40 h-40 text-blue/[0.06]" stroke-width="1"></i>
+            <div class="relative min-w-0">
+                <p class="flex items-center gap-1.5 eyebrow mb-1.5">
+                    @yield('eyebrow', 'AI-ForensicEdu')
+                    <i data-lucide="chevron-right" class="w-3 h-3 text-fg-3"></i>
+                </p>
+                <h1 class="text-[26px] font-bold text-heading leading-tight">@yield('page-title', 'Dashboard')</h1>
+                @hasSection('page-subtitle')
+                <p class="text-[13px] text-fg-2 mt-1">@yield('page-subtitle')</p>
+                @endif
             </div>
-            <div class="flex items-center gap-4">
+            <div class="relative flex items-center gap-4 flex-shrink-0">
+                <button type="button" class="relative w-9 h-9 flex items-center justify-center rounded-full border border-edge text-fg-2 hover:text-fg hover:border-blue transition">
+                    <i data-lucide="bell" class="w-4 h-4"></i>
+                    <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-red"></span>
+                </button>
                 <div class="text-right hidden sm:block">
                     <p class="text-[13px] font-medium text-fg leading-tight">{{ auth()->user()->name }}</p>
-                    <p class="font-mono text-[10px] text-fg-3 uppercase tracking-wider">{{ auth()->user()->role }}</p>
+                    <p class="text-[10px] font-semibold text-fg-3 uppercase tracking-wider">{{ auth()->user()->role }}</p>
                 </div>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="btn-ghost px-3 py-2">Sign out</button>
+                    <button type="submit" class="btn-ghost !rounded-full px-4 py-2 inline-flex items-center gap-1.5">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Sign out
+                    </button>
                 </form>
             </div>
         </header>
@@ -378,5 +393,8 @@
 @endauth
 
 @stack('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => { if (window.lucide) lucide.createIcons(); });
+</script>
 </body>
 </html>

@@ -18,49 +18,49 @@
         @if($role === 'student')
             <p class="eyebrow px-5 mb-2 !text-white/45">Investigation</p>
             <a href="{{ route('student.dashboard') }}" class="nav-link {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
-                <span class="w-4 text-center">◧</span> Case Board
+                <i data-lucide="file-text"></i> Case Board
             </a>
             @php $active = auth()->user()->currentEnrollment(); @endphp
             @if($active)
             <a href="{{ route('student.case.show', $active->forensicCase) }}" class="nav-link {{ request()->routeIs('student.case.show') ? 'active' : '' }}">
-                <span class="w-4 text-center">⌕</span> Active Case
+                <i data-lucide="search"></i> Active Case
             </a>
             <a href="{{ route('student.report.show', $active->forensicCase) }}" class="nav-link {{ request()->routeIs('student.report.show') ? 'active' : '' }}">
-                <span class="w-4 text-center">▤</span> Write Report
+                <i data-lucide="square-pen"></i> Write Report
             </a>
             @endif
 
             <p class="eyebrow px-5 mb-2 mt-6 !text-white/45">Account</p>
             <a href="{{ route('student.record') }}" class="nav-link {{ request()->routeIs('student.record') ? 'active' : '' }}">
-                <span class="w-4 text-center">◈</span> My Record
+                <i data-lucide="award"></i> My Record
             </a>
             <a href="{{ route('student.profile') }}" class="nav-link {{ request()->routeIs('student.profile') ? 'active' : '' }}">
-                <span class="w-4 text-center">◐</span> Profile
+                <i data-lucide="user"></i> Profile
             </a>
 
         @elseif($role === 'lecturer')
             <p class="eyebrow px-5 mb-2 !text-white/45">Cases</p>
             <a href="{{ route('lecturer.dashboard') }}" class="nav-link {{ request()->routeIs('lecturer.dashboard') ? 'active' : '' }}">
-                <span class="w-4 text-center">◧</span> Case Registry
+                <i data-lucide="file-text"></i> Case Registry
             </a>
             <a href="{{ route('lecturer.case.create') }}" class="nav-link {{ request()->routeIs('lecturer.case.create') ? 'active' : '' }}">
-                <span class="w-4 text-center">＋</span> Build Case
+                <i data-lucide="plus"></i> Build Case
             </a>
 
             <p class="eyebrow px-5 mb-2 mt-6 !text-white/45">Cohort</p>
             <a href="{{ route('lecturer.progress') }}" class="nav-link {{ request()->routeIs('lecturer.progress*') ? 'active' : '' }}">
-                <span class="w-4 text-center">◑</span> Progress
+                <i data-lucide="chart-no-axes-column"></i> Progress
             </a>
             <a href="{{ route('lecturer.gradebook') }}" class="nav-link {{ request()->routeIs('lecturer.gradebook') ? 'active' : '' }}">
-                <span class="w-4 text-center">▦</span> Gradebook
+                <i data-lucide="layout-grid"></i> Gradebook
             </a>
             <a href="{{ route('lecturer.students') }}" class="nav-link {{ request()->routeIs('lecturer.students') ? 'active' : '' }}">
-                <span class="w-4 text-center">◈</span> My Students
+                <i data-lucide="users"></i> My Students
             </a>
 
             <p class="eyebrow px-5 mb-2 mt-6 !text-white/45">Account</p>
             <a href="{{ route('lecturer.profile') }}" class="nav-link {{ request()->routeIs('lecturer.profile') ? 'active' : '' }}">
-                <span class="w-4 text-center">◐</span> Profile
+                <i data-lucide="user"></i> Profile
             </a>
         @endif
     </nav>
