@@ -52,6 +52,19 @@
 
         <div class="space-y-5">
 
+            {{-- Unanswered-question warning — catch this before submission, not after. --}}
+            @php $totalQuestions = $forensicCase->questions()->count(); @endphp
+            @if($totalQuestions > 0 && $answers->count() < $totalQuestions)
+            <div class="bg-red-soft border border-red px-5 py-4">
+                <p class="text-[13px] font-semibold text-red">
+                    {{ $answers->count() === 0 ? "You haven't answered any investigation questions yet" : "You've answered {$answers->count()} of {$totalQuestions} investigation questions" }}
+                </p>
+                <p class="text-[12px] text-fg-2 mt-1">
+                    Go back to the <a href="{{ route('student.case.show', $forensicCase) }}" class="text-blue hover:underline font-medium">case page</a> and answer the remaining questions before submitting — your lecturer sees exactly how many were completed.
+                </p>
+            </div>
+            @endif
+
             {{-- Question sheet --}}
             @if($forensicCase->question_pdf_path)
             <section class="bg-surface border border-edge px-6 py-5">
@@ -155,8 +168,13 @@
                     </div>
                     <div class="flex gap-2">
                         <button type="button" @click="saveDraft()" class="btn-ghost px-4 py-2.5" x-text="draftLabel"></button>
+                        @php
+                            $confirmMsg = ($totalQuestions > 0 && $answers->count() < $totalQuestions)
+                                ? "You've only answered {$answers->count()} of {$totalQuestions} investigation questions. Submit anyway? You will not be able to edit it afterwards."
+                                : 'Submit this report? You will not be able to edit it afterwards.';
+                        @endphp
                         <button type="submit" class="btn-primary text-[13px] px-6 py-2.5"
-                            onclick="return confirm('Submit this report? You will not be able to edit it afterwards.')">
+                            onclick="return confirm(@js($confirmMsg))">
                             Submit report
                         </button>
                     </div>
