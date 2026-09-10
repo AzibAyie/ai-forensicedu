@@ -11,7 +11,7 @@
     @if($hasActiveCase && $currentEnrollment)
     @php $ac = $currentEnrollment->forensicCase; @endphp
     <section class="relative bg-black text-white rounded-2xl overflow-hidden">
-        <i data-lucide="fingerprint" class="pointer-events-none absolute -right-8 -top-10 w-48 h-48 text-blue/[0.08]" stroke-width="1"></i>
+        <img src="{{ asset('images/logo-icon.png') }}" alt="" class="pointer-events-none absolute -right-8 -top-10 w-48 h-48 object-contain opacity-[0.09]">
         <div class="relative px-7 py-6">
             <div class="flex items-start justify-between gap-6 mb-5">
                 <div class="min-w-0">

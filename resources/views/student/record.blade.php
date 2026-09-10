@@ -24,7 +24,7 @@
 
     {{-- IDENTITY BAR --}}
     <section class="relative bg-black text-white px-7 py-5 flex flex-wrap items-center gap-6 rounded-2xl overflow-hidden">
-        <i data-lucide="fingerprint" class="pointer-events-none absolute -right-8 -top-10 w-48 h-48 text-blue/[0.08]" stroke-width="1"></i>
+        <img src="{{ asset('images/logo-icon.png') }}" alt="" class="pointer-events-none absolute -right-8 -top-10 w-48 h-48 object-contain opacity-[0.09]">
         <div class="relative w-12 h-12 border border-blue flex items-center justify-center flex-shrink-0">
             <span class="font-mono text-[15px] font-semibold text-blue">{{ strtoupper(substr($user->name, 0, 2)) }}</span>
         </div>

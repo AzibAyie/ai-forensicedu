@@ -5,11 +5,8 @@
 <div class="min-h-screen bg-base flex items-center justify-center p-8">
     <div class="w-full max-w-[520px]">
 
-        <div class="flex items-center gap-3 mb-8">
-            <div class="w-9 h-9 bg-blue flex items-center justify-center rounded-lg">
-                <span class="font-display font-bold text-[14px] text-base">FE</span>
-            </div>
-            <p class="font-display text-[15px] font-semibold text-fg">AI-ForensicEdu</p>
+        <div class="mb-8">
+            <img src="{{ asset('images/logo.png') }}" alt="AI-ForensicEDU" class="h-9 w-auto object-contain object-left">
         </div>
 
         <p class="eyebrow mb-2">Enrolment</p>

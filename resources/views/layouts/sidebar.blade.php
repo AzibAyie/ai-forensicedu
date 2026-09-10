@@ -4,9 +4,7 @@
 
     <div class="px-5 py-5 border-b border-white/10">
         <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 bg-blue flex items-center justify-center flex-shrink-0 rounded-lg">
-                <span class="font-display font-bold text-[13px] text-base">FE</span>
-            </div>
+            <img src="{{ asset('images/logo-icon.png') }}" alt="AI-ForensicEDU" class="w-9 h-9 object-contain flex-shrink-0">
             <div class="leading-tight">
                 <p class="font-display text-[13.5px] font-semibold text-white">AI-ForensicEDU</p>
                 <p class="text-[9px] font-semibold text-white/55 uppercase tracking-[0.08em]">{{ $role }} console</p>

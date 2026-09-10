@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'AI-ForensicEdu')</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -335,7 +336,7 @@
 
     <div class="flex-1 flex flex-col overflow-hidden">
         <header class="relative bg-surface border-b border-edge px-7 py-5 flex items-center justify-between flex-shrink-0 gap-6 overflow-hidden">
-            <i data-lucide="fingerprint" class="pointer-events-none absolute -right-6 -top-10 w-40 h-40 text-blue/[0.06]" stroke-width="1"></i>
+            <img src="{{ asset('images/logo-icon.png') }}" alt="" class="pointer-events-none absolute -right-6 -top-10 w-40 h-40 object-contain opacity-[0.07]">
             <div class="relative min-w-0">
                 <p class="flex items-center gap-1.5 eyebrow mb-1.5">
                     @yield('eyebrow', 'AI-ForensicEdu')

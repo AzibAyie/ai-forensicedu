@@ -5,15 +5,11 @@
 <div class="min-h-screen flex">
 
     {{-- Left: brand panel --}}
-    <div class="hidden lg:flex lg:w-[46%] bg-black flex-col justify-between p-12">
-        <div class="flex items-center gap-3">
-            <div class="w-9 h-9 bg-blue flex items-center justify-center rounded-lg">
-                <span class="font-display font-bold text-[14px] text-base">FE</span>
-            </div>
-            <p class="font-display text-[15px] font-semibold text-white">AI-ForensicEdu</p>
-        </div>
+    <div class="relative hidden lg:flex lg:w-[46%] bg-black flex-col justify-between p-12 overflow-hidden">
+        <img src="{{ asset('images/logo-icon.png') }}" alt="" class="pointer-events-none absolute -right-10 -top-14 w-72 h-72 object-contain opacity-[0.08]">
+        <img src="{{ asset('images/logo.png') }}" alt="AI-ForensicEDU" class="relative h-11 w-auto object-contain object-left">
 
-        <div>
+        <div class="relative">
             <p class="eyebrow text-blue mb-4">Digital forensics · case-based learning</p>
             <h2 class="font-display text-[34px] font-semibold text-white leading-[1.15] mb-5">
                 Read the logs.<br>Build the timeline.<br>Name the intrusion.
@@ -23,7 +19,7 @@
             </p>
         </div>
 
-        <div class="font-mono text-[10px] text-white/50 uppercase tracking-[0.14em] space-y-1.5">
+        <div class="relative font-mono text-[10px] text-white/50 uppercase tracking-[0.14em] space-y-1.5">
             <p>Brute force · Data modification · Mass deletion</p>
             <p>Evidence panels · Timeline reconstruction · AI-assisted grading</p>
         </div>
@@ -33,11 +29,8 @@
     <div class="flex-1 flex items-center justify-center p-8 bg-base">
         <div class="w-full max-w-[380px]">
 
-            <div class="lg:hidden flex items-center gap-3 mb-9">
-                <div class="w-9 h-9 bg-blue flex items-center justify-center rounded-lg">
-                    <span class="font-display font-bold text-[14px] text-base">FE</span>
-                </div>
-                <p class="font-display text-[15px] font-semibold text-fg">AI-ForensicEdu</p>
+            <div class="lg:hidden mb-9">
+                <img src="{{ asset('images/logo.png') }}" alt="AI-ForensicEDU" class="h-9 w-auto object-contain object-left">
             </div>
 
             <p class="eyebrow mb-2">Access</p>
