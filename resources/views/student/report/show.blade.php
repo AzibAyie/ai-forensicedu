@@ -168,15 +168,17 @@
                     </div>
                     <div class="flex gap-2">
                         <button type="button" @click="saveDraft()" class="btn-ghost px-4 py-2.5" x-text="draftLabel"></button>
-                        @php
-                            $confirmMsg = ($totalQuestions > 0 && $answers->count() < $totalQuestions)
-                                ? "You've only answered {$answers->count()} of {$totalQuestions} investigation questions. Submit anyway? You will not be able to edit it afterwards."
-                                : 'Submit this report? You will not be able to edit it afterwards.';
-                        @endphp
-                        <button type="submit" class="btn-primary text-[13px] px-6 py-2.5"
-                            onclick="return confirm(@js($confirmMsg))">
+                        @if($totalQuestions > 0 && $answers->count() < $totalQuestions)
+                        <button type="button" class="btn-primary text-[13px] px-6 py-2.5"
+                            onclick="alert('Answer all {{ $totalQuestions }} investigation questions on the case page before submitting your report. You have answered {{ $answers->count() }} so far.'); window.location.href = '{{ route('student.case.show', $forensicCase) }}';">
                             Submit report
                         </button>
+                        @else
+                        <button type="submit" class="btn-primary text-[13px] px-6 py-2.5"
+                            onclick="return confirm('Submit this report? You will not be able to edit it afterwards.')">
+                            Submit report
+                        </button>
+                        @endif
                     </div>
                 </div>
             </section>

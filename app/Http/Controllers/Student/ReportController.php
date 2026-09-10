@@ -44,6 +44,19 @@ class ReportController extends Controller
             'answer_pdf.max' => 'The answer sheet must be under 10 MB.',
         ]);
 
+        // A case with investigation questions must have all of them answered
+        // before the report can be filed — this used to be a soft warning the
+        // student could click past, which let reports through with the
+        // per-question work skipped entirely. Enforced server-side so it
+        // can't be bypassed by submitting the form directly either.
+        $totalQuestions = $forensicCase->questions()->count();
+        $answeredQuestions = $enrollment->answers()->count();
+        if ($totalQuestions > 0 && $answeredQuestions < $totalQuestions) {
+            return back()->withInput()->withErrors([
+                'findings' => "You've only answered {$answeredQuestions} of {$totalQuestions} investigation questions. Go back to the case page and answer the rest before submitting your report.",
+            ]);
+        }
+
         $report = CaseReport::firstOrNew(['enrollment_id' => $enrollment->id]);
 
         $report->fill($request->only([
