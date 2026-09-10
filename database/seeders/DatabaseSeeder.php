@@ -249,6 +249,8 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        $this->call(DemoCasesSeeder::class);
+
         $this->command->info('✅ Database seeded successfully!');
         $this->command->info('Lecturer: lecturer@forensicedu.test / password');
         $this->command->info('Student: student@forensicedu.test / password');
