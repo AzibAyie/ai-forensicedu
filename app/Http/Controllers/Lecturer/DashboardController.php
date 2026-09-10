@@ -13,14 +13,18 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         $cases = ForensicCase::where('lecturer_id', $user->id)
-            ->withCount(['enrollments', 'enrollments as submitted_count' => fn($q) => $q->whereIn('status', ['submitted', 'graded'])])
+            ->withCount([
+                'enrollments',
+                'enrollments as submitted_count' => fn($q) => $q->whereIn('status', ['submitted', 'graded']),
+                'enrollments as awaiting_count' => fn($q) => $q->where('status', 'submitted'),
+            ])
             ->latest()->get();
 
         $stats = [
             'total_cases' => $cases->count(),
             'published' => $cases->where('is_published', true)->count(),
             'total_students' => $cases->sum('enrollments_count'),
-            'pending_reviews' => $cases->sum('submitted_count'),
+            'pending_reviews' => $cases->sum('awaiting_count'),
         ];
 
         return view('lecturer.dashboard.index', compact('cases', 'stats', 'user'));

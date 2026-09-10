@@ -370,8 +370,10 @@
     @include('layouts.sidebar')
 
     <div class="flex-1 flex flex-col overflow-hidden">
-        <header class="relative bg-surface border-b border-edge px-7 py-5 flex items-center justify-between flex-shrink-0 gap-6 overflow-hidden">
-            <img src="{{ asset('images/logo-icon.png') }}" alt="" class="pointer-events-none absolute -right-6 -top-10 w-40 h-40 object-contain opacity-[0.07]">
+        <header class="relative bg-surface border-b border-edge px-7 py-5 flex items-center justify-between flex-shrink-0 gap-6">
+            <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                <img src="{{ asset('images/logo-icon.png') }}" alt="" class="absolute -right-6 -top-10 w-40 h-40 object-contain opacity-[0.07]">
+            </div>
             <div class="relative min-w-0">
                 <p class="flex items-center gap-1.5 eyebrow mb-1.5">
                     @yield('eyebrow', 'AI-ForensicEdu')

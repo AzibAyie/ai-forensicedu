@@ -63,6 +63,31 @@
         @endif
     </nav>
 
+    @if($role === 'lecturer')
+    @php
+        $sidebarActiveCases = \App\Models\ForensicCase::where('lecturer_id', auth()->id())->where('is_published', true)->count();
+        $sidebarAwaitingReview = \App\Models\CaseEnrollment::whereHas('forensicCase', fn($q) => $q->where('lecturer_id', auth()->id()))->where('status', 'submitted')->count();
+    @endphp
+    <div class="mx-4 mb-4 bg-surface border border-edge rounded-xl p-4 flex-shrink-0">
+        <p class="font-display text-[12.5px] font-semibold text-fg mb-3">Teaching Overview</p>
+        <div class="space-y-2.5 mb-3.5">
+            <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-blue-soft flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="folder" class="w-3.5 h-3.5 text-blue"></i>
+                </div>
+                <p class="text-[12.5px] text-fg-2"><span class="font-semibold text-fg">{{ $sidebarActiveCases }}</span> Active Cases</p>
+            </div>
+            <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-warning-soft flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="clock" class="w-3.5 h-3.5 text-warning"></i>
+                </div>
+                <p class="text-[12.5px] text-fg-2"><span class="font-semibold text-fg">{{ $sidebarAwaitingReview }}</span> Awaiting Review</p>
+            </div>
+        </div>
+        <a href="{{ route('lecturer.gradebook') }}" class="btn-ghost !rounded-full !text-[12px] block text-center">Open Gradebook</a>
+    </div>
+    @endif
+
     <div class="px-5 py-4 border-t border-white/15">
         <div class="flex items-center gap-2.5">
             <div class="w-7 h-7 border border-white/30 flex items-center justify-center flex-shrink-0 rounded-full">
