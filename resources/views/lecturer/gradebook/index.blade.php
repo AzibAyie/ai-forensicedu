@@ -86,6 +86,7 @@
     @else
 
     {{-- Matrix --}}
+    <div x-data="{ filter: null }">
     <div class="bg-surface border border-edge">
         <div class="gb-wrap" style="max-height: 62vh; overflow-y: auto;">
             <table class="gb text-[13px]">
@@ -124,8 +125,20 @@
 
                 <tbody>
                     @foreach($rows as $row)
-                    @php $s = $row['student']; @endphp
-                    <tr>
+                    @php
+                        $s = $row['student'];
+                        $rowCats = collect($row['cells'])->map(function ($c) {
+                            return match(true) {
+                                $c['state'] === 'graded' => $c['pct'] < 50 ? 'below50' : 'graded',
+                                $c['state'] === 'submitted' => 'awaiting',
+                                $c['state'] === 'in_progress' => 'inprogress',
+                                default => null,
+                            };
+                        })->filter();
+                        if ($row['class_grade'] !== null && $row['class_grade'] < 50) $rowCats->push('below50');
+                        $rowCats = $rowCats->unique()->implode(',');
+                    @endphp
+                    <tr x-show="!filter || '{{ $rowCats }}'.split(',').includes(filter)">
                         {{-- Learner --}}
                         <td class="frz px-4 py-3">
                             <div class="flex items-start gap-2.5">
@@ -266,13 +279,25 @@
         </div>
     </div>
 
-    {{-- Legend --}}
-    <div class="flex flex-wrap items-center gap-5 font-mono text-[10px] text-white/60 uppercase tracking-[0.1em]">
-        <span class="flex items-center gap-2"><span class="w-3 h-3 border border-white/30" style="background:rgba(0,194,255,0.10)"></span> Graded</span>
-        <span class="flex items-center gap-2"><span class="w-3 h-3 border border-white/30 bg-surface"></span> Awaiting grade</span>
-        <span class="flex items-center gap-2"><span class="w-3 h-3 border border-white/30" style="background:#15243a"></span> In progress</span>
-        <span class="flex items-center gap-2"><span class="w-3 h-3 border border-white/30" style="background:rgba(239,68,68,0.12)"></span> Below 50%</span>
+    {{-- Legend — also acts as a row filter: click a key to show only learners with a case in that state. --}}
+    <div class="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.1em]">
+        @foreach([
+            ['key' => 'graded',    'label' => 'Graded',         'bg' => 'rgba(0,194,255,0.10)'],
+            ['key' => 'awaiting',  'label' => 'Awaiting grade', 'bg' => null],
+            ['key' => 'inprogress','label' => 'In progress',    'bg' => '#15243a'],
+            ['key' => 'below50',   'label' => 'Below 50%',      'bg' => 'rgba(239,68,68,0.12)'],
+        ] as $l)
+        <button type="button" @click="filter = filter === '{{ $l['key'] }}' ? null : '{{ $l['key'] }}'"
+            :class="filter === '{{ $l['key'] }}' ? 'border-blue text-fg' : 'border-edge text-white/60 hover:text-white hover:border-white/40'"
+            class="flex items-center gap-2 border px-2.5 py-1.5 rounded-md transition">
+            <span class="w-3 h-3 border border-white/30 flex-shrink-0 {{ $l['bg'] ? '' : 'bg-surface' }}" @if($l['bg']) style="background:{{ $l['bg'] }}" @endif></span>
+            {{ $l['label'] }}
+        </button>
+        @endforeach
+        <button type="button" x-show="filter" x-cloak @click="filter = null"
+            class="font-mono text-[10px] uppercase tracking-[0.1em] text-blue hover:underline">Clear filter</button>
         <span class="ml-auto normal-case tracking-normal text-[11px] text-white/60">Click any score to open that report.</span>
+    </div>
     </div>
 
     @endif

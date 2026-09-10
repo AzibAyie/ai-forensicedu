@@ -331,6 +331,38 @@
 </script>
 @endif
 
+@php
+    $headerUser = auth()->user();
+    $headerNotifications = collect();
+    if ($headerUser->role === 'lecturer') {
+        $headerNotifications = \App\Models\CaseEnrollment::whereHas('forensicCase', fn($q) => $q->where('lecturer_id', $headerUser->id))
+            ->where('status', 'submitted')
+            ->with(['student', 'forensicCase'])
+            ->latest('submitted_at')
+            ->take(6)
+            ->get()
+            ->map(fn($e) => [
+                'title' => $e->student->name . ' submitted a report',
+                'sub'   => $e->forensicCase->title,
+                'time'  => $e->submitted_at,
+                'url'   => route('lecturer.report.show', [$e->forensicCase, $e]),
+            ]);
+    } elseif ($headerUser->role === 'student') {
+        $headerNotifications = \App\Models\CaseEnrollment::where('student_id', $headerUser->id)
+            ->where('status', 'graded')
+            ->with(['forensicCase', 'report'])
+            ->latest('updated_at')
+            ->take(6)
+            ->get()
+            ->map(fn($e) => [
+                'title' => 'Report graded: ' . $e->forensicCase->title,
+                'sub'   => $e->report?->marks !== null ? $e->report->marks.'/'.$e->forensicCase->total_marks : null,
+                'time'  => $e->updated_at,
+                'url'   => route('student.report.show', $e->forensicCase),
+            ]);
+    }
+@endphp
+
 <div class="flex h-screen overflow-hidden">
     <img src="{{ asset('images/logo-icon.png') }}" alt=""
         class="pointer-events-none fixed bottom-0 right-0 w-[34rem] h-[34rem] object-contain opacity-[0.05] -z-10">
@@ -351,10 +383,30 @@
                 @endif
             </div>
             <div class="relative flex items-center gap-4 flex-shrink-0">
-                <button type="button" class="relative w-9 h-9 flex items-center justify-center rounded-full border border-edge text-fg-2 hover:text-fg hover:border-blue transition">
-                    <i data-lucide="bell" class="w-4 h-4"></i>
-                    <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-red"></span>
-                </button>
+                <div class="relative" x-data="{ open: false }">
+                    <button type="button" @click="open = !open"
+                        class="relative w-9 h-9 flex items-center justify-center rounded-full border border-edge text-fg-2 hover:text-fg hover:border-blue transition">
+                        <i data-lucide="bell" class="w-4 h-4"></i>
+                        @if($headerNotifications->count())
+                        <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-red"></span>
+                        @endif
+                    </button>
+                    <div x-show="open" x-cloak @click.outside="open = false" x-transition
+                        class="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-surface border border-edge rounded-xl shadow-lg z-50">
+                        <div class="px-4 py-3 border-b border-edge">
+                            <p class="text-[13px] font-semibold text-fg">Notifications</p>
+                        </div>
+                        @forelse($headerNotifications as $n)
+                        <a href="{{ $n['url'] }}" class="block px-4 py-3 border-b border-edge last:border-0 hover:bg-raised transition">
+                            <p class="text-[12.5px] font-medium text-fg">{{ $n['title'] }}</p>
+                            @if($n['sub'])<p class="text-[11.5px] text-fg-2 mt-0.5">{{ $n['sub'] }}</p>@endif
+                            <p class="text-[10.5px] text-fg-3 mt-1">{{ $n['time']?->diffForHumans() }}</p>
+                        </a>
+                        @empty
+                        <p class="px-4 py-6 text-[12.5px] text-fg-3 text-center">Nothing new right now.</p>
+                        @endforelse
+                    </div>
+                </div>
                 <div class="text-right hidden sm:block">
                     <p class="text-[13px] font-medium text-fg leading-tight">{{ auth()->user()->name }}</p>
                     <p class="text-[10px] font-semibold text-fg-3 uppercase tracking-wider">{{ auth()->user()->role }}</p>
