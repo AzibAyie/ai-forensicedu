@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'AI-ForensicEdu')</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // Page background is a light neutral so white cards read
+                        // clearly as distinct boxes rather than blending into it.
+                        base:    '#F0F2F5',   // page background
+                        surface: '#FFFFFF',   // cards, panels — the "boxes"
+                        raised:  '#EAF1FE',   // hover, nested panels — blue-tinted
+                        edge:    '#D6DEEC',   // borders — faint blue-grey
+                        // Text — solid black, varied by opacity for hierarchy
+                        fg:      { DEFAULT: '#000000', 2: 'rgba(0,0,0,0.72)', 3: 'rgba(0,0,0,0.52)' },
+                        // Accents — pushed bolder/more saturated
+                        blue:    { DEFAULT: '#2151E5', dim: 'rgba(33,81,229,0.14)', deep: '#1638B0', soft: '#E3EDFF' },
+                        red:     { DEFAULT: '#E22323', deep: '#B0161B', soft: '#FDE4E4' },
+                        // Sidebar / page-canvas accents
+                        maroon:  { DEFAULT: '#7A1220', deep: '#560D16', light: '#9A2233' },
+                        navy:    { DEFAULT: '#0B1E3D', deep: '#071630', light: '#16305C' },
+                    },
+                    fontFamily: {
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        sans:    ['"IBM Plex Sans"', 'sans-serif'],
+                        mono:    ['"IBM Plex Mono"', 'monospace'],
+                    },
+                    boxShadow: {
+                        glow:     '0 0 0 1px rgba(33,81,229,0.5), 0 10px 30px -10px rgba(33,81,229,0.45)',
+                        'glow-sm':'0 0 0 3px rgba(33,81,229,0.16)',
+                        'glow-red':'0 0 0 1px rgba(226,35,35,0.5), 0 10px 30px -10px rgba(226,35,35,0.45)',
+                    },
+                }
+            }
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: #0B1E3D; color: #000000;
+            background-image:
+                radial-gradient(circle at 8% 0%, rgba(22,48,92,0.9), transparent 55%),
+                radial-gradient(circle at 100% 100%, rgba(7,22,48,0.9), transparent 55%);
+            background-attachment: fixed;
+        }
+        h1,h2,h3,h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.015em; }
+
+        .eyebrow {
+            font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600;
+            letter-spacing: 0.14em; text-transform: uppercase; color: rgba(0,0,0,0.5);
+        }
+
+        .seal {
+            font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-weight: 600;
+            letter-spacing: 0.16em; text-transform: uppercase;
+            padding: 3px 7px; border: 1px solid currentColor; display: inline-block; line-height: 1;
+            border-radius: 5px;
+        }
+        .seal-open   { color: #1638B0; background: rgba(33,81,229,0.13); }
+        .seal-active { color: #FFFFFF; background: #2151E5; border-color: #2151E5; }
+        .seal-graded { color: #1638B0; background: rgba(33,81,229,0.13); }
+        .seal-draft  { color: rgba(0,0,0,0.55); background: rgba(0,0,0,0.05); }
+        .seal-alert  { color: #B0161B; background: rgba(226,35,35,0.13); }
+
+        .diff { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600;
+                letter-spacing: 0.08em; text-transform: uppercase; }
+        .diff-beginner     { color: #1638B0; }
+        .diff-intermediate { color: rgba(0,0,0,0.55); }
+        .diff-advanced     { color: #B0161B; }
+
+        /* Cards — soften the boxy look with rounded corners + a soft resting shadow.
+           Tables are excluded: their sticky/frozen headers depend on the card being
+           a plain overflow:visible box, and rounding would clip square header
+           corners without it. */
+        .bg-surface.border:not(:has(table)) {
+            border-radius: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 1px 10px -4px rgba(0,0,0,0.06);
+        }
+
+        /* Terminal */
+        .evidence-panel { background: #05080C; color: #C5CBD6; border-radius: 10px; }
+        .log-line { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
+                    line-height: 1.9; border-bottom: 1px solid #141B25; padding: 2px 12px; }
+        .log-line:hover { background: rgba(33,81,229,0.08); }
+
+        /* Sidebar — maroon background, so nav text runs light-on-dark */
+        .nav-link {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px; font-size: 13.5px; font-weight: 500;
+            color: rgba(255,255,255,0.68); border-left: 2px solid transparent; transition: all 140ms ease;
+            border-radius: 8px;
+        }
+        .nav-link:hover { color: #FFFFFF; background: rgba(255,255,255,0.08); transform: translateX(2px); }
+        .nav-link.active { color: #FFFFFF; background: rgba(255,255,255,0.14); border-left-color: #FFFFFF; font-weight: 600; }
+
+        /* Interactive surfaces — cards that feel clickable, HTB-style */
+        .card-interactive {
+            border-radius: 14px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+        }
+        .card-interactive:hover {
+            transform: translateY(-3px);
+            border-color: #2151E5;
+            box-shadow: 0 0 0 1px rgba(33,81,229,0.35), 0 14px 30px -12px rgba(33,81,229,0.4);
+            z-index: 1; position: relative;
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(33,81,229,0.45); }
+            50%      { box-shadow: 0 0 0 7px rgba(33,81,229,0); }
+        }
+        .flash-once { animation: glow-pulse 900ms ease-out 2; }
+
+        @keyframes rise-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .rise-in { animation: rise-in 260ms ease-out both; }
+
+        /* Form controls */
+        .fld {
+            width: 100%; background: #FFFFFF; border: 1px solid #D6DEEC; color: #000000;
+            padding: 10px 12px; font-size: 13.5px; transition: border-color 140ms ease, box-shadow 140ms ease;
+            border-radius: 9px;
+        }
+        .fld:focus { outline: none; border-color: #2151E5; box-shadow: 0 0 0 3px rgba(33,81,229,0.12); }
+        .fld::placeholder { color: rgba(0,0,0,0.4); }
+        select.fld option { background: #FFFFFF; }
+
+        /* Raw (non-.fld) text inputs/selects/textareas used in a few older forms —
+           round them too so every field in the app looks consistent. */
+        input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea {
+            border-radius: 8px;
+        }
+
+        /* Initial/avatar chips (e.g. "AM", "FE") — the recurring
+           border+border-edge+centered-flex square used across the app. */
+        .border.border-edge.flex.items-center.justify-center,
+        .border.border-blue.flex.items-center.justify-center {
+            border-radius: 9999px;
+        }
+
+        .btn-primary { background: #2151E5; color: #fff; font-weight: 600; border-radius: 9px; transition: background 140ms ease, box-shadow 140ms ease, transform 140ms ease; }
+        .btn-primary:hover { background: #1638B0; box-shadow: 0 0 0 3px rgba(33,81,229,0.18); transform: translateY(-1px); }
+        .btn-ghost {
+            border: 1px solid #D6DEEC; color: rgba(0,0,0,0.65); border-radius: 9px;
+            font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+            letter-spacing: 0.1em; text-transform: uppercase; transition: all 140ms ease;
+        }
+        .btn-ghost:hover { border-color: #2151E5; color: #000000; background: rgba(33,81,229,0.08); transform: translateY(-1px); }
+        .btn-danger { border: 1px solid #D6DEEC; color: #E22323; border-radius: 9px;
+            font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+            letter-spacing: 0.1em; text-transform: uppercase; transition: all 140ms ease; }
+        .btn-danger:hover { background: #B0161B; color: #fff; border-color: #B0161B; }
+
+        .progress-bar { border-radius: 999px; transition: width 600ms cubic-bezier(0.22,1,0.36,1); }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+        .blink { animation: blink 2.2s ease-in-out infinite; }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #EAF1FE; }
+        ::-webkit-scrollbar-thumb { background: #B9CCEE; }
+        ::-webkit-scrollbar-thumb:hover { background: #2151E5; }
+
+        :focus-visible { outline: 2px solid #2151E5; outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+        }
+    </style>
+    @stack('styles')
+</head>
+<body class="min-h-screen">
+
+<script>
+    // Shared external-paste detection, used by the report editor and the case
+    // investigation answer fields. A browser can never tell WHICH website text
+    // came from — clipboard APIs don't expose that — but copying visible text
+    // out of any rendered webpage (or Word/Google Docs) always carries a
+    // "text/html" clipboard entry alongside the plain text, where plain typing
+    // or a paste from a bare-text source never does. That's the signal we use.
+    function extractPasteInfo(e) {
+        const cd = e.clipboardData || window.clipboardData;
+        const text = cd ? (cd.getData('text/plain') || cd.getData('text') || '') : '';
+        const html = cd ? (cd.getData('text/html') || '') : '';
+        const richPattern = /<a\s|<img\s|<table|<ul|<ol|<b>|<i>|<strong|<em|style=|class=|<div|<p[ >]/i;
+        return { text, isRich: !!html && richPattern.test(html) };
+    }
+
+    // Brackets the pasted text with a visible marker directly in the field,
+    // rather than silently accepting or destroying it — the student keeps
+    // their pasted words, but it's now unmistakably flagged in the field
+    // itself (and stays that way if they submit without editing it out).
+    function insertWithExternalMarker(el, text) {
+        const marker = `[⚠ PASTED FROM EXTERNAL SOURCE] ${text.trim()} [END PASTED]`;
+        const start = el.selectionStart ?? el.value.length;
+        const end = el.selectionEnd ?? el.value.length;
+        el.value = el.value.slice(0, start) + marker + el.value.slice(end);
+        const pos = start + marker.length;
+        el.selectionStart = el.selectionEnd = pos;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    // Attach to any container the student is legitimately allowed to copy
+    // from within the app — evidence panels, the scenario/instructions text,
+    // their own previously-written answers carried into the report, etc.
+    // Copying out of a rendered page normally carries BOTH plain text and an
+    // HTML clipboard entry (that's true even for our own pages, which is
+    // exactly what extractPasteInfo() treats as the "external" signal) — this
+    // intercepts the copy and writes plain text only, so pulling a value out
+    // of the evidence panel and into an answer never gets flagged, while a
+    // paste from an actual outside website (which we have no control over)
+    // still carries its own HTML and is still caught.
+    function markInternalCopySource(el) {
+        el.addEventListener('copy', (e) => {
+            const selection = window.getSelection().toString();
+            if (!selection) return;
+            e.clipboardData.setData('text/plain', selection);
+            e.preventDefault();
+        });
+    }
+</script>
+
+@auth
+{{-- Impersonation banner --}}
+@if(session('impersonator_id'))
+<div class="bg-red text-white px-6 py-2.5 flex items-center justify-between gap-4 sticky top-0 z-50"
+    x-data="impersonationSwitcher()" @keydown.escape.window="open = false">
+    <p class="text-[13px] font-medium">
+        <span class="font-mono text-[10px] uppercase tracking-[0.14em] border border-white/40 px-2 py-1 mr-2">View as</span>
+        You are viewing the platform as <strong>{{ auth()->user()->name }}</strong>. Actions here are recorded.
+    </p>
+    <div class="flex items-center gap-2 relative">
+        <div class="relative">
+            <input type="text" x-model="query" @focus="openList()" @input="openList()"
+                placeholder="Switch to another student…"
+                class="bg-white/15 placeholder-white/70 text-white text-[12.5px] px-3 py-1.5 border border-white/30 focus:outline-none focus:bg-white/25 transition w-56">
+            <div x-show="open" x-cloak @click.outside="open = false" x-transition
+                class="absolute right-0 mt-1 w-72 max-h-72 overflow-y-auto bg-surface border border-edge text-fg shadow-lg z-50">
+                <template x-if="loading">
+                    <p class="px-3 py-3 text-[12px] text-fg-3">Loading students…</p>
+                </template>
+                <template x-if="!loading && filtered().length === 0">
+                    <p class="px-3 py-3 text-[12px] text-fg-3">No matching students.</p>
+                </template>
+                <template x-for="s in filtered()" :key="s.id">
+                    <form method="POST" :action="switchUrl(s.id)">
+                        @csrf
+                        <button type="submit" class="w-full text-left px-3 py-2 text-[12.5px] hover:bg-raised transition flex items-center justify-between gap-2">
+                            <span x-text="s.name"></span>
+                            <span class="font-mono text-[10px] text-fg-3" x-text="s.identifier"></span>
+                        </button>
+                    </form>
+                </template>
+            </div>
+        </div>
+        <form method="POST" action="{{ route('impersonate.stop') }}">
+            @csrf
+            <button class="bg-white text-red font-semibold text-[12px] px-4 py-1.5 hover:bg-fg transition">
+                Exit view-as
+            </button>
+        </form>
+    </div>
+</div>
+<script>
+    function impersonationSwitcher() {
+        return {
+            open: false, loading: false, query: '', students: [],
+            openList() {
+                this.open = true;
+                if (this.students.length || this.loading) return;
+                this.loading = true;
+                fetch('{{ route('impersonate.students') }}')
+                    .then(r => r.json())
+                    .then(data => { this.students = data; this.loading = false; })
+                    .catch(() => { this.loading = false; });
+            },
+            filtered() {
+                const q = this.query.trim().toLowerCase();
+                const list = q
+                    ? this.students.filter(s => s.name.toLowerCase().includes(q) || (s.identifier || '').toLowerCase().includes(q))
+                    : this.students;
+                return list.slice(0, 20);
+            },
+            switchUrl(id) {
+                return '{{ url('/impersonate/switch') }}/' + id;
+            },
+        }
+    }
+</script>
+@endif
+
+<div class="flex h-screen overflow-hidden">
+    @include('layouts.sidebar')
+
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="bg-surface border-b border-edge px-7 py-3.5 flex items-center justify-between flex-shrink-0">
+            <div>
+                <p class="eyebrow mb-0.5">@yield('eyebrow', 'AI-ForensicEdu')</p>
+                <h1 class="text-[17px] font-semibold text-fg leading-tight">@yield('page-title', 'Dashboard')</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <p class="text-[13px] font-medium text-fg leading-tight">{{ auth()->user()->name }}</p>
+                    <p class="font-mono text-[10px] text-fg-3 uppercase tracking-wider">{{ auth()->user()->role }}</p>
+                </div>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="btn-ghost px-3 py-2">Sign out</button>
+                </form>
+            </div>
+        </header>
+
+        @if(session('success') || $errors->any())
+        <div class="px-7 pt-5">
+            @if(session('success'))
+                <div class="bg-blue-soft border-l-2 border-blue px-4 py-3 mb-3 flex items-start gap-2.5">
+                    <span class="seal seal-graded mt-0.5">OK</span>
+                    <p class="text-[13.5px] text-fg leading-relaxed">{{ session('success') }}</p>
+                </div>
+            @endif
+            @if($errors->any())
+                <div class="bg-red-soft border-l-2 border-red px-4 py-3 mb-3 flex items-start gap-2.5">
+                    <span class="seal seal-alert mt-0.5">ERR</span>
+                    <ul class="text-[13.5px] text-fg space-y-0.5 leading-relaxed">
+                        @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+                    </ul>
+                </div>
+            @endif
+        </div>
+        @endif
+
+        <main class="flex-1 overflow-y-auto px-7 pb-8">
+            @yield('content')
+        </main>
+    </div>
+</div>
+@else
+    @yield('content')
+@endauth
+
+@stack('scripts')
+</body>
+</html>
