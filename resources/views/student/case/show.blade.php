@@ -77,7 +77,7 @@
                     </div>
 
                     {{-- Sub-tabs for evidence types --}}
-                    <div x-data="{ evidenceTab: 'audit_logs' }">
+                    <div x-data="{ evidenceTab: 'audit_logs', ...terminalTool(@js($evidence), @js($forensicCase->timeline_events ?? [])) }">
                         <div class="flex border-b border-edge bg-base">
                             @if(!empty($evidence['audit_logs']))
                             <button @click="evidenceTab = 'audit_logs'; logActivity('EVIDENCE_OPENED', 'Opened audit logs')"
@@ -104,20 +104,25 @@
                                 :class="evidenceTab === 'system' ? 'text-blue bg-surface border-b-2 border-blue' : 'text-fg-2'"
                                 class="px-4 py-2 text-xs font-medium">System Info</button>
                             @endif
+                            <button @click="evidenceTab = 'terminal'; logActivity('EVIDENCE_OPENED', 'Opened terminal'); $nextTick(() => $refs.termInput && $refs.termInput.focus())"
+                                :class="evidenceTab === 'terminal' ? 'text-blue bg-surface border-b-2 border-blue' : 'text-fg-2'"
+                                class="px-4 py-2 text-xs font-medium inline-flex items-center gap-1.5">
+                                <i data-lucide="terminal" class="w-3 h-3"></i> Terminal
+                            </button>
                         </div>
 
                         {{-- Audit Logs --}}
                         @if(!empty($evidence['audit_logs']))
                         <div x-show="evidenceTab === 'audit_logs'" x-transition.opacity.duration.200ms class="evidence-panel " style="max-height: 380px; overflow-y: auto;">
-                            <div class="px-3 py-2 text-xs text-fg-2 border-b border-edge-3 font-mono flex gap-4">
+                            <div class="px-3 py-2 text-xs text-[#8891A5] border-b border-edge-3 font-mono flex gap-4">
                                 <span class="w-40">TIMESTAMP</span><span class="w-24">USER</span><span class="w-28">ACTION</span><span>DETAILS</span>
                             </div>
                             @foreach($evidence['audit_logs'] as $log)
                             <div class="log-line flex gap-4">
                                 <span class="w-40 text-[#6E9BFF]">{{ $log['timestamp'] }}</span>
                                 <span class="w-24 text-white">{{ $log['user'] }}</span>
-                                <span class="w-28 text-blue">{{ $log['action'] }}</span>
-                                <span class="text-fg-3 flex-1">{{ $log['details'] }}</span>
+                                <span class="w-28 text-[#00c2ff]">{{ $log['action'] }}</span>
+                                <span class="text-[#8891A5] flex-1">{{ $log['details'] }}</span>
                                 @if(!empty($log['ip']))<span class="text-[#FF7A7A] text-xs">{{ $log['ip'] }}</span>@endif
                             </div>
                             @endforeach
@@ -155,7 +160,7 @@
                             <div class="log-line">
                                 <span class="text-[#6E9BFF]">{{ $log['timestamp'] ?? '' }}</span>
                                 <span class="text-white ml-3">{{ $log['source_ip'] ?? '' }}</span>
-                                <span class="text-fg-3 ml-3">{{ $log['event'] ?? '' }}</span>
+                                <span class="text-[#8891A5] ml-3">{{ $log['event'] ?? '' }}</span>
                                 @foreach(array_diff_key($log, array_flip(['timestamp','source_ip','event'])) as $k => $v)
                                 <span class="text-[#FF7A7A] ml-2 text-xs">{{ $k }}: {{ $v }}</span>
                                 @endforeach
@@ -192,6 +197,32 @@
                             </div>
                         </div>
                         @endif
+
+                        {{-- Terminal --}}
+                        <div x-show="evidenceTab === 'terminal'" x-transition.opacity.duration.200ms
+                            class="evidence-panel flex flex-col" style="height: 380px;"
+                            @click="$refs.termInput && $refs.termInput.focus()">
+                            {{-- Note: this panel is deliberately fixed-dark in both site themes
+                                 (like the rest of .evidence-panel), so every color here is a
+                                 frozen hex value, never a theme token (fg/blue/success/etc. would
+                                 go near-black-on-black once the light theme flips those tokens). --}}
+                            <div class="flex-1 overflow-y-auto px-3 py-2" x-ref="termOutput">
+                                <template x-for="(line, i) in termLines" :key="i">
+                                    <div class="log-line !border-0" :class="line.type === 'cmd' ? 'text-[#00c2ff]' : (line.type === 'err' ? 'text-[#FF7A7A]' : 'text-[#C5CBD6]')">
+                                        <span x-show="line.type === 'cmd'" class="text-[#3ddc84]">investigator@case-{{ $forensicCase->id }}</span><span x-show="line.type === 'cmd'" class="text-[#7C8798]">:~$&nbsp;</span><span x-text="line.text" style="white-space: pre-wrap;"></span>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="flex items-center gap-1.5 border-t border-[#16223a] px-3 py-2 flex-shrink-0">
+                                <span class="text-[#3ddc84] font-mono text-[11.5px]">investigator@case-{{ $forensicCase->id }}</span><span class="text-[#7C8798] font-mono text-[11.5px]">:~$</span>
+                                <input x-ref="termInput" x-model="termInput"
+                                    @keydown.enter="termInput.trim() && logActivity('TERMINAL_COMMAND', 'Ran: ' + termInput.trim()); submitCommand()"
+                                    @keydown.up.prevent="historyUp()" @keydown.down.prevent="historyDown()"
+                                    type="text" autocomplete="off" spellcheck="false"
+                                    class="flex-1 bg-transparent border-0 outline-none font-mono text-[11.5px] text-[#eaf2ff]"
+                                    placeholder="type 'help' to get started">
+                            </div>
+                        </div>
                     </div>
                     @else
                     <div class="p-8 text-center text-fg-3 text-sm">No simulated evidence configured for this case.</div>
@@ -310,6 +341,151 @@
 
 @push('scripts')
 <script>
+// A constrained, fake command-line interpreter that runs entirely in the
+// browser against the case's own simulated evidence — no real shell, no
+// server round-trip per command. It exists to make digging through evidence
+// feel more like an HTB/THM-style investigation (typing commands to pull
+// out what you need) without needing real per-student sandboxes.
+function terminalTool(evidence, timelineEvents) {
+    const files = {};
+    if (evidence.audit_logs?.length) {
+        files['audit.log'] = evidence.audit_logs.map(l =>
+            `[${l.timestamp || ''}] user=${l.user || ''} action=${l.action || ''}` +
+            (l.ip ? ` ip=${l.ip}` : '') + ` :: ${l.details || ''}`
+        );
+    }
+    if (evidence.database_records?.length) {
+        const cols = Object.keys(evidence.database_records[0]);
+        files['database.csv'] = [cols.join(',')].concat(
+            evidence.database_records.map(r => cols.map(c => r[c]).join(','))
+        );
+    }
+    if (evidence.network_logs?.length) {
+        files['network.log'] = evidence.network_logs.map(l => {
+            const known = ['timestamp', 'source_ip', 'event'];
+            const extra = Object.keys(l).filter(k => !known.includes(k)).map(k => `${k}=${l[k]}`).join(' ');
+            return `[${l.timestamp || ''}] ${l.source_ip || ''} ${l.event || ''}` + (extra ? ` ${extra}` : '');
+        });
+    }
+    if (evidence.system_info && Object.keys(evidence.system_info).length) {
+        files['system.info'] = Object.entries(evidence.system_info).map(([k, v]) =>
+            `${k}: ${typeof v === 'boolean' ? (v ? 'yes' : 'no') : v}`
+        );
+    }
+    if (timelineEvents?.length) {
+        files['timeline.log'] = timelineEvents.map(t => `[${t.timestamp || ''}] ${t.event || ''}`);
+    }
+
+    return {
+        termLines: [
+            { type: 'out', text: 'AI-ForensicEdu investigation shell — evidence for this case is mounted read-only.' },
+            { type: 'out', text: "Type 'help' to see available commands." },
+        ],
+        termInput: '',
+        termHistory: [],
+        termHistoryIdx: -1,
+
+        scrollTerm() {
+            this.$nextTick(() => {
+                const el = this.$refs.termOutput;
+                if (el) el.scrollTop = el.scrollHeight;
+            });
+        },
+
+        historyUp() {
+            if (!this.termHistory.length) return;
+            this.termHistoryIdx = Math.max(0, this.termHistoryIdx - 1);
+            this.termInput = this.termHistory[this.termHistoryIdx] ?? '';
+        },
+        historyDown() {
+            if (!this.termHistory.length) return;
+            this.termHistoryIdx = Math.min(this.termHistory.length, this.termHistoryIdx + 1);
+            this.termInput = this.termHistory[this.termHistoryIdx] ?? '';
+        },
+
+        submitCommand() {
+            const raw = this.termInput.trim();
+            this.termInput = '';
+            this.termLines.push({ type: 'cmd', text: raw });
+            if (raw) {
+                this.termHistory.push(raw);
+                this.termHistoryIdx = this.termHistory.length;
+            }
+            this.runCommand(raw, files);
+            this.scrollTerm();
+        },
+
+        runCommand(raw, files) {
+            const push = (text, type = 'out') => this.termLines.push({ type, text });
+            if (!raw) return;
+            const parts = raw.split(/\s+/);
+            const cmd = parts[0].toLowerCase();
+            const args = parts.slice(1);
+
+            switch (cmd) {
+                case 'help':
+                    push('Available commands:');
+                    push('  ls                    list evidence files mounted for this case');
+                    push('  cat <file>            print a file in full');
+                    push('  grep <pattern> <file>  print lines from <file> containing <pattern>');
+                    push('  find <keyword>        search every mounted file for <keyword>');
+                    push('  whoami                show the identity you are investigating as');
+                    push('  clear                 clear the screen');
+                    break;
+
+                case 'ls':
+                    if (Object.keys(files).length === 0) { push('ls: no evidence files mounted for this case'); break; }
+                    Object.entries(files).forEach(([name, lines]) => {
+                        push(`-rw-r--r--  investigator  forensics  ${String(lines.length).padStart(4, ' ')}  ${name}`);
+                    });
+                    break;
+
+                case 'cat': {
+                    const name = args[0];
+                    if (!name) { push('usage: cat <file>', 'err'); break; }
+                    if (!files[name]) { push(`cat: ${name}: No such file`, 'err'); break; }
+                    files[name].forEach(l => push(l));
+                    break;
+                }
+
+                case 'grep': {
+                    if (args.length < 2) { push('usage: grep <pattern> <file>', 'err'); break; }
+                    const pattern = args[0];
+                    const name = args[1];
+                    if (!files[name]) { push(`grep: ${name}: No such file`, 'err'); break; }
+                    const hits = files[name].filter(l => l.toLowerCase().includes(pattern.toLowerCase()));
+                    if (!hits.length) { push(`grep: no matches for "${pattern}" in ${name}`); break; }
+                    hits.forEach(l => push(l));
+                    break;
+                }
+
+                case 'find': {
+                    const keyword = args.join(' ');
+                    if (!keyword) { push('usage: find <keyword>', 'err'); break; }
+                    let any = false;
+                    Object.entries(files).forEach(([name, lines]) => {
+                        lines.filter(l => l.toLowerCase().includes(keyword.toLowerCase()))
+                            .forEach(l => { push(`${name}: ${l}`); any = true; });
+                    });
+                    if (!any) push(`find: nothing matching "${keyword}"`);
+                    break;
+                }
+
+                case 'whoami':
+                    push('{{ auth()->user()->name }} ({{ auth()->user()->role }})');
+                    break;
+
+                case 'clear':
+                    this.termLines = [];
+                    return;
+
+                default:
+                    push(`bash: ${cmd}: command not found`, 'err');
+            }
+        },
+    };
+}
+
 function caseInvestigation() {
     return {
         activeTab: 'scenario',
