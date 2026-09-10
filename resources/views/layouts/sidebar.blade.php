@@ -1,8 +1,8 @@
 @php $role = auth()->user()->role; @endphp
 
-<aside class="bg-sidebar border-r border-edge w-60 flex-shrink-0 flex flex-col">
+<aside class="bg-sidebar border-r border-edge w-60 flex-shrink-0 flex flex-col overflow-y-auto">
 
-    <div class="px-5 py-5 border-b border-white/10">
+    <div class="px-5 py-4 border-b border-white/10">
         <div class="flex items-center gap-2.5">
             <img src="{{ asset('images/logo-icon.png') }}" alt="AI-ForensicEDU" class="w-9 h-9 object-contain flex-shrink-0">
             <div class="leading-tight">
@@ -12,9 +12,9 @@
         </div>
     </div>
 
-    <nav class="flex-1 py-4 overflow-y-auto">
+    <nav class="flex-shrink-0 py-3">
         @if($role === 'student')
-            <p class="eyebrow px-5 mb-2 !text-white/45">Investigation</p>
+            <p class="eyebrow px-5 mb-1.5 !text-white/45">Investigation</p>
             <a href="{{ route('student.dashboard') }}" class="nav-link {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
                 <i data-lucide="file-text"></i> Case Board
             </a>
@@ -28,7 +28,7 @@
             </a>
             @endif
 
-            <p class="eyebrow px-5 mb-2 mt-6 !text-white/45">Account</p>
+            <p class="eyebrow px-5 mb-1.5 mt-5 !text-white/45">Account</p>
             <a href="{{ route('student.record') }}" class="nav-link {{ request()->routeIs('student.record') ? 'active' : '' }}">
                 <i data-lucide="award"></i> My Record
             </a>
@@ -37,7 +37,7 @@
             </a>
 
         @elseif($role === 'lecturer')
-            <p class="eyebrow px-5 mb-2 !text-white/45">Cases</p>
+            <p class="eyebrow px-5 mb-1.5 !text-white/45">Cases</p>
             <a href="{{ route('lecturer.dashboard') }}" class="nav-link {{ request()->routeIs('lecturer.dashboard') ? 'active' : '' }}">
                 <i data-lucide="file-text"></i> Case Registry
             </a>
@@ -45,7 +45,7 @@
                 <i data-lucide="plus"></i> Build Case
             </a>
 
-            <p class="eyebrow px-5 mb-2 mt-6 !text-white/45">Cohort</p>
+            <p class="eyebrow px-5 mb-1.5 mt-5 !text-white/45">Cohort</p>
             <a href="{{ route('lecturer.progress') }}" class="nav-link {{ request()->routeIs('lecturer.progress*') ? 'active' : '' }}">
                 <i data-lucide="chart-no-axes-column"></i> Progress
             </a>
@@ -56,7 +56,7 @@
                 <i data-lucide="users"></i> My Students
             </a>
 
-            <p class="eyebrow px-5 mb-2 mt-6 !text-white/45">Account</p>
+            <p class="eyebrow px-5 mb-1.5 mt-5 !text-white/45">Account</p>
             <a href="{{ route('lecturer.profile') }}" class="nav-link {{ request()->routeIs('lecturer.profile') ? 'active' : '' }}">
                 <i data-lucide="user"></i> Profile
             </a>
@@ -68,9 +68,9 @@
         $sidebarActiveCases = \App\Models\ForensicCase::where('lecturer_id', auth()->id())->where('is_published', true)->count();
         $sidebarAwaitingReview = \App\Models\CaseEnrollment::whereHas('forensicCase', fn($q) => $q->where('lecturer_id', auth()->id()))->where('status', 'submitted')->count();
     @endphp
-    <div class="mx-4 mb-4 bg-surface border border-edge rounded-xl p-4 flex-shrink-0">
-        <p class="font-display text-[12.5px] font-semibold text-fg mb-3">Teaching Overview</p>
-        <div class="space-y-2.5 mb-3.5">
+    <div class="mx-4 mb-3 bg-surface border border-edge rounded-xl p-3.5 flex-shrink-0">
+        <p class="font-display text-[12.5px] font-semibold text-fg mb-2.5">Teaching Overview</p>
+        <div class="space-y-2 mb-3">
             <div class="flex items-center gap-2.5">
                 <div class="w-7 h-7 rounded-lg bg-blue-soft flex items-center justify-center flex-shrink-0">
                     <i data-lucide="folder" class="w-3.5 h-3.5 text-blue"></i>
@@ -84,11 +84,11 @@
                 <p class="text-[12.5px] text-fg-2"><span class="font-semibold text-fg">{{ $sidebarAwaitingReview }}</span> Awaiting Review</p>
             </div>
         </div>
-        <a href="{{ route('lecturer.gradebook') }}" class="btn-ghost !rounded-full !text-[12px] block text-center">Open Gradebook</a>
+        <a href="{{ route('lecturer.gradebook') }}" class="btn-ghost !rounded-full !text-[12px] !py-1.5 block text-center">Open Gradebook</a>
     </div>
     @endif
 
-    <div class="px-5 py-4 border-t border-white/15">
+    <div class="px-5 py-3.5 border-t border-white/15 flex-shrink-0">
         <div class="flex items-center gap-2.5">
             <div class="w-7 h-7 border border-white/30 flex items-center justify-center flex-shrink-0 rounded-full">
                 <span class="font-mono text-[10px] font-semibold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</span>
