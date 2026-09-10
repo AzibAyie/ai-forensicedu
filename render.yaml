@@ -1,0 +1,72 @@
+databases:
+  - name: ai-forensicedu-db
+    plan: free
+    databaseName: ai_forensicedu
+    user: ai_forensicedu
+
+services:
+  - type: web
+    name: ai-forensicedu
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /login
+    envVars:
+      - key: APP_NAME
+        value: AI-ForensicEdu
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        sync: false
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        sync: false
+      - key: APP_TIMEZONE
+        value: Asia/Kuala_Lumpur
+      - key: APP_LOCALE
+        value: en
+      - key: APP_FALLBACK_LOCALE
+        value: en
+      - key: APP_MAINTENANCE_DRIVER
+        value: file
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_LEVEL
+        value: error
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: ai-forensicedu-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: ai-forensicedu-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: ai-forensicedu-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: ai-forensicedu-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: ai-forensicedu-db
+          property: password
+      - key: CACHE_STORE
+        value: file
+      - key: SESSION_DRIVER
+        value: file
+      - key: SESSION_LIFETIME
+        value: "120"
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: MAIL_MAILER
+        value: log
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: ANTHROPIC_API_KEY
+        sync: false
