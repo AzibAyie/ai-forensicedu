@@ -332,6 +332,9 @@
 @endif
 
 <div class="flex h-screen overflow-hidden">
+    <img src="{{ asset('images/logo-icon.png') }}" alt=""
+        class="pointer-events-none fixed bottom-0 right-0 w-[34rem] h-[34rem] object-contain opacity-[0.05] -z-10">
+
     @include('layouts.sidebar')
 
     <div class="flex-1 flex flex-col overflow-hidden">
