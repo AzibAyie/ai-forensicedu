@@ -49,35 +49,75 @@ class IntegrityService
         // Evidence copied from inside the app never sets these flags — see
         // markInternalCopySource() in the shared layout.
         $answers = $report->enrollment?->answers()->with('question')->get() ?? collect();
-        $flaggedLocations = $answers->values()
+        $externalLocations = $answers->values()
             ->map(fn ($a, $i) => $a->flagged_external_paste ? 'Q' . ($i + 1) : null)
             ->filter()->values()->all();
 
         $externalFindingsPastes = collect($report->paste_events ?? [])->where('external', true);
         if ($externalFindingsPastes->count() > 0) {
-            $flaggedLocations[] = 'Investigation Findings';
+            $externalLocations[] = 'Investigation Findings';
         }
 
-        if (count($flaggedLocations) > 0) {
+        // Rich/HTML clipboard content is a reliable signal when present, but a
+        // plain-text paste (copied from an AI chat reply, a notes app, or a
+        // webpage via "paste as plain text") carries no such marker and slips
+        // past it entirely. When that happens, the aggregate composition
+        // stats still tell the story: if almost all of the final text arrived
+        // by paste while almost no time or keystrokes went into writing it,
+        // that is worth flagging on its own — even without a confirmed
+        // external source. This only ever applies to Investigation Findings,
+        // since paste/keystroke/compose-time stats are tracked at the report
+        // level, not per question.
+        $patternLocations = [];
+        if (! in_array('Investigation Findings', $externalLocations) && $length > 0 && $report->pasted_chars > 0) {
+            $pastedShare = $report->pasted_chars / $length; // can exceed 1.0
+            $lowKeystrokes = $report->keystroke_count <= 20
+                || ($report->keystroke_count / max($length, 1)) < 0.05;
+            $lowActiveTime = $report->compose_seconds <= 30;
+
+            if ($pastedShare >= 0.8 && ($lowKeystrokes || $lowActiveTime)) {
+                $patternLocations[] = 'Investigation Findings';
+            }
+        }
+
+        $flaggedLocations = array_values(array_unique(array_merge($externalLocations, $patternLocations)));
+
+        if (count($externalLocations) > 0) {
             $flags[] = [
                 'code' => 'copy_paste_flagged',
                 'severity' => 'review',
-                'label' => 'Copy-paste flagged in ' . implode(', ', $flaggedLocations),
-                'detail' => 'Formatted (HTML) clipboard content was detected on paste in ' . implode(', ', $flaggedLocations)
+                'label' => 'Copy-paste flagged in ' . implode(', ', $externalLocations),
+                'detail' => 'Formatted (HTML) clipboard content was detected on paste in ' . implode(', ', $externalLocations)
                     . ' — typical of copying from a website, an AI chat interface, or a document, not typing. Evidence copied from within the case workspace is exempt and never triggers this. '
                     . 'The pasted text was bracketed with a warning marker in the field rather than removed; check whether it still appears verbatim.',
             ];
         }
 
+        if (count($patternLocations) > 0) {
+            $flags[] = [
+                'code' => 'pattern_paste_flagged',
+                'severity' => 'review',
+                'label' => 'Pasted without typing in ' . implode(', ', $patternLocations),
+                'detail' => "No formatted clipboard content was detected, but {$report->pasted_chars} of the {$length} characters in this section arrived by paste, with almost no active typing time or keystrokes recorded — consistent with pasting from a plain-text source (an AI chat reply, notes, or \"paste as plain text\" from a webpage) rather than writing it.",
+            ];
+        }
+
+        $copyPasteType = count($externalLocations) > 0 ? 'external' : (count($patternLocations) > 0 ? 'pattern' : 'none');
+
         $copyPaste = [
             'flagged' => count($flaggedLocations) > 0,
+            'type' => $copyPasteType,
             'locations' => $flaggedLocations,
-            'headline' => count($flaggedLocations) > 0
-                ? 'Copy-paste flagged in ' . implode(', ', $flaggedLocations)
-                : 'No copy-paste flagged',
-            'sublabel' => count($flaggedLocations) > 0
-                ? 'Formatted text was pasted from outside the case workspace. Ask the student to explain this section before grading.'
-                : 'No paste in this report or its answers carried the formatting signal of an outside source.',
+            'headline' => match ($copyPasteType) {
+                'external' => 'Copy-paste detected',
+                'pattern' => 'Unusual paste pattern',
+                default => 'No copy-paste detected',
+            },
+            'sublabel' => match ($copyPasteType) {
+                'external' => 'Formatted text was pasted from outside the case workspace. Ask the student to explain this section before grading.',
+                'pattern' => 'No formatted (HTML) paste was detected, but the text arrived almost entirely by paste with very little active typing — consistent with a plain-text paste from outside the editor. Ask the student to explain this section before grading.',
+                default => 'No paste in this report or its answers carried the formatting signal of an outside source, and composition volume looks typical.',
+            },
         ];
 
         // ── Signal 1: pasted volume relative to the finished report ──

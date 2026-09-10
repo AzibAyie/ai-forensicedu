@@ -44,9 +44,20 @@
             </div>
 
             {{-- Investigation Q&A --}}
-            @if($answers->count())
+            @php $totalQuestions = $forensicCase->questions()->count(); @endphp
+            @if($totalQuestions > 0 && $answers->count() === 0)
+            <div class="bg-red-soft border border-red p-5">
+                <h4 class="font-semibold text-red mb-1">No investigation answers submitted</h4>
+                <p class="text-sm text-fg-2">This case has {{ $totalQuestions }} investigation question{{ $totalQuestions === 1 ? '' : 's' }}, but the student submitted the report without answering any of them.</p>
+            </div>
+            @elseif($answers->count())
             <div class="bg-surface  border border-edge  p-5">
-                <h4 class="font-semibold text-fg mb-4">Investigation Answers</h4>
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <h4 class="font-semibold text-fg">Investigation Answers</h4>
+                    @if($answers->count() < $totalQuestions)
+                    <span class="seal seal-alert flex-shrink-0">{{ $answers->count() }} of {{ $totalQuestions }} answered</span>
+                    @endif
+                </div>
                 <div class="space-y-4">
                     @foreach($answers as $a)
                     <div class="border {{ $a->flagged_external_paste ? 'border-red' : 'border-edge' }}  p-4">
@@ -128,17 +139,20 @@
 
             {{-- ── AUTHORSHIP INTEGRITY ────────────────────────────── --}}
             @if($integrity)
-            @php $copyPaste = $integrity['copy_paste']; $otherFlags = collect($integrity['flags'])->reject(fn($f) => $f['code'] === 'copy_paste_flagged'); @endphp
+            @php
+                $copyPaste = $integrity['copy_paste'];
+                $otherFlags = collect($integrity['flags'])->reject(fn($f) => in_array($f['code'], ['copy_paste_flagged', 'pattern_paste_flagged']));
+            @endphp
             <div class="bg-surface border border-edge">
                 <div class="px-5 py-4 border-b border-edge">
                     <h4 class="font-display text-[14px] font-semibold text-fg">Authorship signals</h4>
                     <p class="text-[11.5px] text-fg-3 mt-0.5">Observed while the report was written. Evidence, not a verdict.</p>
                 </div>
 
-                {{-- Headline: where copy-paste was flagged, if anywhere --}}
+                {{-- Headline: where copy-paste (or an unexplained paste-heavy pattern) was flagged, if anywhere --}}
                 <div class="px-5 py-4 border-b border-edge {{ $copyPaste['flagged'] ? 'bg-red-soft' : '' }}">
                     <span class="seal {{ $copyPaste['flagged'] ? 'seal-alert' : 'seal-graded' }}">
-                        {{ $copyPaste['flagged'] ? '⚠ Copy-paste detected' : '✓ No copy-paste detected' }}
+                        {{ $copyPaste['flagged'] ? '⚠' : '✓' }} {{ $copyPaste['headline'] }}
                     </span>
                     @if($copyPaste['flagged'])
                     <p class="text-[13px] font-semibold text-fg mt-2.5">
