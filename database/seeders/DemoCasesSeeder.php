@@ -127,12 +127,30 @@ class DemoCasesSeeder extends Seeder
         ]);
 
         CaseQuestion::create(['forensic_case_id' => $case5->id, 'question' => 'What was the original grade, what was it changed to, and exactly when did the change occur?', 'marks' => 20, 'display_order' => 1]);
-        CaseQuestion::create(['forensic_case_id' => $case5->id, 'question' => 'How does the log entry for the 14:32 change differ from the normal grade-submission entry at 09:15? What does that difference tell you?', 'marks' => 25, 'display_order' => 2]);
-        CaseQuestion::create(['forensic_case_id' => $case5->id, 'question' => 'The change happened under dr.lim\'s account, but does the evidence prove dr.lim made it personally? Explain your reasoning using the session and idle-time evidence.', 'marks' => 25, 'display_order' => 3]);
-        CaseQuestion::create(['forensic_case_id' => $case5->id, 'question' => 'Recommend at least 3 controls (technical or procedural) that would prevent this kind of unattended-session abuse.', 'marks' => 30, 'display_order' => 4]);
+        CaseQuestion::create(['forensic_case_id' => $case5->id, 'question' => 'How does the log entry for the 14:32 change differ from the normal grade-submission entry at 09:15? What does that difference tell you?', 'marks' => 20, 'display_order' => 2]);
+        CaseQuestion::create(['forensic_case_id' => $case5->id, 'question' => 'The change happened under dr.lim\'s account, but does the evidence prove dr.lim made it personally? Explain your reasoning using the session and idle-time evidence.', 'marks' => 20, 'display_order' => 3]);
+        CaseQuestion::create(['forensic_case_id' => $case5->id, 'question' => 'Recommend at least 3 controls (technical or procedural) that would prevent this kind of unattended-session abuse.', 'marks' => 20, 'display_order' => 4]);
+        CaseQuestion::create(['forensic_case_id' => $case5->id, 'question' => 'If this had gone unnoticed until the transcript was finalised, what would the real-world impact have been for the institution and other students?', 'marks' => 20, 'display_order' => 5]);
 
         // ---- Light demo enrollment data so both new cases show up in gradebooks too ----
         if ($students->count() >= 5) {
+            $modelAnswers = [
+                $case4->id => [
+                    "63 failed login attempts were recorded against dr.tan's account between 03:12:04 and 03:26:08 on 2 December 2024 — a span of roughly 14 minutes.",
+                    "The source IP was 203.0.113.44. Attempts arrived roughly every 13 seconds with no variation, consistent with an automated brute-force tool rather than a person manually retrying a password.",
+                    "The attacker downloaded DBS301_Final_v2.pdf and also opened DBS301_AnswerKey.xlsx — so both the exam questions and the answer key were exposed, not just the question paper.",
+                    "Since the exam was still three days away, the university should treat the paper as compromised and replace it with a new version before the scheduled sitting.",
+                    "1) Enforce account lockout after repeated failed logins. 2) Require MFA on staff accounts with exam bank access. 3) Rate-limit the login endpoint. 4) Restrict exam bank access to specific IP ranges or hours.",
+                ],
+                $case5->id => [
+                    "Student A20BC1234's Database Systems grade was originally submitted as an F at 09:15 via the normal grade-submission workflow, then changed directly to B+ at 14:32 the same day.",
+                    "The 09:15 entry was logged as a GRADE_SUBMITTED action through the standard batch workflow. The 14:32 entry was a RECORD_MODIFIED action — a direct UPDATE bypassing the grade-submission process entirely.",
+                    "Not conclusively — the session had been idle for over two hours before the change occurred, and dr.lim's account was still authenticated on an unattended lab workstation.",
+                    "1) Automatically time out idle sessions. 2) Require a second factor for direct record edits outside the normal workflow. 3) Restrict direct table edits to a smaller, more tightly audited group.",
+                    "Had this gone unnoticed until the transcript was finalised, the institution would have issued an inaccurate academic record, and other tampered records from the same window might have gone unchecked too.",
+                ],
+            ];
+
             $demo = [
                 [0, $case4, 'graded', 74],
                 [2, $case4, 'submitted', null],
@@ -151,6 +169,18 @@ class DemoCasesSeeder extends Seeder
                     'started_at' => now()->subDays(rand(2, 10)),
                     'submitted_at' => $status === 'in_progress' ? null : now()->subDays(rand(1, 3)),
                 ]);
+
+                $questions = $case->questions()->orderBy('display_order')->get();
+                $answersForCase = $modelAnswers[$case->id] ?? [];
+                $answerLimit = $status === 'in_progress' ? 2 : $questions->count();
+
+                foreach ($questions->take($answerLimit) as $i => $question) {
+                    CaseAnswer::create([
+                        'enrollment_id' => $enrollment->id,
+                        'question_id' => $question->id,
+                        'answer' => $answersForCase[$i] ?? 'Answer on file.',
+                    ]);
+                }
 
                 if ($status === 'in_progress') {
                     continue;

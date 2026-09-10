@@ -1,6 +1,7 @@
 <?php
 namespace Database\Seeders;
 
+use App\Models\CaseAnswer;
 use App\Models\CaseEnrollment;
 use App\Models\CaseQuestion;
 use App\Models\CaseReport;
@@ -146,10 +147,11 @@ class DatabaseSeeder extends Seeder
             'total_marks' => 100,
         ]);
 
-        CaseQuestion::create(['forensic_case_id' => $case2->id, 'question' => 'List all database fields that were modified. For each field, state the original value and the new value.', 'marks' => 25, 'display_order' => 1]);
-        CaseQuestion::create(['forensic_case_id' => $case2->id, 'question' => 'Identify the anti-forensics technique used by the attacker. What was the purpose of this action?', 'marks' => 25, 'display_order' => 2]);
-        CaseQuestion::create(['forensic_case_id' => $case2->id, 'question' => 'Calculate the total potential financial loss if this modification went undetected for 12 months.', 'marks' => 25, 'display_order' => 3]);
-        CaseQuestion::create(['forensic_case_id' => $case2->id, 'question' => 'What database security controls should be implemented to prevent privileged insiders from performing unauthorized modifications?', 'marks' => 25, 'display_order' => 4]);
+        CaseQuestion::create(['forensic_case_id' => $case2->id, 'question' => 'List all database fields that were modified. For each field, state the original value and the new value.', 'marks' => 20, 'display_order' => 1]);
+        CaseQuestion::create(['forensic_case_id' => $case2->id, 'question' => 'Identify the anti-forensics technique used by the attacker. What was the purpose of this action?', 'marks' => 20, 'display_order' => 2]);
+        CaseQuestion::create(['forensic_case_id' => $case2->id, 'question' => 'Calculate the total potential financial loss if this modification went undetected for 12 months.', 'marks' => 20, 'display_order' => 3]);
+        CaseQuestion::create(['forensic_case_id' => $case2->id, 'question' => 'What database security controls should be implemented to prevent privileged insiders from performing unauthorized modifications?', 'marks' => 20, 'display_order' => 4]);
+        CaseQuestion::create(['forensic_case_id' => $case2->id, 'question' => "What role did the compromised account's excessive privileges play in enabling this incident, and how should access be scoped differently?", 'marks' => 20, 'display_order' => 5]);
 
         // ---- CASE 3: Mass Deletion ----
         $case3 = ForensicCase::create([
@@ -193,7 +195,34 @@ class DatabaseSeeder extends Seeder
 
 
         // ---- DEMO GRADEBOOK DATA ----
-        // Gives the lecturer gradebook real rows on first run.
+        // Gives the lecturer gradebook real rows on first run. Model answers
+        // per case so seeded reports show real per-question work instead of
+        // just the findings narrative — a case with 0 saved answers reads as
+        // "the student skipped the investigation" on the grading screen.
+        $modelAnswers = [
+            $case1->id => [
+                "47 failed login attempts were recorded between 01:58:12 and 02:14:33 on 15 March 2024, a span of roughly 16 minutes 21 seconds, before the successful login on attempt 47.",
+                "The attacker's IP address was 192.168.1.105. The steady one-attempt-per-second pattern with no delay between failures is consistent with an automated brute-force script rather than manual guessing.",
+                "The Q1 2024 payroll spreadsheet (payroll_Q1_2024.xlsx, 2.3MB) was downloaded. The attacker logged in at 02:14:33, browsed to /confidential/payroll/ at 02:14:45, opened the file at 02:14:51, downloaded it at 02:15:01, and logged out at 02:16:22 — a total session of 109 seconds.",
+                "There was no account lockout policy after repeated failed attempts, no rate limiting on the login endpoint, and no multi-factor authentication on the admin account, which allowed 47 consecutive guesses without any block or alert.",
+                "1) Enforce an account lockout after 5 failed attempts. 2) Require multi-factor authentication for all admin accounts. 3) Add rate limiting / CAPTCHA on the login endpoint. 4) Alert on off-hours access to payroll data.",
+            ],
+            $case2->id => [
+                "Two employee record fields were modified for ID 1042: salary changed from RM52,000/year to RM85,000/year, and bank_account changed from MY-ORIG-ACCT-4421 to MY-NEW-ACCT-9981.",
+                "The attacker set the audit_trail.modified_by field to NULL for record 1042 after making the changes. This is an anti-forensics technique intended to erase the trail of who made the modification.",
+                "The salary inflation alone (RM33,000/year) would total RM33,000 over 12 months if undetected, plus any funds redirected to the substituted bank account before the change was caught.",
+                "Separation of duties so no single DBA account can both modify payroll records and alter the audit trail; write-once/append-only audit logging; mandatory second-approval for salary or bank account changes above a threshold.",
+                "The db_admin role had unrestricted write access to both the employees table and the audit_trail table. Access should be scoped so payroll changes require a distinct, logged approval workflow.",
+            ],
+            $case3->id => [
+                "The sys_admin account executed 'DELETE FROM transactions WHERE YEAR(date)=2023', deleting 847 records at 23:01:34 from IP 172.16.0.8.",
+                "No — this was deliberate. The attacker deleted the primary records, then four seconds later deleted the matching backup records for the same date range, indicating intent to make recovery impossible.",
+                "The destroyed records were worth RM4,238,591.20, which could also trigger regulatory reporting obligations for failing to protect customer transaction records.",
+                "Completing both deletions in 46 seconds with no exploratory queries beyond a single COUNT check suggests the attacker already knew the exact tables, date range, and backup location — consistent with premeditation.",
+                "Maintain backups that cannot be deleted by the same credentials used for production access, enforce approval workflows for bulk deletes, restrict off-hours database access, and alert on large DELETE operations.",
+            ],
+        ];
+
         $demo = [
             // [student index, case, status, marks|null]
             [1, $case1, 'graded',    82],
@@ -219,6 +248,14 @@ class DatabaseSeeder extends Seeder
 
             if ($status === 'in_progress') {
                 continue;
+            }
+
+            foreach ($case->questions()->orderBy('display_order')->get() as $i => $question) {
+                CaseAnswer::create([
+                    'enrollment_id' => $enrollment->id,
+                    'question_id' => $question->id,
+                    'answer' => $modelAnswers[$case->id][$i] ?? 'Answer on file.',
+                ]);
             }
 
             CaseReport::create([
