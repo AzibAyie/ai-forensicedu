@@ -9,8 +9,8 @@
     {{-- Assigned --}}
     <section>
         <div class="flex items-baseline justify-between mb-4">
-            <h2 class="font-display text-[15px] font-semibold text-white">Assigned to you</h2>
-            <p class="font-mono text-[10.5px] text-white/60">{{ $students->count() }} students</p>
+            <h2 class="font-display text-[15px] font-semibold text-heading">Assigned to you</h2>
+            <p class="font-mono text-[10.5px] text-fg-3">{{ $students->count() }} students</p>
         </div>
 
         @if($students->isEmpty())
@@ -76,8 +76,8 @@
     @if($unassigned->count())
     <section>
         <div class="flex items-baseline justify-between mb-4">
-            <h2 class="font-display text-[15px] font-semibold text-white">Working on your cases, not yet assigned</h2>
-            <p class="font-mono text-[10.5px] text-white/60">{{ $unassigned->count() }} students</p>
+            <h2 class="font-display text-[15px] font-semibold text-heading">Working on your cases, not yet assigned</h2>
+            <p class="font-mono text-[10.5px] text-fg-3">{{ $unassigned->count() }} students</p>
         </div>
         <div class="bg-surface border border-edge">
             @foreach($unassigned as $s)
@@ -103,10 +103,10 @@
     @if($otherStudents->count())
     <section x-data="{ open: false }">
         <button @click="open = !open" class="flex items-baseline justify-between mb-4 w-full text-left group">
-            <h2 class="font-display text-[15px] font-semibold text-white group-hover:text-blue transition">
-                All other students <span class="font-mono text-[10.5px] text-white/60 ml-1" x-text="open ? '▾' : '▸'"></span>
+            <h2 class="font-display text-[15px] font-semibold text-heading group-hover:text-blue transition">
+                All other students <span class="font-mono text-[10.5px] text-fg-3 ml-1" x-text="open ? '▾' : '▸'"></span>
             </h2>
-            <p class="font-mono text-[10.5px] text-white/60">{{ $otherStudents->count() }} students</p>
+            <p class="font-mono text-[10.5px] text-fg-3">{{ $otherStudents->count() }} students</p>
         </button>
         <div x-show="open" x-cloak x-transition class="bg-surface border border-edge">
             @foreach($otherStudents as $s)

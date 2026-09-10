@@ -7,26 +7,26 @@
 <style>
     .gb-wrap { overflow-x: auto; }
     .gb { border-collapse: separate; border-spacing: 0; min-width: 100%; }
-    .gb th, .gb td { border-right: 1px solid #263a55; border-bottom: 1px solid #263a55; }
+    .gb th, .gb td { border-right: 1px solid rgb(var(--color-edge)); border-bottom: 1px solid rgb(var(--color-edge)); }
 
     /* Frozen learner column */
     .gb .frz {
         position: sticky; left: 0; z-index: 3;
-        background: #111d2e;
-        box-shadow: 1px 0 0 #263a55;
+        background: rgb(var(--color-surface));
+        box-shadow: 1px 0 0 rgb(var(--color-edge));
         min-width: 230px; max-width: 230px;
     }
-    .gb thead .frz { z-index: 5; background: #172a43; }
-    .gb tbody tr:hover .frz { background: #172a43; }
+    .gb thead .frz { z-index: 5; background: rgb(var(--color-raised)); }
+    .gb tbody tr:hover .frz { background: rgb(var(--color-raised)); }
 
-    .gb thead th { position: sticky; top: 0; z-index: 2; background: #172a43; }
+    .gb thead th { position: sticky; top: 0; z-index: 2; background: rgb(var(--color-raised)); }
     .gb-group { background: #05080C !important; color: #fff; z-index: 4 !important; }
 
-    .cell-graded    { background: rgba(0,194,255,0.10); }
-    .cell-submitted { background: #111d2e; }
-    .cell-progress  { background: #15243a; }
-    .cell-none      { background: #111d2e; }
-    .cell-low       { background: rgba(239,68,68,0.12); }
+    .cell-graded    { background: rgb(var(--color-blue) / 0.10); }
+    .cell-submitted { background: rgb(var(--color-surface)); }
+    .cell-progress  { background: rgb(var(--color-elevated)); }
+    .cell-none      { background: rgb(var(--color-surface)); }
+    .cell-low       { background: rgb(var(--color-red) / 0.12); }
 
     .gb td.num { min-width: 118px; }
 </style>
@@ -223,7 +223,7 @@
                 {{-- Column averages --}}
                 <tfoot>
                     <tr class="bg-base">
-                        <td class="frz px-4 py-3" style="background:#172a43;">
+                        <td class="frz px-4 py-3" style="background: rgb(var(--color-raised));">
                             <span class="eyebrow">Case average</span>
                         </td>
                         <td colspan="3"></td>
@@ -282,21 +282,21 @@
     {{-- Legend — also acts as a row filter: click a key to show only learners with a case in that state. --}}
     <div class="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.1em]">
         @foreach([
-            ['key' => 'graded',    'label' => 'Graded',         'bg' => 'rgba(0,194,255,0.10)'],
+            ['key' => 'graded',    'label' => 'Graded',         'bg' => 'rgb(var(--color-blue) / 0.10)'],
             ['key' => 'awaiting',  'label' => 'Awaiting grade', 'bg' => null],
-            ['key' => 'inprogress','label' => 'In progress',    'bg' => '#15243a'],
-            ['key' => 'below50',   'label' => 'Below 50%',      'bg' => 'rgba(239,68,68,0.12)'],
+            ['key' => 'inprogress','label' => 'In progress',    'bg' => 'rgb(var(--color-elevated))'],
+            ['key' => 'below50',   'label' => 'Below 50%',      'bg' => 'rgb(var(--color-red) / 0.12)'],
         ] as $l)
         <button type="button" @click="filter = filter === '{{ $l['key'] }}' ? null : '{{ $l['key'] }}'"
-            :class="filter === '{{ $l['key'] }}' ? 'border-blue text-fg' : 'border-edge text-white/60 hover:text-white hover:border-white/40'"
+            :class="filter === '{{ $l['key'] }}' ? 'border-blue text-fg' : 'border-edge text-fg-3 hover:text-fg hover:border-edge-hover'"
             class="flex items-center gap-2 border px-2.5 py-1.5 rounded-md transition">
-            <span class="w-3 h-3 border border-white/30 flex-shrink-0 {{ $l['bg'] ? '' : 'bg-surface' }}" @if($l['bg']) style="background:{{ $l['bg'] }}" @endif></span>
+            <span class="w-3 h-3 border border-edge flex-shrink-0 {{ $l['bg'] ? '' : 'bg-surface' }}" @if($l['bg']) style="background:{{ $l['bg'] }}" @endif></span>
             {{ $l['label'] }}
         </button>
         @endforeach
         <button type="button" x-show="filter" x-cloak @click="filter = null"
             class="font-mono text-[10px] uppercase tracking-[0.1em] text-blue hover:underline">Clear filter</button>
-        <span class="ml-auto normal-case tracking-normal text-[11px] text-white/60">Click any score to open that report.</span>
+        <span class="ml-auto normal-case tracking-normal text-[11px] text-fg-3">Click any score to open that report.</span>
     </div>
     </div>
 

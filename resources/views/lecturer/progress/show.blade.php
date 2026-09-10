@@ -6,7 +6,7 @@
 @section('content')
 <div class="pt-6 space-y-6">
 
-    <a href="{{ route('lecturer.progress') }}" class="text-[13px] text-white/70 hover:text-white">← Back to progress</a>
+    <a href="{{ route('lecturer.progress') }}" class="text-[13px] text-fg-2 hover:text-fg">← Back to progress</a>
 
     <section class="bg-surface border border-edge px-6 py-5 flex flex-wrap items-center gap-5">
         <div class="w-12 h-12 border border-blue flex items-center justify-center flex-shrink-0">

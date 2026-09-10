@@ -61,7 +61,7 @@
         </form>
     </section>
 
-    <p class="text-[12.5px] text-white/70">
+    <p class="text-[12.5px] text-fg-2">
         Looking for your scores and case history?
         <a href="{{ route('student.record') }}" class="text-blue font-medium hover:underline">Open your record →</a>
     </p>

@@ -7,6 +7,17 @@
     <title>@yield('title', 'AI-ForensicEdu')</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo-icon.png') }}">
 
+    <script>
+        // Set the theme before first paint so there's no flash of the wrong
+        // theme. Defaults to dark (the app's original/branded look) unless
+        // the visitor has explicitly switched before.
+        (function () {
+            var stored = null;
+            try { stored = localStorage.getItem('theme'); } catch (e) {}
+            document.documentElement.setAttribute('data-theme', stored === 'light' ? 'light' : 'dark');
+        })();
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -18,26 +29,29 @@
                 extend: {
                     colors: {
                         // Digital-forensics dashboard palette — dark navy surfaces
-                        // with cyan highlights (see design.md for the full spec).
-                        base:     '#08111f',   // page background
-                        sidebar:  '#0b1728',   // sidebar background
-                        surface:  '#111d2e',   // cards, panels — the "boxes"
-                        raised:   '#172a43',   // hover / nested panels
-                        elevated: '#15243a',   // elevated panels
-                        input:    '#0d1a2b',   // form field background
-                        edge:     { DEFAULT: '#263a55', hover: '#365170' },
-                        // Text — light on dark, varied by opacity for hierarchy
-                        fg:       { DEFAULT: '#eaf2ff', 2: 'rgba(234,242,255,0.72)', 3: 'rgba(234,242,255,0.52)' },
-                        heading:  '#f8fafc',
+                        // with cyan highlights by default (see design.md), now
+                        // driven by CSS custom properties so a light theme can
+                        // override the same tokens (see the :root / [data-theme]
+                        // rules below) without touching any view file.
+                        base:     'rgb(var(--color-base) / <alpha-value>)',
+                        sidebar:  'rgb(var(--color-sidebar) / <alpha-value>)',
+                        surface:  'rgb(var(--color-surface) / <alpha-value>)',
+                        raised:   'rgb(var(--color-raised) / <alpha-value>)',
+                        elevated: 'rgb(var(--color-elevated) / <alpha-value>)',
+                        input:    'rgb(var(--color-input) / <alpha-value>)',
+                        edge:     { DEFAULT: 'rgb(var(--color-edge) / <alpha-value>)', hover: 'rgb(var(--color-edge-hover) / <alpha-value>)' },
+                        // Text — varied by opacity for hierarchy
+                        fg:       { DEFAULT: 'rgb(var(--color-fg) / <alpha-value>)', 2: 'rgb(var(--color-fg) / 0.72)', 3: 'rgb(var(--color-fg) / 0.52)' },
+                        heading:  'rgb(var(--color-heading) / <alpha-value>)',
                         // Brand and actions — cyan primary; purple reserved for AI
-                        blue:     { DEFAULT: '#00c2ff', hover: '#38d2ff', deep: '#0891b2', soft: 'rgba(0,194,255,0.14)' },
-                        secondary:'#2563eb',
-                        ai:       { DEFAULT: '#8b5cf6', hover: '#a78bfa', soft: 'rgba(139,92,246,0.14)' },
+                        blue:     { DEFAULT: 'rgb(var(--color-blue) / <alpha-value>)', hover: 'rgb(var(--color-blue-hover) / <alpha-value>)', deep: 'rgb(var(--color-blue-deep) / <alpha-value>)', soft: 'rgb(var(--color-blue) / 0.14)' },
+                        secondary:'rgb(var(--color-secondary) / <alpha-value>)',
+                        ai:       { DEFAULT: 'rgb(var(--color-ai) / <alpha-value>)', hover: 'rgb(var(--color-ai-hover) / <alpha-value>)', soft: 'rgb(var(--color-ai) / 0.14)' },
                         // Status
-                        success:  { DEFAULT: '#22c55e', soft: 'rgba(34,197,94,0.14)' },
-                        warning:  { DEFAULT: '#f59e0b', soft: 'rgba(245,158,11,0.14)' },
-                        red:      { DEFAULT: '#ef4444', deep: '#b91c1c', soft: 'rgba(239,68,68,0.14)' },
-                        info:     { DEFAULT: '#3b82f6', soft: 'rgba(59,130,246,0.14)' },
+                        success:  { DEFAULT: 'rgb(var(--color-success) / <alpha-value>)', soft: 'rgb(var(--color-success) / 0.14)' },
+                        warning:  { DEFAULT: 'rgb(var(--color-warning) / <alpha-value>)', soft: 'rgb(var(--color-warning) / 0.14)' },
+                        red:      { DEFAULT: 'rgb(var(--color-red) / <alpha-value>)', deep: 'rgb(var(--color-red-deep) / <alpha-value>)', soft: 'rgb(var(--color-red) / 0.14)' },
+                        info:     { DEFAULT: 'rgb(var(--color-info) / <alpha-value>)', soft: 'rgb(var(--color-info) / 0.14)' },
                     },
                     fontFamily: {
                         display: ['"Inter"', 'Arial', 'sans-serif'],
@@ -45,9 +59,9 @@
                         mono:    ['"IBM Plex Mono"', 'monospace'],
                     },
                     boxShadow: {
-                        glow:     '0 0 0 1px rgba(0,194,255,0.5), 0 10px 30px -10px rgba(0,194,255,0.45)',
-                        'glow-sm':'0 0 0 3px rgba(0,194,255,0.16)',
-                        'glow-red':'0 0 0 1px rgba(239,68,68,0.5), 0 10px 30px -10px rgba(239,68,68,0.45)',
+                        glow:     '0 0 0 1px rgb(var(--color-blue) / 0.5), 0 10px 30px -10px rgb(var(--color-blue) / 0.45)',
+                        'glow-sm':'0 0 0 3px rgb(var(--color-blue) / 0.16)',
+                        'glow-red':'0 0 0 1px rgb(var(--color-red) / 0.5), 0 10px 30px -10px rgb(var(--color-red) / 0.45)',
                     },
                 }
             }
@@ -59,20 +73,71 @@
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.462.0/dist/umd/lucide.js"></script>
 
     <style>
+        :root {
+            /* Dark theme (default) — space-separated R G B so Tailwind's
+               rgb(var(--x) / <alpha-value>) opacity modifiers work, and so
+               raw CSS below can do rgb(var(--x) / 0.5) too. */
+            --color-base:      8 17 31;
+            --color-sidebar:   11 23 40;
+            --color-surface:   17 29 46;
+            --color-raised:    23 42 67;
+            --color-elevated:  21 36 58;
+            --color-input:     13 26 43;
+            --color-edge:      38 58 85;
+            --color-edge-hover:54 81 112;
+            --color-fg:        234 242 255;
+            --color-heading:   248 250 252;
+            --color-blue:      0 194 255;
+            --color-blue-hover:56 210 255;
+            --color-blue-deep: 8 145 178;
+            --color-secondary: 37 99 235;
+            --color-ai:        139 92 246;
+            --color-ai-hover:  167 139 250;
+            --color-success:   34 197 94;
+            --color-warning:   245 158 11;
+            --color-red:       239 68 68;
+            --color-red-deep:  185 28 28;
+            --color-info:      59 130 246;
+        }
+        :root[data-theme="light"] {
+            --color-base:      241 245 250;
+            --color-sidebar:   255 255 255;
+            --color-surface:   255 255 255;
+            --color-raised:    237 243 250;
+            --color-elevated:  233 240 249;
+            --color-input:     255 255 255;
+            --color-edge:      219 227 238;
+            --color-edge-hover:185 198 218;
+            --color-fg:        16 24 38;
+            --color-heading:   9 15 26;
+            --color-blue:      2 132 199;
+            --color-blue-hover:14 165 233;
+            --color-blue-deep: 3 105 161;
+            --color-secondary: 37 99 235;
+            --color-ai:        124 58 237;
+            --color-ai-hover:  139 92 246;
+            --color-success:   22 163 74;
+            --color-warning:   217 119 6;
+            --color-red:       220 38 38;
+            --color-red-deep:  153 27 27;
+            --color-info:      37 99 235;
+        }
+
         [x-cloak] { display: none !important; }
         body {
             font-family: 'Inter', Arial, sans-serif;
-            background: #08111f; color: #eaf2ff;
+            background: rgb(var(--color-base)); color: rgb(var(--color-fg));
             background-image:
-                radial-gradient(circle at 8% 0%, rgba(21,36,58,0.9), transparent 55%),
-                radial-gradient(circle at 100% 100%, rgba(11,23,40,0.9), transparent 55%);
+                radial-gradient(circle at 8% 0%, rgb(var(--color-elevated) / 0.9), transparent 55%),
+                radial-gradient(circle at 100% 100%, rgb(var(--color-sidebar) / 0.9), transparent 55%);
             background-attachment: fixed;
+            transition: background-color 200ms ease, color 200ms ease;
         }
-        h1,h2,h3,h4 { font-family: 'Inter', Arial, sans-serif; font-weight: 700; letter-spacing: -0.01em; color: #f8fafc; }
+        h1,h2,h3,h4 { font-family: 'Inter', Arial, sans-serif; font-weight: 700; letter-spacing: -0.01em; color: rgb(var(--color-heading)); }
 
         .eyebrow {
             font-family: 'Inter', Arial, sans-serif; font-size: 12px; font-weight: 600;
-            letter-spacing: 0.04em; text-transform: uppercase; color: rgba(234,242,255,0.52);
+            letter-spacing: 0.04em; text-transform: uppercase; color: rgb(var(--color-fg) / 0.52);
         }
 
         .seal {
@@ -81,17 +146,17 @@
             padding: 4px 10px; border: 1px solid currentColor; display: inline-flex; align-items: center; gap: 6px; line-height: 1;
             border-radius: 999px;
         }
-        .seal-open   { color: #00c2ff; background: rgba(0,194,255,0.14); }
-        .seal-active { color: #08111f; background: #00c2ff; border-color: #00c2ff; }
-        .seal-graded { color: #22c55e; background: rgba(34,197,94,0.14); }
-        .seal-draft  { color: rgba(234,242,255,0.55); background: rgba(234,242,255,0.08); }
-        .seal-alert  { color: #ef4444; background: rgba(239,68,68,0.14); }
+        .seal-open   { color: rgb(var(--color-blue)); background: rgb(var(--color-blue) / 0.14); }
+        .seal-active { color: rgb(var(--color-base)); background: rgb(var(--color-blue)); border-color: rgb(var(--color-blue)); }
+        .seal-graded { color: rgb(var(--color-success)); background: rgb(var(--color-success) / 0.14); }
+        .seal-draft  { color: rgb(var(--color-fg) / 0.55); background: rgb(var(--color-fg) / 0.08); }
+        .seal-alert  { color: rgb(var(--color-red)); background: rgb(var(--color-red) / 0.14); }
 
         .diff { font-family: 'Inter', Arial, sans-serif; font-size: 11px; font-weight: 600;
                 letter-spacing: 0.02em; text-transform: uppercase; }
-        .diff-beginner     { color: #00c2ff; }
-        .diff-intermediate { color: #f59e0b; }
-        .diff-advanced     { color: #ef4444; }
+        .diff-beginner     { color: rgb(var(--color-blue)); }
+        .diff-intermediate { color: rgb(var(--color-warning)); }
+        .diff-advanced     { color: rgb(var(--color-red)); }
 
         /* Cards — rounded corners on the dark card surface.
            Tables are excluded: their sticky/frozen headers depend on the card being
@@ -102,7 +167,9 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.25);
         }
 
-        /* Terminal */
+        /* Terminal — deliberately stays a fixed dark console look in both
+           themes, like a code editor's terminal pane; it's meant to read as
+           a literal log/terminal, not as themed chrome. */
         .evidence-panel { background: #05080C; color: #C5CBD6; border-radius: 10px; }
         .log-line { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
                     line-height: 1.9; border-bottom: 1px solid #16223a; padding: 2px 12px; }
@@ -112,13 +179,13 @@
         .nav-link {
             display: flex; align-items: center; gap: 11px;
             min-height: 44px; padding: 0 14px; margin: 0 10px; font-size: 13.5px; font-weight: 500;
-            color: rgba(234,242,255,0.62); border-left: 3px solid transparent; transition: all 200ms ease;
+            color: rgb(var(--color-fg) / 0.62); border-left: 3px solid transparent; transition: all 200ms ease;
             border-radius: 8px;
         }
         .nav-link svg { width: 18px; height: 18px; flex-shrink: 0; }
-        .nav-link:hover { color: #f8fafc; background: rgba(0,194,255,0.10); border-left-color: #00c2ff; transform: translateX(2px); }
-        .nav-link.active { color: #00c2ff; background: rgba(0,194,255,0.14); border-left-color: #00c2ff; font-weight: 600;
-            box-shadow: inset 0 0 18px rgba(0,194,255,0.08); }
+        .nav-link:hover { color: rgb(var(--color-heading)); background: rgb(var(--color-blue) / 0.10); border-left-color: rgb(var(--color-blue)); transform: translateX(2px); }
+        .nav-link.active { color: rgb(var(--color-blue)); background: rgb(var(--color-blue) / 0.14); border-left-color: rgb(var(--color-blue)); font-weight: 600;
+            box-shadow: inset 0 0 18px rgb(var(--color-blue) / 0.08); }
 
         /* Interactive surfaces — cards that feel clickable, HTB-style */
         .card-interactive {
@@ -127,14 +194,14 @@
         }
         .card-interactive:hover {
             transform: translateY(-2px);
-            border-color: #00c2ff;
-            box-shadow: 0 0 0 1px rgba(0,194,255,0.35), 0 14px 30px -12px rgba(0,194,255,0.35);
+            border-color: rgb(var(--color-blue));
+            box-shadow: 0 0 0 1px rgb(var(--color-blue) / 0.35), 0 14px 30px -12px rgb(var(--color-blue) / 0.35);
             z-index: 1; position: relative;
         }
 
         @keyframes glow-pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(0,194,255,0.45); }
-            50%      { box-shadow: 0 0 0 7px rgba(0,194,255,0); }
+            0%, 100% { box-shadow: 0 0 0 0 rgb(var(--color-blue) / 0.45); }
+            50%      { box-shadow: 0 0 0 7px rgb(var(--color-blue) / 0); }
         }
         .flash-once { animation: glow-pulse 900ms ease-out 2; }
 
@@ -146,14 +213,14 @@
 
         /* Form controls */
         .fld {
-            width: 100%; background: #0d1a2b; border: 1px solid #263a55; color: #eaf2ff;
+            width: 100%; background: rgb(var(--color-input)); border: 1px solid rgb(var(--color-edge)); color: rgb(var(--color-fg));
             padding: 10px 14px; font-size: 13.5px; min-height: 44px; transition: border-color 150ms ease, box-shadow 150ms ease;
             border-radius: 8px;
         }
-        .fld:hover { border-color: #365170; }
-        .fld:focus { outline: none; border-color: #00c2ff; box-shadow: 0 0 0 3px rgba(0,194,255,0.14); }
-        .fld::placeholder { color: rgba(234,242,255,0.4); }
-        select.fld option { background: #0d1a2b; color: #eaf2ff; }
+        .fld:hover { border-color: rgb(var(--color-edge-hover)); }
+        .fld:focus { outline: none; border-color: rgb(var(--color-blue)); box-shadow: 0 0 0 3px rgb(var(--color-blue) / 0.14); }
+        .fld::placeholder { color: rgb(var(--color-fg) / 0.4); }
+        select.fld option { background: rgb(var(--color-input)); color: rgb(var(--color-fg)); }
 
         /* Raw (non-.fld) text inputs/selects/textareas used in a few older forms —
            round them too so every field in the app looks consistent. */
@@ -171,40 +238,54 @@
         .btn-primary {
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             min-height: 42px; padding: 10px 18px;
-            background: #00c2ff; color: #08111f; font-weight: 600; border-radius: 8px;
+            background: rgb(var(--color-blue)); color: rgb(var(--color-base)); font-weight: 600; border-radius: 8px;
             transition: background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
         }
-        .btn-primary:hover { background: #38d2ff; box-shadow: 0 0 16px rgba(0,194,255,0.35); transform: translateY(-2px); }
+        .btn-primary:hover { background: rgb(var(--color-blue-hover)); box-shadow: 0 0 16px rgb(var(--color-blue) / 0.35); transform: translateY(-2px); }
 
         .btn-ai {
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             min-height: 42px; padding: 10px 18px;
-            background: #8b5cf6; color: #fff; font-weight: 600; border-radius: 8px;
+            background: rgb(var(--color-ai)); color: #fff; font-weight: 600; border-radius: 8px;
             transition: background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
         }
-        .btn-ai:hover { background: #a78bfa; box-shadow: 0 0 16px rgba(139,92,246,0.35); transform: translateY(-2px); }
+        .btn-ai:hover { background: rgb(var(--color-ai-hover)); box-shadow: 0 0 16px rgb(var(--color-ai) / 0.35); transform: translateY(-2px); }
 
         .btn-ghost {
-            border: 1px solid #263a55; color: rgba(234,242,255,0.75); border-radius: 8px;
+            border: 1px solid rgb(var(--color-edge)); color: rgb(var(--color-fg) / 0.75); border-radius: 8px;
             font-family: 'Inter', Arial, sans-serif; font-size: 13px; font-weight: 600;
             padding: 10px 16px; transition: all 150ms ease;
         }
-        .btn-ghost:hover { border-color: #00c2ff; color: #f8fafc; background: rgba(0,194,255,0.08); transform: translateY(-1px); }
-        .btn-danger { border: 1px solid #ef4444; color: #ef4444; border-radius: 8px;
+        .btn-ghost:hover { border-color: rgb(var(--color-blue)); color: rgb(var(--color-heading)); background: rgb(var(--color-blue) / 0.08); transform: translateY(-1px); }
+        .btn-danger { border: 1px solid rgb(var(--color-red)); color: rgb(var(--color-red)); border-radius: 8px;
             font-family: 'Inter', Arial, sans-serif; font-size: 13px; font-weight: 600;
             padding: 10px 16px; transition: all 150ms ease; }
-        .btn-danger:hover { background: #ef4444; color: #fff; box-shadow: 0 0 14px rgba(239,68,68,0.3); }
+        .btn-danger:hover { background: rgb(var(--color-red)); color: #fff; box-shadow: 0 0 14px rgb(var(--color-red) / 0.3); }
 
         .progress-bar { border-radius: 999px; transition: width 600ms cubic-bezier(0.22,1,0.36,1); }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
         .blink { animation: blink 2.2s ease-in-out infinite; }
 
         ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-track { background: #0b1728; }
-        ::-webkit-scrollbar-thumb { background: #263a55; border-radius: 999px; }
-        ::-webkit-scrollbar-thumb:hover { background: #00c2ff; }
+        ::-webkit-scrollbar-track { background: rgb(var(--color-sidebar)); }
+        ::-webkit-scrollbar-thumb { background: rgb(var(--color-edge)); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgb(var(--color-blue)); }
 
-        :focus-visible { outline: 2px solid #00c2ff; outline-offset: 2px; }
+        :focus-visible { outline: 2px solid rgb(var(--color-blue)); outline-offset: 2px; }
+
+        /* Theme toggle switch */
+        .theme-toggle {
+            width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 9999px; border: 1px solid rgb(var(--color-edge)); color: rgb(var(--color-fg) / 0.75);
+            transition: all 150ms ease;
+        }
+        .theme-toggle:hover { color: rgb(var(--color-heading)); border-color: rgb(var(--color-blue)); background: rgb(var(--color-blue) / 0.08); }
+        .theme-toggle svg { width: 16px; height: 16px; }
+        /* Show the sun icon in dark mode (click to switch to light) and the
+           moon icon in light mode (click to switch to dark). */
+        .theme-icon-dark { display: none; }
+        :root[data-theme="light"] .theme-icon-light { display: none; }
+        :root[data-theme="light"] .theme-icon-dark { display: block; }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
         }
@@ -260,6 +341,16 @@
             e.preventDefault();
         });
     }
+
+    // Light/dark theme toggle. The actual color values live in CSS custom
+    // properties (see the :root / [data-theme="light"] rules in the layout
+    // <style> block) — this just flips the attribute and remembers the
+    // choice, mirroring the inline pre-paint script in <head>.
+    window.toggleTheme = function () {
+        const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+    };
 </script>
 
 @auth
@@ -385,6 +476,10 @@
                 @endif
             </div>
             <div class="relative flex items-center gap-4 flex-shrink-0">
+                <button type="button" class="theme-toggle" x-data @click="window.toggleTheme()" title="Toggle light / dark theme">
+                    <i data-lucide="sun" class="theme-icon-light"></i>
+                    <i data-lucide="moon" class="theme-icon-dark"></i>
+                </button>
                 <div class="relative" x-data="{ open: false }">
                     <button type="button" @click="open = !open"
                         class="relative w-9 h-9 flex items-center justify-center rounded-full border border-edge text-fg-2 hover:text-fg hover:border-blue transition">
@@ -447,6 +542,10 @@
     </div>
 </div>
 @else
+    <button type="button" class="theme-toggle fixed top-5 right-5 z-50 bg-surface" x-data @click="window.toggleTheme()" title="Toggle light / dark theme">
+        <i data-lucide="sun" class="theme-icon-light"></i>
+        <i data-lucide="moon" class="theme-icon-dark"></i>
+    </button>
     @yield('content')
 @endauth
 

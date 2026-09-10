@@ -2,19 +2,19 @@
 
 <aside class="bg-sidebar border-r border-edge w-60 flex-shrink-0 flex flex-col overflow-y-auto">
 
-    <div class="px-5 py-4 border-b border-white/10">
+    <div class="px-5 py-4 border-b border-edge">
         <div class="flex items-center gap-2.5">
             <img src="{{ asset('images/logo-icon.png') }}" alt="AI-ForensicEDU" class="w-9 h-9 object-contain flex-shrink-0">
             <div class="leading-tight">
-                <p class="font-display text-[13.5px] font-semibold text-white">AI-ForensicEDU</p>
-                <p class="text-[9px] font-semibold text-white/55 uppercase tracking-[0.08em]">{{ $role }} console</p>
+                <p class="font-display text-[13.5px] font-semibold text-heading">AI-ForensicEDU</p>
+                <p class="text-[9px] font-semibold text-fg-3 uppercase tracking-[0.08em]">{{ $role }} console</p>
             </div>
         </div>
     </div>
 
     <nav class="flex-shrink-0 py-3">
         @if($role === 'student')
-            <p class="eyebrow px-5 mb-1.5 !text-white/45">Investigation</p>
+            <p class="eyebrow px-5 mb-1.5">Investigation</p>
             <a href="{{ route('student.dashboard') }}" class="nav-link {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
                 <i data-lucide="file-text"></i> Case Board
             </a>
@@ -28,7 +28,7 @@
             </a>
             @endif
 
-            <p class="eyebrow px-5 mb-1.5 mt-5 !text-white/45">Account</p>
+            <p class="eyebrow px-5 mb-1.5 mt-5">Account</p>
             <a href="{{ route('student.record') }}" class="nav-link {{ request()->routeIs('student.record') ? 'active' : '' }}">
                 <i data-lucide="award"></i> My Record
             </a>
@@ -37,7 +37,7 @@
             </a>
 
         @elseif($role === 'lecturer')
-            <p class="eyebrow px-5 mb-1.5 !text-white/45">Cases</p>
+            <p class="eyebrow px-5 mb-1.5">Cases</p>
             <a href="{{ route('lecturer.dashboard') }}" class="nav-link {{ request()->routeIs('lecturer.dashboard') ? 'active' : '' }}">
                 <i data-lucide="file-text"></i> Case Registry
             </a>
@@ -45,7 +45,7 @@
                 <i data-lucide="plus"></i> Build Case
             </a>
 
-            <p class="eyebrow px-5 mb-1.5 mt-5 !text-white/45">Cohort</p>
+            <p class="eyebrow px-5 mb-1.5 mt-5">Cohort</p>
             <a href="{{ route('lecturer.progress') }}" class="nav-link {{ request()->routeIs('lecturer.progress*') ? 'active' : '' }}">
                 <i data-lucide="chart-no-axes-column"></i> Progress
             </a>
@@ -56,7 +56,7 @@
                 <i data-lucide="users"></i> My Students
             </a>
 
-            <p class="eyebrow px-5 mb-1.5 mt-5 !text-white/45">Account</p>
+            <p class="eyebrow px-5 mb-1.5 mt-5">Account</p>
             <a href="{{ route('lecturer.profile') }}" class="nav-link {{ request()->routeIs('lecturer.profile') ? 'active' : '' }}">
                 <i data-lucide="user"></i> Profile
             </a>
@@ -88,18 +88,18 @@
     </div>
     @endif
 
-    <div class="px-5 py-3.5 border-t border-white/15 flex-shrink-0">
+    <div class="px-5 py-3.5 border-t border-edge flex-shrink-0">
         <div class="flex items-center gap-2.5">
-            <div class="w-7 h-7 border border-white/30 flex items-center justify-center flex-shrink-0 rounded-full">
-                <span class="font-mono text-[10px] font-semibold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</span>
+            <div class="w-7 h-7 border border-edge flex items-center justify-center flex-shrink-0 rounded-full">
+                <span class="font-mono text-[10px] font-semibold text-fg">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</span>
             </div>
             <div class="min-w-0 leading-tight">
-                <p class="text-[12px] font-medium text-white truncate">{{ auth()->user()->name }}</p>
-                <p class="font-mono text-[9.5px] text-white/55 truncate">
+                <p class="text-[12px] font-medium text-fg truncate">{{ auth()->user()->name }}</p>
+                <p class="font-mono text-[9.5px] text-fg-3 truncate">
                     {{ auth()->user()->student_id ?? auth()->user()->staff_id ?? auth()->user()->email }}
                 </p>
                 @if($role === 'student')
-                <span class="seal seal-open mt-1.5 !text-[8px] !px-1.5 !py-0.5 !bg-white/15 !text-white !border-white/30">{{ auth()->user()->investigatorRank()['label'] }}</span>
+                <span class="seal seal-open mt-1.5 !text-[8px] !px-1.5 !py-0.5 !bg-fg/10 !text-fg !border-fg/25">{{ auth()->user()->investigatorRank()['label'] }}</span>
                 @endif
             </div>
         </div>

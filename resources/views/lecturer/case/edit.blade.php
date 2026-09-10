@@ -60,7 +60,7 @@
             </div>
         </div>
         <div class="flex gap-3 justify-end">
-            <a href="{{ route('lecturer.dashboard') }}" class="border border-white/30 text-white/80 px-5 py-2  text-sm hover:bg-white hover:text-black transition rounded-lg">Cancel</a>
+            <a href="{{ route('lecturer.dashboard') }}" class="btn-ghost text-sm">Cancel</a>
             <button type="submit" class="btn-primary">Save Changes</button>
         </div>
     </form>

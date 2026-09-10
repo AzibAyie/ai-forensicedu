@@ -8,14 +8,14 @@
 
     {{-- Header Actions --}}
     <div class="flex items-center gap-3 mb-5">
-        <a href="{{ route('lecturer.report.index', $forensicCase) }}" class="text-sm text-white/70 hover:text-white">← Back to Reports</a>
+        <a href="{{ route('lecturer.report.index', $forensicCase) }}" class="text-sm text-fg-2 hover:text-fg">← Back to Reports</a>
         <div class="ml-auto flex gap-2">
             <button @click="runAI()" :disabled="aiLoading" class="btn-ai text-sm disabled:opacity-50">
                 <span x-show="!aiLoading">AI Evaluate</span>
                 <span x-show="aiLoading">Analysing...</span>
             </button>
             <a href="{{ route('lecturer.report.export-pdf', [$forensicCase, $enrollment]) }}"
-                class="px-4 py-2.5 normal-case tracking-normal font-sans text-sm border border-white/30 text-white/85 hover:bg-white hover:text-black transition rounded-lg">
+                class="btn-ghost normal-case tracking-normal font-sans text-sm">
                 Export PDF
             </a>
         </div>

@@ -99,7 +99,7 @@
 
     {{-- MILESTONES --}}
     <section>
-        <h3 class="font-display text-[15px] font-semibold text-white mb-4 inline-flex items-center gap-2"><i data-lucide="award" class="w-4 h-4 text-warning"></i> Milestones</h3>
+        <h3 class="font-display text-[15px] font-semibold text-heading mb-4 inline-flex items-center gap-2"><i data-lucide="award" class="w-4 h-4 text-warning"></i> Milestones</h3>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-px bg-edge border border-edge">
             @foreach($milestones as $m)
             @php $isNew = collect($newlyEarned)->contains('mark', $m['mark']); @endphp
@@ -122,8 +122,8 @@
     {{-- INVESTIGATION LOG --}}
     <section>
         <div class="flex items-baseline justify-between mb-4">
-            <h3 class="font-display text-[15px] font-semibold text-white inline-flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-fg-3"></i> Recent activity</h3>
-            <p class="font-mono text-[10.5px] text-white/60">{{ $stats['total_actions'] }} actions logged</p>
+            <h3 class="font-display text-[15px] font-semibold text-heading inline-flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-fg-3"></i> Recent activity</h3>
+            <p class="font-mono text-[10.5px] text-fg-3">{{ $stats['total_actions'] }} actions logged</p>
         </div>
         <div class="bg-surface border border-edge">
             @forelse($recentActivity as $log)

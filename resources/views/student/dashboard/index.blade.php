@@ -76,10 +76,10 @@
     {{-- AVAILABLE CASES --}}
     <section>
         <div class="flex items-baseline justify-between mb-4">
-            <h2 class="font-display text-[15px] font-semibold text-white">
+            <h2 class="font-display text-[15px] font-semibold text-heading">
                 {{ $hasActiveCase ? 'Queued cases' : 'Available cases' }}
             </h2>
-            <p class="font-mono text-[10.5px] text-white/60">{{ $availableCases->count() }} in registry</p>
+            <p class="font-mono text-[10.5px] text-fg-3">{{ $availableCases->count() }} in registry</p>
         </div>
 
         @if($hasActiveCase)
@@ -169,7 +169,7 @@
     @if($completedEnrollments->count())
     <section>
         <div class="flex items-baseline justify-between mb-4">
-            <h2 class="font-display text-[15px] font-semibold text-white">Closed cases</h2>
+            <h2 class="font-display text-[15px] font-semibold text-heading">Closed cases</h2>
             <a href="{{ route('student.record') }}" class="inline-flex items-center gap-1 font-mono text-[10.5px] text-blue hover:underline uppercase tracking-wider">
                 Full record <i data-lucide="arrow-right" class="w-3 h-3"></i>
             </a>
