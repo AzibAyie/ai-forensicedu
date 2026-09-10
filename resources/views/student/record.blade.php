@@ -2,6 +2,7 @@
 @section('title', 'My Record')
 @section('eyebrow', 'Account')
 @section('page-title', 'Investigator Record')
+@section('page-subtitle', 'Your investigation history, incident coverage, and earned milestones.')
 
 @section('content')
 <div class="pt-6 space-y-8">
@@ -17,13 +18,14 @@
             </p>
             <p class="text-[12px] text-base/70 mt-0.5">New milestone{{ count($newlyEarned) > 1 ? 's' : '' }} earned. Nice work.</p>
         </div>
-        <button @click="show = false" class="text-base/70 hover:text-black text-[13px]">✕</button>
+        <button @click="show = false" class="text-base/70 hover:text-black"><i data-lucide="x" class="w-4 h-4"></i></button>
     </div>
     @endif
 
     {{-- IDENTITY BAR --}}
-    <section class="bg-black text-white px-7 py-5 flex flex-wrap items-center gap-6 rounded-2xl">
-        <div class="w-12 h-12 border border-blue flex items-center justify-center flex-shrink-0">
+    <section class="relative bg-black text-white px-7 py-5 flex flex-wrap items-center gap-6 rounded-2xl overflow-hidden">
+        <i data-lucide="fingerprint" class="pointer-events-none absolute -right-8 -top-10 w-48 h-48 text-blue/[0.08]" stroke-width="1"></i>
+        <div class="relative w-12 h-12 border border-blue flex items-center justify-center flex-shrink-0">
             <span class="font-mono text-[15px] font-semibold text-blue">{{ strtoupper(substr($user->name, 0, 2)) }}</span>
         </div>
         <div class="min-w-0">
@@ -55,7 +57,7 @@
         {{-- SCORE TREND --}}
         <section class="xl:col-span-2 bg-surface border border-edge">
             <div class="px-6 py-4 border-b border-edge flex items-baseline justify-between">
-                <h3 class="font-display text-[14px] font-semibold text-fg">Score history</h3>
+                <h3 class="font-display text-[14px] font-semibold text-fg inline-flex items-center gap-2"><i data-lucide="trending-up" class="w-4 h-4 text-blue"></i> Score history</h3>
                 <p class="font-mono text-[10.5px] text-fg-3">{{ count($scoreHistory) }} graded</p>
             </div>
             <div class="px-6 py-5">
@@ -73,7 +75,7 @@
         {{-- COMPETENCY --}}
         <section class="bg-surface border border-edge">
             <div class="px-6 py-4 border-b border-edge">
-                <h3 class="font-display text-[14px] font-semibold text-fg">Incident coverage</h3>
+                <h3 class="font-display text-[14px] font-semibold text-fg inline-flex items-center gap-2"><i data-lucide="target" class="w-4 h-4 text-ai"></i> Incident coverage</h3>
             </div>
             <div class="px-6 py-5 space-y-5">
                 @foreach($competency as $type => $data)
@@ -97,7 +99,7 @@
 
     {{-- MILESTONES --}}
     <section>
-        <h3 class="font-display text-[15px] font-semibold text-white mb-4">Milestones</h3>
+        <h3 class="font-display text-[15px] font-semibold text-white mb-4 inline-flex items-center gap-2"><i data-lucide="award" class="w-4 h-4 text-warning"></i> Milestones</h3>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-px bg-edge border border-edge">
             @foreach($milestones as $m)
             @php $isNew = collect($newlyEarned)->contains('mark', $m['mark']); @endphp
@@ -108,7 +110,7 @@
                 <p class="text-[12.5px] font-semibold text-fg leading-tight">{{ $m['name'] }}</p>
                 <p class="text-[11.5px] text-fg-2 mt-1 leading-snug">{{ $m['desc'] }}</p>
                 @if($m['earned'])
-                    <span class="seal seal-graded mt-3">Earned</span>
+                    <span class="seal seal-graded mt-3"><span class="w-1.5 h-1.5 rounded-full bg-current"></span> Earned</span>
                 @else
                     <p class="font-mono text-[10px] text-fg-3 mt-3 uppercase tracking-wider">{{ $m['progress'] }}</p>
                 @endif
@@ -120,7 +122,7 @@
     {{-- INVESTIGATION LOG --}}
     <section>
         <div class="flex items-baseline justify-between mb-4">
-            <h3 class="font-display text-[15px] font-semibold text-white">Recent activity</h3>
+            <h3 class="font-display text-[15px] font-semibold text-white inline-flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-fg-3"></i> Recent activity</h3>
             <p class="font-mono text-[10.5px] text-white/60">{{ $stats['total_actions'] }} actions logged</p>
         </div>
         <div class="bg-surface border border-edge">
