@@ -1,6 +1,7 @@
 <?php
 namespace Database\Seeders;
 
+use App\Models\CaseAnswer;
 use App\Models\CaseEnrollment;
 use App\Models\CaseQuestion;
 use App\Models\CaseReport;
@@ -110,6 +111,12 @@ class DemoCasesSeeder extends Seeder
                     ['id' => 'A20BC1234', 'field' => 'grade', 'table' => 'student_records', 'before' => 'F', 'after' => 'B+', 'changed_at' => '2024-12-18 14:32:07'],
                 ],
                 'system_info' => ['incident_date' => '2024-12-18', 'affected_system' => 'Faculty of Computing Student Records System', 'affected_student' => 'A20BC1234', 'course' => 'Database Systems (DBS301)', 'change_method' => 'Direct table UPDATE, not the grade-submission workflow', 'session_context' => 'Change occurred after 2+ hours of idle time on an unattended, still-authenticated session'],
+                'suspects' => [
+                    ['name' => 'Dr. Lim', 'role' => 'Lecturer — account used for the change', 'culprit' => false],
+                    ['name' => 'Student A20BC1234', 'role' => 'The student whose grade changed', 'culprit' => true],
+                    ['name' => 'Lab Technician', 'role' => 'On duty in Lab 3 that day', 'culprit' => false],
+                    ['name' => 'Another Lab 3 Student', 'role' => 'Was also in the lab that afternoon', 'culprit' => false],
+                ],
             ],
             'timeline_events' => [
                 ['timestamp' => '2024-12-18 09:03', 'event' => 'dr.lim logs in at Lab 3, Workstation 7.'],

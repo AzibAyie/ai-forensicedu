@@ -73,4 +73,41 @@ class CaseController extends Controller
         ActivityLog::record($request->action, $request->description ?? '', $forensicCase->id);
         return response()->json(['success' => true]);
     }
+
+    public function accuseSuspect(Request $request, ForensicCase $forensicCase)
+    {
+        $user = auth()->user();
+        $enrollment = CaseEnrollment::where('forensic_case_id', $forensicCase->id)
+            ->where('student_id', $user->id)
+            ->firstOrFail();
+
+        $request->validate(['name' => 'required|string']);
+
+        $suspects = $forensicCase->simulated_evidence['suspects'] ?? [];
+        $picked = collect($suspects)->firstWhere('name', $request->name);
+
+        if (! $picked) {
+            return response()->json(['success' => false, 'message' => 'Unknown suspect.'], 422);
+        }
+
+        $correct = (bool) ($picked['culprit'] ?? false);
+
+        // Only overwrite a previous correct guess if they somehow guess again —
+        // keeps "solved" sticky rather than flapping between attempts.
+        if (! $enrollment->accusation_correct) {
+            $enrollment->update(['accused_suspect' => $picked['name'], 'accusation_correct' => $correct]);
+        }
+
+        ActivityLog::record(
+            'SUSPECT_ACCUSED',
+            "Accused {$picked['name']} ({$picked['role']}) — " . ($correct ? 'correct' : 'incorrect'),
+            $forensicCase->id
+        );
+
+        return response()->json([
+            'success' => true,
+            'correct' => $correct,
+            'culprit' => $correct ? $picked['name'] : null,
+        ]);
+    }
 }

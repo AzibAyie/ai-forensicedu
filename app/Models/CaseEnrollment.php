@@ -8,11 +8,13 @@ class CaseEnrollment extends Model
     protected $fillable = [
         'forensic_case_id', 'student_id', 'status',
         'progress_percent', 'started_at', 'submitted_at',
+        'accused_suspect', 'accusation_correct',
     ];
 
     protected $casts = [
         'started_at' => 'datetime',
         'submitted_at' => 'datetime',
+        'accusation_correct' => 'boolean',
     ];
 
     public function forensicCase() {

@@ -77,7 +77,10 @@
                     </div>
 
                     {{-- Sub-tabs for evidence types --}}
-                    <div x-data="{ evidenceTab: 'audit_logs', ...terminalTool(@js($evidence), @js($forensicCase->timeline_events ?? [])) }">
+                    {{-- Note: suspects (and their culprit flag) are deliberately excluded from
+                         what's fed to the client-side terminal — that data must stay server-side
+                         only (see the accuse() endpoint) so the answer can't be read via devtools. --}}
+                    <div x-data="{ evidenceTab: 'audit_logs', ...terminalTool(@js(collect($evidence)->except('suspects')->all()), @js($forensicCase->timeline_events ?? [])) }">
                         <div class="flex border-b border-edge bg-base">
                             @if(!empty($evidence['audit_logs']))
                             <button @click="evidenceTab = 'audit_logs'; logActivity('EVIDENCE_OPENED', 'Opened audit logs')"
@@ -240,6 +243,72 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Suspect Lineup — only shows when the lecturer configured suspects
+                 for this case. Names/roles are rendered server-side; the correct
+                 answer never reaches the browser, so it can't be read from
+                 devtools/view-source — the accusation is checked by the server. --}}
+            @php $suspects = $forensicCase->simulated_evidence['suspects'] ?? []; @endphp
+            @if(!empty($suspects))
+            <div class="bg-surface border border-edge"
+                x-data="{
+                    picked: null,
+                    result: null,
+                    solved: {{ $enrollment->accusation_correct ? 'true' : 'false' }},
+                    solvedName: {{ $enrollment->accusation_correct ? json_encode($enrollment->accused_suspect) : 'null' }},
+                    async accuse(name) {
+                        if (this.solved) return;
+                        this.picked = name;
+                        this.result = null;
+                        try {
+                            const res = await fetch('{{ route('student.case.accuse', $forensicCase) }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                },
+                                body: JSON.stringify({ name }),
+                            });
+                            const data = await res.json();
+                            this.result = data.correct ? 'correct' : 'wrong';
+                            if (data.correct) { this.solved = true; this.solvedName = data.culprit; }
+                        } catch (e) { this.result = 'error'; }
+                    },
+                }">
+                <div class="px-5 py-4 border-b border-edge flex items-center justify-between">
+                    <h3 class="font-semibold text-fg inline-flex items-center gap-2">
+                        <i data-lucide="user-search" class="w-4 h-4 text-blue"></i> Name the Suspect
+                    </h3>
+                    <span class="text-xs text-fg-3" x-show="!solved">Pick who you think is responsible</span>
+                    <span class="text-xs text-success font-semibold" x-show="solved" x-cloak>Case solved</span>
+                </div>
+                <div class="p-5">
+                    <div x-show="solved" x-cloak class="bg-success-soft border border-success px-4 py-3 mb-4 flex items-start gap-2.5">
+                        <i data-lucide="circle-check-big" class="w-4 h-4 text-success flex-shrink-0 mt-0.5"></i>
+                        <p class="text-sm text-fg">You correctly named <strong x-text="solvedName"></strong> as the responsible party. Use this in your report's findings.</p>
+                    </div>
+                    <div x-show="result === 'wrong'" x-cloak x-transition class="bg-red-soft border border-red px-4 py-3 mb-4 flex items-start gap-2.5">
+                        <i data-lucide="circle-x" class="w-4 h-4 text-red flex-shrink-0 mt-0.5"></i>
+                        <p class="text-sm text-fg">Not <strong x-text="picked"></strong> — look again at who had access, motive, and opportunity in the evidence.</p>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        @foreach($suspects as $s)
+                        <button type="button" @click="accuse('{{ addslashes($s['name']) }}')"
+                            :disabled="solved"
+                            :class="{
+                                'border-success bg-success-soft': solved && solvedName === '{{ addslashes($s['name']) }}',
+                                'border-red': !solved && result === 'wrong' && picked === '{{ addslashes($s['name']) }}',
+                                'opacity-50 cursor-not-allowed': solved && solvedName !== '{{ addslashes($s['name']) }}',
+                            }"
+                            class="text-left border border-edge p-3.5 hover:border-blue hover:bg-raised disabled:pointer-events-none transition rounded-lg">
+                            <p class="text-sm font-semibold text-fg">{{ $s['name'] }}</p>
+                            <p class="text-xs text-fg-3 mt-0.5">{{ $s['role'] }}</p>
+                        </button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
 
             {{-- Investigation Questions --}}
             <div class="bg-surface  border border-edge ">

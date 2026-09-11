@@ -69,6 +69,12 @@ class Lecturer1CasesSeeder extends Seeder
                     'prices_reverted_before_daily_audit' => true,
                     'daily_audit_scheduled_time' => '15:00',
                 ],
+                'suspects' => [
+                    ['name' => 'K. Tan', 'role' => 'Warehouse Operator (k.tan)', 'culprit' => true],
+                    ['name' => 'R. Aziz', 'role' => 'Inventory Supervisor', 'culprit' => false],
+                    ['name' => 'Finance Approval Clerk', 'role' => 'Approves price changes over RM500', 'culprit' => false],
+                    ['name' => 'IT Support', 'role' => 'Holds an admin override account', 'culprit' => false],
+                ],
             ],
             'timeline_events' => [
                 ['timestamp' => '2024-10-14 14:02', 'event' => 'Four product prices are dropped to RM0.50 each within a 48-second window.'],
@@ -123,6 +129,12 @@ class Lecturer1CasesSeeder extends Seeder
                     'data_span' => '3 years (2021-2024)',
                     'context' => 'Account holder was informed 9 hours earlier that he would not be a co-author on the group\'s upcoming paper',
                     'backups_available' => 'Unknown — under investigation',
+                ],
+                'suspects' => [
+                    ['name' => 'grad_lim', 'role' => 'Graduate Student, lab member', 'culprit' => true],
+                    ['name' => 'Dr. Hassan', 'role' => 'Principal Investigator', 'culprit' => false],
+                    ['name' => 'Another Lab Member', 'role' => 'Co-author on the upcoming paper', 'culprit' => false],
+                    ['name' => 'IT Helpdesk', 'role' => 'Manages the shared results server', 'culprit' => false],
                 ],
             ],
             'timeline_events' => [

@@ -68,6 +68,12 @@ class ExtraCaseSeeder extends Seeder
                     'records_deleted' => '1,240 patient visits + 890 upcoming appointments',
                     'data_exported_first' => true,
                 ],
+                'suspects' => [
+                    ['name' => 'contractor_reyes', 'role' => 'Offboarding External Contractor', 'culprit' => true],
+                    ['name' => 'IT Security Auditor', 'role' => 'Reviews contractor access', 'culprit' => false],
+                    ['name' => 'Permanent Records Clerk', 'role' => 'Full-time patient records staff', 'culprit' => false],
+                    ['name' => 'Second Contractor', 'role' => 'Also had temporary access', 'culprit' => false],
+                ],
             ],
             'timeline_events' => [
                 ['timestamp' => '2024-10-29', 'event' => 'Contractor Reyes is notified that system access will be revoked on 7 November.'],

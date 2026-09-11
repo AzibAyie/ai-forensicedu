@@ -31,6 +31,7 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('/case/{forensicCase}', [Student\CaseController::class, 'show'])->name('case.show');
     Route::post('/case/{forensicCase}/answer', [Student\CaseController::class, 'saveAnswer'])->name('case.save-answer');
     Route::post('/case/{forensicCase}/log', [Student\CaseController::class, 'logActivity'])->name('case.log');
+    Route::post('/case/{forensicCase}/accuse', [Student\CaseController::class, 'accuseSuspect'])->name('case.accuse');
     Route::get('/case/{forensicCase}/questions.pdf', [Student\ReportController::class, 'downloadQuestions'])->name('case.questions');
 
     Route::get('/case/{forensicCase}/report', [Student\ReportController::class, 'show'])->name('report.show');
