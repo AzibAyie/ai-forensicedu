@@ -1,11 +1,23 @@
 <?php
+
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Student;
 use App\Http\Controllers\Lecturer;
+use App\Http\Controllers\Student;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/_diag/gemini', function () {
+    $key = config('services.gemini.api_key', '');
+
+    return response()->json([
+        'key_present' => $key !== '',
+        'key_length' => strlen($key),
+        'key_prefix' => substr($key, 0, 3),
+        'model' => config('services.gemini.model'),
+    ]);
+});
+
 // ── Auth ──────────────────────────────────────────────────────────
-Route::get('/', fn() => redirect()->route('login'));
+Route::get('/', fn () => redirect()->route('login'));
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
