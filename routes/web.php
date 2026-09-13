@@ -3,34 +3,24 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Lecturer;
 use App\Http\Controllers\Student;
-use Illuminate\Support\Facades\Http;
+use App\Services\AIService;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/_diag/gemini', function () {
     $key = config('services.gemini.api_key', '');
     $model = config('services.gemini.model', 'gemini-3.6-flash');
 
-    $listResponse = Http::withHeaders([
-        'x-goog-api-key' => $key,
-    ])->get('https://generativelanguage.googleapis.com/v1beta/models');
-
-    $genResponse = Http::withHeaders([
-        'x-goog-api-key' => $key,
-        'content-type' => 'application/json',
-    ])->timeout(90)->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent", [
-        'contents' => [
-            ['role' => 'user', 'parts' => [['text' => 'Say hello in one word.']]],
-        ],
-    ]);
+    $ai = new AIService;
+    $result = $ai->generateCase('brute_force', 'beginner', 'diagnostic test');
 
     return response()->json([
         'key_present' => $key !== '',
         'key_length' => strlen($key),
         'key_prefix' => substr($key, 0, 3),
         'model' => $model,
-        'list_call_status' => $listResponse->status(),
-        'generate_call_status' => $genResponse->status(),
-        'generate_call_body' => $genResponse->json() ?? $genResponse->body(),
+        'result_empty' => empty($result),
+        'last_error' => $ai->getLastError(),
+        'result_title' => $result['title'] ?? null,
     ]);
 });
 
