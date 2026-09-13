@@ -3,16 +3,24 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Lecturer;
 use App\Http\Controllers\Student;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/_diag/gemini', function () {
     $key = config('services.gemini.api_key', '');
+    $model = config('services.gemini.model', 'gemini-3.6-flash');
+
+    $response = Http::withHeaders([
+        'x-goog-api-key' => $key,
+    ])->get('https://generativelanguage.googleapis.com/v1beta/models');
 
     return response()->json([
         'key_present' => $key !== '',
         'key_length' => strlen($key),
         'key_prefix' => substr($key, 0, 3),
-        'model' => config('services.gemini.model'),
+        'model' => $model,
+        'live_call_status' => $response->status(),
+        'live_call_body' => $response->json() ?? $response->body(),
     ]);
 });
 
