@@ -10,17 +10,27 @@ Route::get('/_diag/gemini', function () {
     $key = config('services.gemini.api_key', '');
     $model = config('services.gemini.model', 'gemini-3.6-flash');
 
-    $response = Http::withHeaders([
+    $listResponse = Http::withHeaders([
         'x-goog-api-key' => $key,
     ])->get('https://generativelanguage.googleapis.com/v1beta/models');
+
+    $genResponse = Http::withHeaders([
+        'x-goog-api-key' => $key,
+        'content-type' => 'application/json',
+    ])->timeout(90)->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent", [
+        'contents' => [
+            ['role' => 'user', 'parts' => [['text' => 'Say hello in one word.']]],
+        ],
+    ]);
 
     return response()->json([
         'key_present' => $key !== '',
         'key_length' => strlen($key),
         'key_prefix' => substr($key, 0, 3),
         'model' => $model,
-        'live_call_status' => $response->status(),
-        'live_call_body' => $response->json() ?? $response->body(),
+        'list_call_status' => $listResponse->status(),
+        'generate_call_status' => $genResponse->status(),
+        'generate_call_body' => $genResponse->json() ?? $genResponse->body(),
     ]);
 });
 
