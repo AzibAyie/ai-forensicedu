@@ -28,8 +28,9 @@ php artisan key:generate
 mysql -u root -p -e "CREATE DATABASE ai_forensicedu CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 # 4. Point .env at it — edit DB_USERNAME / DB_PASSWORD
-#    and add your key for the AI features:
-#    ANTHROPIC_API_KEY=sk-ant-...
+#    and add your key for the AI features (from https://aistudio.google.com/apikey):
+#    GEMINI_API_KEY=...
+#    GEMINI_MODEL=gemini-3.6-flash
 
 # 5. Tables + demo data
 php artisan migrate --seed
@@ -145,7 +146,7 @@ impersonate students assigned to them.
 
 | Symptom | Fix |
 |---|---|
-| AI buttons do nothing | Set `ANTHROPIC_API_KEY` in `.env`, then `php artisan config:clear` |
+| AI buttons do nothing | Set `GEMINI_API_KEY` in `.env`, then `php artisan config:clear` |
 | Uploads fail | Raise `upload_max_filesize` / `post_max_size` in php.ini |
 | Blank page after changes | `php artisan optimize:clear` |
 | Case not visible to students | Check it is published **and** inside its open/close window |
@@ -155,4 +156,4 @@ impersonate students assigned to them.
 ## Stack
 
 Laravel 12 · MySQL 8 · Tailwind (CDN) · Alpine.js · Chart.js ·
-barryvdh/laravel-dompdf · Anthropic Claude API · PHPUnit + Dusk · GitHub Actions · Pint
+barryvdh/laravel-dompdf · Google Gemini API · PHPUnit + Dusk · GitHub Actions · Pint

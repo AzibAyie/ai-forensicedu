@@ -1,23 +1,35 @@
 <?php
+
 namespace App\Services;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class AIService
 {
     private string $apiKey;
-    private string $model = 'claude-sonnet-4-6';
-    private string $baseUrl = 'https://api.anthropic.com/v1/messages';
+
+    private string $model;
+
+    private string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
+
+    private ?string $lastError = null;
 
     public function __construct()
     {
-        $this->apiKey = config('services.anthropic.api_key', '');
+        $this->apiKey = config('services.gemini.api_key', '');
+        $this->model = config('services.gemini.model', 'gemini-3.6-flash');
+    }
+
+    public function getLastError(): ?string
+    {
+        return $this->lastError;
     }
 
     public function generateCase(string $incidentType, string $difficulty, string $additionalContext = ''): array
     {
-        $incidentLabel = match($incidentType) {
+        $incidentLabel = match ($incidentType) {
             'unauthorized_modification' => 'Unauthorized Data Modification',
             'brute_force' => 'Brute Force Login Attack',
             'mass_deletion' => 'Mass Data Deletion',
@@ -60,35 +72,12 @@ Respond ONLY with valid JSON (no markdown, no explanation) in this exact structu
   ]
 }";
 
-        try {
-            $response = Http::withHeaders([
-                'x-api-key' => $this->apiKey,
-                'anthropic-version' => '2023-06-01',
-                'content-type' => 'application/json',
-            ])->post($this->baseUrl, [
-                'model' => $this->model,
-                'max_tokens' => 3000,
-                'messages' => [['role' => 'user', 'content' => $prompt]],
-            ]);
-
-            if ($response->successful()) {
-                $content = $response->json('content.0.text', '');
-                $clean = preg_replace('/```json|```/', '', $content);
-                return json_decode(trim($clean), true) ?? [];
-            }
-
-            Log::error('AI case generation failed', ['status' => $response->status(), 'body' => $response->body()]);
-            return [];
-        } catch (\Exception $e) {
-            Log::error('AI service error', ['message' => $e->getMessage()]);
-            return [];
-        }
+        return $this->request($prompt, 'case generation');
     }
 
     public function evaluateReport(array $reportData, array $questions, string $caseScenario): array
     {
-        $questionsText = collect($questions)->map(fn($q, $i) =>
-            ($i + 1) . ". Q: {$q['question']} (Max: {$q['marks']} marks)\n   A: " . ($reportData['answers'][$q['id']] ?? 'No answer provided')
+        $questionsText = collect($questions)->map(fn ($q, $i) => ($i + 1).". Q: {$q['question']} (Max: {$q['marks']} marks)\n   A: ".($reportData['answers'][$q['id']] ?? 'No answer provided')
         )->join("\n\n");
 
         $prompt = "You are a digital forensics lecturer evaluating a student's forensic investigation report. Be fair, constructive, and specific.
@@ -117,27 +106,98 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
   \"improvement_suggestions\": [\"Specific actionable suggestion 1\", \"Specific actionable suggestion 2\"]
 }";
 
+        return $this->request($prompt, 'report evaluation');
+    }
+
+    private function request(string $prompt, string $context): array
+    {
+        $this->lastError = null;
+
+        $result = $this->callGemini($prompt, $context);
+
+        if ($result['retry'] ?? false) {
+            Log::warning("AI {$context}: retrying once after invalid JSON response");
+            $result = $this->callGemini($prompt, $context);
+        }
+
+        return $result['data'] ?? [];
+    }
+
+    /**
+     * @return array{data: array, retry?: bool}
+     */
+    private function callGemini(string $prompt, string $context): array
+    {
+        $url = "{$this->baseUrl}/{$this->model}:generateContent";
+
         try {
             $response = Http::withHeaders([
-                'x-api-key' => $this->apiKey,
-                'anthropic-version' => '2023-06-01',
+                'x-goog-api-key' => $this->apiKey,
                 'content-type' => 'application/json',
-            ])->post($this->baseUrl, [
-                'model' => $this->model,
-                'max_tokens' => 2000,
-                'messages' => [['role' => 'user', 'content' => $prompt]],
+            ])->timeout(90)->post($url, [
+                'contents' => [
+                    ['role' => 'user', 'parts' => [['text' => $prompt]]],
+                ],
+                'generationConfig' => [
+                    'responseMimeType' => 'application/json',
+                    'thinkingConfig' => ['thinkingLevel' => 'minimal'],
+                ],
             ]);
 
-            if ($response->successful()) {
-                $content = $response->json('content.0.text', '');
-                $clean = preg_replace('/```json|```/', '', $content);
-                return json_decode(trim($clean), true) ?? [];
+            $finishReason = $response->json('candidates.0.finishReason');
+            $usage = $response->json('usageMetadata');
+
+            if (! $response->successful()) {
+                $errorMessage = $response->json('error.message') ?? 'AI service request failed.';
+                Log::error("AI {$context} failed", [
+                    'status' => $response->status(),
+                    'error_body' => $response->json('error') ?? $response->body(),
+                    'finish_reason' => $finishReason,
+                    'usage' => $usage,
+                ]);
+                $this->lastError = $errorMessage;
+
+                return ['data' => []];
             }
 
-            return [];
+            $parts = $response->json('candidates.0.content.parts', []);
+            $text = collect($parts)
+                ->reject(fn ($part) => ($part['thought'] ?? false) === true)
+                ->pluck('text')
+                ->filter()
+                ->join('');
+
+            $clean = preg_replace('/```json|```/', '', $text);
+            $decoded = json_decode(trim($clean), true);
+
+            if (json_last_error() !== JSON_ERROR_NONE || ! is_array($decoded)) {
+                Log::warning("AI {$context}: invalid or empty JSON in response", [
+                    'status' => $response->status(),
+                    'finish_reason' => $finishReason,
+                    'usage' => $usage,
+                    'json_error' => json_last_error_msg(),
+                ]);
+                $this->lastError = 'AI service returned an invalid response.';
+
+                return ['data' => [], 'retry' => true];
+            }
+
+            Log::info("AI {$context} succeeded", [
+                'finish_reason' => $finishReason,
+                'usage' => $usage,
+            ]);
+
+            return ['data' => $decoded];
+        } catch (ConnectionException $e) {
+            Log::error("AI {$context}: connection error", ['message' => $e->getMessage()]);
+            $this->lastError = 'Could not reach the AI service. Please try again.';
+
+            return ['data' => []];
         } catch (\Exception $e) {
-            Log::error('AI evaluation error', ['message' => $e->getMessage()]);
-            return [];
+            Log::error("AI {$context}: unexpected error", ['message' => $e->getMessage()]);
+            $this->lastError = 'An unexpected error occurred while contacting the AI service.';
+
+            return ['data' => []];
         }
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Lecturer;
 
 use App\Http\Controllers\Controller;
@@ -45,7 +46,9 @@ class CaseController extends Controller
         // Lecturer-authored audit log lines are appended to the generated set.
         if ($request->filled('custom_logs')) {
             foreach ($request->custom_logs as $log) {
-                if (empty($log['details'])) continue;
+                if (empty($log['details'])) {
+                    continue;
+                }
                 $evidenceData['audit_logs'][] = [
                     'timestamp' => $log['timestamp'] ?? '',
                     'user' => $log['user'] ?? 'unknown',
@@ -82,7 +85,7 @@ class CaseController extends Controller
             'publish_at' => $request->publish_at,
             'close_at' => $request->close_at,
             'password' => $request->password,
-            'is_locked' => !empty($request->password),
+            'is_locked' => ! empty($request->password),
             'is_published' => $request->has('publish'),
             'expected_duration' => $request->expected_duration,
             'total_marks' => array_sum(array_column($request->questions, 'marks')),
@@ -106,6 +109,7 @@ class CaseController extends Controller
     public function edit(ForensicCase $forensicCase)
     {
         $this->authorizeCase($forensicCase);
+
         return view('lecturer.case.edit', compact('forensicCase'));
     }
 
@@ -152,22 +156,25 @@ class CaseController extends Controller
         $title = $forensicCase->title;
         $forensicCase->delete();
         ActivityLog::record('CASE_DELETED', "Deleted case: {$title}");
+
         return redirect()->route('lecturer.dashboard')->with('success', 'Case deleted.');
     }
 
     public function toggleLock(ForensicCase $forensicCase)
     {
         $this->authorizeCase($forensicCase);
-        $forensicCase->update(['is_locked' => !$forensicCase->is_locked]);
+        $forensicCase->update(['is_locked' => ! $forensicCase->is_locked]);
         $status = $forensicCase->is_locked ? 'locked' : 'unlocked';
+
         return back()->with('success', "Case {$status}.");
     }
 
     public function togglePublish(ForensicCase $forensicCase)
     {
         $this->authorizeCase($forensicCase);
-        $forensicCase->update(['is_published' => !$forensicCase->is_published]);
+        $forensicCase->update(['is_published' => ! $forensicCase->is_published]);
         $status = $forensicCase->is_published ? 'published' : 'unpublished';
+
         return back()->with('success', "Case {$status}.");
     }
 
@@ -179,11 +186,13 @@ class CaseController extends Controller
             'context' => 'nullable|string|max:500',
         ]);
 
-        $ai = new AIService();
+        $ai = new AIService;
         $generated = $ai->generateCase($request->incident_type, $request->difficulty, $request->context ?? '');
 
         if (empty($generated)) {
-            return response()->json(['success' => false, 'message' => 'AI generation failed. Please fill in manually.'], 422);
+            $message = $ai->getLastError() ?? 'AI generation failed. Please fill in manually.';
+
+            return response()->json(['success' => false, 'message' => $message], 422);
         }
 
         return response()->json(['success' => true, 'data' => $generated]);
@@ -193,6 +202,7 @@ class CaseController extends Controller
     {
         $this->authorizeCase($forensicCase);
         abort_unless($forensicCase->question_pdf_path, 404);
+
         return Storage::disk('local')->download(
             $forensicCase->question_pdf_path,
             $forensicCase->question_pdf_name ?? 'questions.pdf'
@@ -208,7 +218,7 @@ class CaseController extends Controller
 
     private function buildSimulatedEvidence(string $type): array
     {
-        return match($type) {
+        return match ($type) {
             'brute_force' => [
                 'type' => 'brute_force',
                 'overview' => 'Network and authentication logs showing repeated failed login attempts followed by successful unauthorized access.',

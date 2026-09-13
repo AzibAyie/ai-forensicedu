@@ -1,4 +1,5 @@
 <?php
+
 return [
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),
@@ -17,7 +18,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
-    'anthropic' => [
-        'api_key' => env('ANTHROPIC_API_KEY', ''),
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY', ''),
+        'model' => env('GEMINI_MODEL', 'gemini-3.6-flash'),
     ],
 ];

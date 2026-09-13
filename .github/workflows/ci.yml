@@ -53,7 +53,8 @@ jobs:
           echo "DB_DATABASE=ai_forensicedu_test" >> .env
           echo "DB_USERNAME=root" >> .env
           echo "DB_PASSWORD=password" >> .env
-          echo "ANTHROPIC_API_KEY=test_key" >> .env
+          echo "GEMINI_API_KEY=test_key" >> .env
+          echo "GEMINI_MODEL=gemini-3.6-flash" >> .env
 
       - name: Run database migrations
         run: php artisan migrate --force
@@ -102,7 +103,8 @@ jobs:
           echo "DB_DATABASE=ai_forensicedu_dusk" >> .env
           echo "DB_USERNAME=root" >> .env
           echo "DB_PASSWORD=password" >> .env
-          echo "ANTHROPIC_API_KEY=test_key" >> .env
+          echo "GEMINI_API_KEY=test_key" >> .env
+          echo "GEMINI_MODEL=gemini-3.6-flash" >> .env
       - run: php artisan migrate --force
       - run: php artisan db:seed --force
       - name: Start Laravel server

@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     public function showLogin() {
+        if (Auth::check()) {
+            return redirect($this->redirectPath(Auth::user()->role));
+        }
+
         return view('auth.login');
     }
 

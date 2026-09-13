@@ -1,22 +1,24 @@
 <?php
+
 namespace App\Http\Controllers\Lecturer;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\CaseEnrollment;
-use App\Models\CaseReport;
 use App\Models\ForensicCase;
 use App\Services\AIService;
 use App\Services\IntegrityService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
     public function index(ForensicCase $forensicCase)
     {
-        if ($forensicCase->lecturer_id !== auth()->id()) abort(403);
+        if ($forensicCase->lecturer_id !== auth()->id()) {
+            abort(403);
+        }
 
         $enrollments = CaseEnrollment::where('forensic_case_id', $forensicCase->id)
             ->with(['student', 'report'])
@@ -27,7 +29,9 @@ class ReportController extends Controller
 
     public function show(ForensicCase $forensicCase, CaseEnrollment $enrollment)
     {
-        if ($forensicCase->lecturer_id !== auth()->id()) abort(403);
+        if ($forensicCase->lecturer_id !== auth()->id()) {
+            abort(403);
+        }
 
         $report = $enrollment->report;
         $answers = $enrollment->answers()->with('question')->get();
@@ -42,7 +46,9 @@ class ReportController extends Controller
 
     public function grade(Request $request, ForensicCase $forensicCase, CaseEnrollment $enrollment)
     {
-        if ($forensicCase->lecturer_id !== auth()->id()) abort(403);
+        if ($forensicCase->lecturer_id !== auth()->id()) {
+            abort(403);
+        }
 
         $request->validate([
             'marks' => "required|integer|min:0|max:{$forensicCase->total_marks}",
@@ -64,21 +70,23 @@ class ReportController extends Controller
 
     public function aiEvaluate(ForensicCase $forensicCase, CaseEnrollment $enrollment)
     {
-        if ($forensicCase->lecturer_id !== auth()->id()) abort(403);
+        if ($forensicCase->lecturer_id !== auth()->id()) {
+            abort(403);
+        }
 
         $report = $enrollment->report;
-        if (!$report) {
+        if (! $report) {
             return response()->json(['success' => false, 'message' => 'No report submitted yet.'], 404);
         }
 
-        $questions = $forensicCase->questions->map(fn($q) => [
+        $questions = $forensicCase->questions->map(fn ($q) => [
             'id' => $q->id, 'question' => $q->question, 'marks' => $q->marks,
         ])->toArray();
 
         $answers = $enrollment->answers()->with('question')->get()
-            ->mapWithKeys(fn($a) => [$a->question_id => $a->answer])->toArray();
+            ->mapWithKeys(fn ($a) => [$a->question_id => $a->answer])->toArray();
 
-        $ai = new AIService();
+        $ai = new AIService;
         $evaluation = $ai->evaluateReport([
             'executive_summary' => $report->executive_summary,
             'findings' => $report->findings,
@@ -89,7 +97,9 @@ class ReportController extends Controller
         ], $questions, $forensicCase->scenario);
 
         if (empty($evaluation)) {
-            return response()->json(['success' => false, 'message' => 'AI evaluation failed.'], 422);
+            $message = $ai->getLastError() ?? 'AI evaluation failed.';
+
+            return response()->json(['success' => false, 'message' => $message], 422);
         }
 
         $report->update([
@@ -102,7 +112,9 @@ class ReportController extends Controller
 
     public function downloadAnswer(ForensicCase $forensicCase, CaseEnrollment $enrollment)
     {
-        if ($forensicCase->lecturer_id !== auth()->id()) abort(403);
+        if ($forensicCase->lecturer_id !== auth()->id()) {
+            abort(403);
+        }
         $report = $enrollment->report;
         abort_unless($report && $report->answer_pdf_path, 404);
 
@@ -114,7 +126,9 @@ class ReportController extends Controller
 
     public function exportPdf(ForensicCase $forensicCase, CaseEnrollment $enrollment)
     {
-        if ($forensicCase->lecturer_id !== auth()->id()) abort(403);
+        if ($forensicCase->lecturer_id !== auth()->id()) {
+            abort(403);
+        }
         $report = $enrollment->report;
         $student = $enrollment->student;
         $answers = $enrollment->answers()->with('question')->get();
