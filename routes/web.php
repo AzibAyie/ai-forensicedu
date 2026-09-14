@@ -3,27 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Lecturer;
 use App\Http\Controllers\Student;
-use App\Services\AIService;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/_diag/groq', function () {
-    $key = config('services.groq.api_key', '');
-    $model = config('services.groq.model', 'openai/gpt-oss-120b');
-
-    $ai = new AIService;
-    $result = $ai->generateCase('brute_force', 'beginner', 'diagnostic test');
-
-    return response()->json([
-        'key_present' => $key !== '',
-        'key_length' => strlen($key),
-        'key_prefix' => substr($key, 0, 6),
-        'key_suffix' => substr($key, -6),
-        'has_leading_or_trailing_whitespace' => $key !== trim($key),
-        'model' => $model,
-        'result_empty' => empty($result),
-        'last_error' => $ai->getLastError(),
-    ]);
-});
 
 // ── Auth ──────────────────────────────────────────────────────────
 Route::get('/', fn () => redirect()->route('login'));
