@@ -12,14 +12,14 @@ class AIService
 
     private string $model;
 
-    private string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
+    private string $baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
     private ?string $lastError = null;
 
     public function __construct()
     {
-        $this->apiKey = config('services.gemini.api_key', '');
-        $this->model = config('services.gemini.model', 'gemini-3.6-flash');
+        $this->apiKey = config('services.groq.api_key', '');
+        $this->model = config('services.groq.model', 'openai/gpt-oss-120b');
     }
 
     public function getLastError(): ?string
@@ -113,11 +113,11 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
     {
         $this->lastError = null;
 
-        $result = $this->callGemini($prompt, $context);
+        $result = $this->callGroq($prompt, $context);
 
         if ($result['retry'] ?? false) {
             Log::warning("AI {$context}: retrying once after invalid JSON response");
-            $result = $this->callGemini($prompt, $context);
+            $result = $this->callGroq($prompt, $context);
         }
 
         return $result['data'] ?? [];
@@ -126,26 +126,22 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
     /**
      * @return array{data: array, retry?: bool}
      */
-    private function callGemini(string $prompt, string $context): array
+    private function callGroq(string $prompt, string $context): array
     {
-        $url = "{$this->baseUrl}/{$this->model}:generateContent";
-
         try {
             $response = Http::withHeaders([
-                'x-goog-api-key' => $this->apiKey,
+                'Authorization' => "Bearer {$this->apiKey}",
                 'content-type' => 'application/json',
-            ])->timeout(90)->post($url, [
-                'contents' => [
-                    ['role' => 'user', 'parts' => [['text' => $prompt]]],
+            ])->timeout(90)->post($this->baseUrl, [
+                'model' => $this->model,
+                'messages' => [
+                    ['role' => 'user', 'content' => $prompt],
                 ],
-                'generationConfig' => [
-                    'responseMimeType' => 'application/json',
-                    'thinkingConfig' => ['thinkingLevel' => 'minimal'],
-                ],
+                'response_format' => ['type' => 'json_object'],
             ]);
 
-            $finishReason = $response->json('candidates.0.finishReason');
-            $usage = $response->json('usageMetadata');
+            $finishReason = $response->json('choices.0.finish_reason');
+            $usage = $response->json('usage');
 
             if (! $response->successful()) {
                 $errorMessage = $response->json('error.message') ?? 'AI service request failed.';
@@ -160,12 +156,7 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
                 return ['data' => []];
             }
 
-            $parts = $response->json('candidates.0.content.parts', []);
-            $text = collect($parts)
-                ->reject(fn ($part) => ($part['thought'] ?? false) === true)
-                ->pluck('text')
-                ->filter()
-                ->join('');
+            $text = $response->json('choices.0.message.content', '');
 
             $clean = preg_replace('/```json|```/', '', $text);
             $decoded = json_decode(trim($clean), true);
