@@ -76,15 +76,20 @@ Respond ONLY with valid JSON (no markdown, no explanation) in this exact structu
         return $this->request($prompt, 'case generation');
     }
 
-    public function evaluateReport(array $reportData, array $questions, string $caseScenario): array
+    public function evaluateReport(array $reportData, array $questions, string $caseScenario, array $simulatedEvidence = []): array
     {
         $questionsText = collect($questions)->map(fn ($q, $i) => ($i + 1).". Q: {$q['question']} (Max: {$q['marks']} marks)\n   A: ".($reportData['answers'][$q['id']] ?? 'No answer provided')
         )->join("\n\n");
 
-        $prompt = "You are a digital forensics lecturer evaluating a student's forensic investigation report. Be fair, constructive, and specific.
+        $evidenceJson = mb_substr(json_encode($simulatedEvidence, JSON_PRETTY_PRINT), 0, 4000);
+
+        $prompt = "You are a strict digital forensics lecturer grading a student's investigation report against the ACTUAL evidence for this case. Do not give credit for confident-sounding writing that isn't backed by the evidence below - vague, generic, or unsupported answers must score LOW even if they read smoothly.
 
 CASE SCENARIO:
 {$caseScenario}
+
+ACTUAL EVIDENCE FOR THIS CASE (use this to check whether each answer is factually correct - an answer that contradicts this evidence, invents facts not in it, or never engages with specifics from it should score near zero):
+{$evidenceJson}
 
 STUDENT REPORT:
 Executive Summary: {$reportData['executive_summary']}
@@ -96,18 +101,26 @@ Conclusion: {$reportData['conclusion']}
 INVESTIGATION QUESTIONS & ANSWERS:
 {$questionsText}
 
-Evaluate this report and respond ONLY with valid JSON (no markdown):
+Grading rules - apply in this order for each question:
+1. First check: is the answer empty, random/gibberish text, unrelated to the question, or does it contradict the evidence? If yes, score = 0. Stop here for this question.
+2. If the answer is a genuine, on-topic attempt but cites no specific correct detail from the evidence (no real timestamp, username, IP, value, or count that actually appears in the evidence above), score = at most 30% of that question's marks.
+3. If the answer cites SOME correct specific details from the evidence but is incomplete or has minor errors, score proportionally (40-80%).
+4. Only a fully correct, specific, evidence-backed answer earns full marks.
+- overall_score must equal the sum of question_scores (as a percentage of total marks), not a separate impression-based number.
+- grade must be consistent with overall_score: A=90-100, B=75-89, C=60-74, D=45-59, F=below 45.
+
+Respond ONLY with valid JSON (no markdown) in this exact structure - the values below are placeholders showing the expected TYPE, not a scoring target:
 {
-  \"overall_score\": 75,
-  \"grade\": \"B\",
-  \"strengths\": [\"Clear identification of the attack vector\", \"Good use of timeline\"],
-  \"weaknesses\": [\"Missing IOC analysis\", \"Recommendations too vague\"],
-  \"detailed_feedback\": \"Comprehensive paragraph feedback for the student\",
-  \"question_scores\": {\"question_id\": {\"score\": 15, \"max\": 20, \"comment\": \"Good answer but missing timestamp correlation\"}},
-  \"improvement_suggestions\": [\"Specific actionable suggestion 1\", \"Specific actionable suggestion 2\"]
+  \"overall_score\": \"<integer 0-100, calculated from question_scores>\",
+  \"grade\": \"<letter grade consistent with overall_score>\",
+  \"strengths\": [\"<specific strength, or omit if none>\"],
+  \"weaknesses\": [\"<specific weakness>\"],
+  \"detailed_feedback\": \"<comprehensive paragraph feedback for the student, referencing what the evidence actually shows>\",
+  \"question_scores\": {\"<question_id>\": {\"score\": \"<integer>\", \"max\": \"<integer, the question's marks>\", \"comment\": \"<why this score - what evidence was or wasn't used correctly>\"}},
+  \"improvement_suggestions\": [\"<specific actionable suggestion>\"]
 }";
 
-        return $this->request($prompt, 'report evaluation');
+        return $this->request($prompt, 'report evaluation', 'medium');
     }
 
     public function generateHint(string $question, string $caseScenario, string $evidenceOverview): array
@@ -183,12 +196,12 @@ Respond ONLY with valid JSON (no markdown, no explanation) in this exact structu
 
     private const MAX_ATTEMPTS = 3;
 
-    private function request(string $prompt, string $context): array
+    private function request(string $prompt, string $context, string $reasoningEffort = 'low'): array
     {
         $this->lastError = null;
 
         for ($attempt = 1; $attempt <= self::MAX_ATTEMPTS; $attempt++) {
-            $result = $this->callGroq($prompt, $context, $attempt);
+            $result = $this->callGroq($prompt, $context, $attempt, $reasoningEffort);
 
             if (! empty($result['data'])) {
                 return $result['data'];
@@ -212,7 +225,7 @@ Respond ONLY with valid JSON (no markdown, no explanation) in this exact structu
     /**
      * @return array{data: array, status?: int}
      */
-    private function callGroq(string $prompt, string $context, int $attempt): array
+    private function callGroq(string $prompt, string $context, int $attempt, string $reasoningEffort = 'low'): array
     {
         try {
             $response = Http::withHeaders([
@@ -224,7 +237,7 @@ Respond ONLY with valid JSON (no markdown, no explanation) in this exact structu
                     ['role' => 'user', 'content' => $prompt],
                 ],
                 'response_format' => ['type' => 'json_object'],
-                'reasoning_effort' => 'low',
+                'reasoning_effort' => $reasoningEffort,
             ]);
 
             $finishReason = $response->json('choices.0.finish_reason');

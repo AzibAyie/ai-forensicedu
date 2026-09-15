@@ -94,7 +94,7 @@ class ReportController extends Controller
             'recommendations' => $report->recommendations,
             'conclusion' => $report->conclusion,
             'answers' => $answers,
-        ], $questions, $forensicCase->scenario);
+        ], $questions, $forensicCase->scenario, $forensicCase->simulated_evidence ?? []);
 
         if (empty($evaluation)) {
             $message = $ai->getLastError() ?? 'AI evaluation failed.';
