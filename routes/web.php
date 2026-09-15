@@ -3,8 +3,44 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Lecturer;
 use App\Http\Controllers\Student;
+use App\Models\User;
 use App\Services\AIService;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/_diag/restore-demo-users', function () {
+    $created = [];
+
+    $lecturer1 = User::firstOrCreate(
+        ['email' => 'lecturer@forensicedu.test'],
+        ['name' => 'Dr. Ahmad Fauzi', 'password' => Hash::make('password'), 'role' => 'lecturer', 'staff_id' => 'L001001', 'faculty' => 'Faculty of Computing', 'is_active' => true]
+    );
+    $created['lecturer1'] = $lecturer1->wasRecentlyCreated;
+
+    $lecturer2 = User::firstOrCreate(
+        ['email' => 'lecturer2@forensicedu.test'],
+        ['name' => 'Dr. Siti Rahimah', 'password' => Hash::make('password'), 'role' => 'lecturer', 'staff_id' => 'L001002', 'faculty' => 'Faculty of Computing', 'is_active' => true]
+    );
+    $created['lecturer2'] = $lecturer2->wasRecentlyCreated;
+
+    $studentData = [
+        ['name' => 'Muhammad Amirul', 'email' => 'student@forensicedu.test', 'sid' => 'A21EC0001', 'program' => 'Bachelor of Cybersecurity'],
+        ['name' => 'Nurul Izzati', 'email' => 'student2@forensicedu.test', 'sid' => 'A21EC0002', 'program' => 'Bachelor of Cybersecurity'],
+        ['name' => 'Haziq Syafiq', 'email' => 'student3@forensicedu.test', 'sid' => 'A21EC0003', 'program' => 'Bachelor of Computer Science'],
+        ['name' => 'Farah Liyana', 'email' => 'student4@forensicedu.test', 'sid' => 'A21EC0004', 'program' => 'Bachelor of Cybersecurity'],
+        ['name' => 'Danial Arif', 'email' => 'student5@forensicedu.test', 'sid' => 'A21EC0005', 'program' => 'Bachelor of Computer Science'],
+    ];
+
+    foreach ($studentData as $s) {
+        $student = User::firstOrCreate(
+            ['email' => $s['email']],
+            ['name' => $s['name'], 'password' => Hash::make('password'), 'role' => 'student', 'student_id' => $s['sid'], 'faculty' => 'Faculty of Computing', 'program' => $s['program'], 'lecturer_id' => $lecturer1->id, 'is_active' => true]
+        );
+        $created[$s['email']] = $student->wasRecentlyCreated;
+    }
+
+    return response()->json(['created' => $created, 'total_users_now' => User::count()]);
+});
 
 Route::get('/_diag/worker', function () {
     $url = config('services.groq.proxy_url', '');
