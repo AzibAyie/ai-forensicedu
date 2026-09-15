@@ -227,6 +227,17 @@ Respond ONLY with valid JSON (no markdown, no explanation) in this exact structu
      */
     private function callGroq(string $prompt, string $context, int $attempt, string $reasoningEffort = 'low'): array
     {
+        if ($this->proxyUrl === '' || $this->proxySecret === '') {
+            Log::error("AI {$context}: proxy is not configured", [
+                'attempt' => $attempt,
+                'proxy_url_set' => $this->proxyUrl !== '',
+                'proxy_secret_set' => $this->proxySecret !== '',
+            ]);
+            $this->lastError = 'The AI service is not configured on this server. Please contact the administrator.';
+
+            return ['data' => []];
+        }
+
         try {
             $response = Http::withHeaders([
                 'X-Proxy-Secret' => $this->proxySecret,
@@ -286,12 +297,12 @@ Respond ONLY with valid JSON (no markdown, no explanation) in this exact structu
             return ['data' => $decoded];
         } catch (ConnectionException $e) {
             Log::error("AI {$context}: connection error", ['attempt' => $attempt, 'message' => $e->getMessage()]);
-            $this->lastError = 'DEBUG connection error (attempt '.$attempt.'): '.$e->getMessage();
+            $this->lastError = 'Could not reach the AI service. Please try again.';
 
             return ['data' => []];
         } catch (\Exception $e) {
             Log::error("AI {$context}: unexpected error", ['attempt' => $attempt, 'message' => $e->getMessage()]);
-            $this->lastError = 'DEBUG unexpected error (attempt '.$attempt.'): '.get_class($e).': '.$e->getMessage();
+            $this->lastError = 'An unexpected error occurred while contacting the AI service.';
 
             return ['data' => []];
         }
