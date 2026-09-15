@@ -264,25 +264,45 @@ function gradeReport() {
         aiLoading: false,
         aiResult: null,
 
+        async attemptRunAI() {
+            const res = await fetch('{{ route('lecturer.report.ai-evaluate', [$forensicCase, $enrollment]) }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                    'Content-Type': 'application/json',
+                },
+            });
+            return res.json();
+        },
+
         async runAI() {
             this.aiLoading = true;
-            try {
-                const res = await fetch('{{ route('lecturer.report.ai-evaluate', [$forensicCase, $enrollment]) }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                        'Content-Type': 'application/json',
-                    },
-                });
-                const data = await res.json();
-                if (data.success) {
-                    this.aiResult = data.evaluation;
-                } else {
-                    alert(data.message || 'AI evaluation failed.');
+
+            const maxAttempts = 2;
+            let data = null;
+            let lastException = null;
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    data = await this.attemptRunAI();
+                    lastException = null;
+                    if (data.success) break;
+                } catch (e) {
+                    lastException = e;
                 }
-            } catch(e) {
-                alert('Error contacting AI service.');
+                if (attempt < maxAttempts) {
+                    await new Promise(r => setTimeout(r, 1000));
+                }
             }
+
+            if (lastException) {
+                alert('Error contacting AI service. Please try again.');
+            } else if (data?.success) {
+                this.aiResult = data.evaluation;
+            } else {
+                alert(data?.message || 'AI evaluation failed.');
+            }
+
             this.aiLoading = false;
         },
 

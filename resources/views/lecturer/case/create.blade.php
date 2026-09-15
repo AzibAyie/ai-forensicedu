@@ -285,43 +285,63 @@ function caseCreator() {
             this.form.questions.splice(i, 1);
         },
 
+        async attemptGenerateAI() {
+            const res = await fetch('{{ route('lecturer.case.generate-ai') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                },
+                body: JSON.stringify({
+                    incident_type: this.aiType,
+                    difficulty: this.aiDifficulty,
+                    context: this.aiContext,
+                }),
+            });
+            return res.json();
+        },
+
         async generateAI() {
             this.generating = true;
             this.aiError = '';
             this.aiSuccess = false;
-            try {
-                const res = await fetch('{{ route('lecturer.case.generate-ai') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                    },
-                    body: JSON.stringify({
-                        incident_type: this.aiType,
-                        difficulty: this.aiDifficulty,
-                        context: this.aiContext,
-                    }),
-                });
-                const data = await res.json();
-                if (data.success && data.data) {
-                    const d = data.data;
-                    this.form.title = d.title || '';
-                    this.form.incident_type = this.aiType;
-                    this.form.difficulty = this.aiDifficulty;
-                    this.form.description = d.description || '';
-                    this.form.scenario = d.scenario || '';
-                    this.form.learning_objectives = d.learning_objectives || '';
-                    this.form.investigation_instructions = d.investigation_instructions || '';
-                    if (d.questions?.length) {
-                        this.form.questions = d.questions.map(q => ({ question: q.question, marks: q.marks }));
-                    }
-                    this.aiSuccess = true;
-                } else {
-                    this.aiError = data.message || 'AI generation failed. Please fill in manually.';
+
+            const maxAttempts = 2;
+            let data = null;
+            let lastException = null;
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    data = await this.attemptGenerateAI();
+                    lastException = null;
+                    if (data.success) break;
+                } catch (e) {
+                    lastException = e;
                 }
-            } catch(e) {
-                this.aiError = 'Connection error. Please fill in manually.';
+                if (attempt < maxAttempts) {
+                    await new Promise(r => setTimeout(r, 1000));
+                }
             }
+
+            if (lastException) {
+                this.aiError = 'Connection error. Please try again.';
+            } else if (data?.success && data.data) {
+                const d = data.data;
+                this.form.title = d.title || '';
+                this.form.incident_type = this.aiType;
+                this.form.difficulty = this.aiDifficulty;
+                this.form.description = d.description || '';
+                this.form.scenario = d.scenario || '';
+                this.form.learning_objectives = d.learning_objectives || '';
+                this.form.investigation_instructions = d.investigation_instructions || '';
+                if (d.questions?.length) {
+                    this.form.questions = d.questions.map(q => ({ question: q.question, marks: q.marks }));
+                }
+                this.aiSuccess = true;
+            } else {
+                this.aiError = data?.message || 'AI generation failed. Please fill in manually.';
+            }
+
             this.generating = false;
         }
     }
