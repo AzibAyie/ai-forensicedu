@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
@@ -9,7 +10,8 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function showLogin() {
+    public function showLogin()
+    {
         if (Auth::check()) {
             return redirect($this->redirectPath(Auth::user()->role));
         }
@@ -17,7 +19,8 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request) {
+    public function login(Request $request)
+    {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -25,18 +28,21 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            ActivityLog::create([
-                'user_id' => $user?->id ?? 0,
-                'action' => 'LOGIN_FAILED',
-                'description' => "Failed login attempt for {$request->email}",
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            if ($user) {
+                ActivityLog::create([
+                    'user_id' => $user->id,
+                    'action' => 'LOGIN_FAILED',
+                    'description' => "Failed login attempt for {$request->email}",
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+            }
+
             return back()->withErrors(['email' => 'Invalid credentials.'])->withInput();
         }
 
-        if (!$user->is_active) {
+        if (! $user->is_active) {
             return back()->withErrors(['email' => 'Your account has been deactivated.']);
         }
 
@@ -46,11 +52,13 @@ class AuthController extends Controller
         return redirect()->intended($this->redirectPath($user->role));
     }
 
-    public function showRegister() {
+    public function showRegister()
+    {
         return view('auth.register');
     }
 
-    public function register(Request $request) {
+    public function register(Request $request)
+    {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
@@ -79,16 +87,19 @@ class AuthController extends Controller
         return redirect($this->redirectPath($user->role));
     }
 
-    public function logout(Request $request) {
+    public function logout(Request $request)
+    {
         ActivityLog::record('LOGOUT', 'User logged out');
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect()->route('login');
     }
 
-    private function redirectPath(string $role): string {
-        return match($role) {
+    private function redirectPath(string $role): string
+    {
+        return match ($role) {
             'lecturer' => '/lecturer/dashboard',
             default => '/student/dashboard',
         };
