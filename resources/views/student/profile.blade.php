@@ -4,7 +4,7 @@
 @section('page-title', 'Profile')
 
 @section('content')
-<div class="pt-6 max-w-2xl space-y-6">
+<div class="pt-6 max-w-2xl mx-auto space-y-6">
 
     <section class="bg-black text-white px-6 py-5 flex items-center gap-4 rounded-2xl">
         <div class="w-11 h-11 border border-blue flex items-center justify-center flex-shrink-0">
