@@ -21,6 +21,16 @@ Route::get('/_diag/worker', function () {
     ]);
 });
 
+Route::middleware(['auth', 'role:lecturer'])->get('/_diag/worker-authed', function () {
+    $url = config('services.groq.proxy_url', '');
+
+    return response()->json([
+        'url_present' => $url !== '',
+        'url' => $url,
+        'user' => auth()->user()?->email,
+    ]);
+});
+
 // ── Auth ──────────────────────────────────────────────────────────
 Route::get('/', fn () => redirect()->route('login'));
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
