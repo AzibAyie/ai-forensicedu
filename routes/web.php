@@ -3,7 +3,15 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Lecturer;
 use App\Http\Controllers\Student;
+use App\Models\CaseQuestion;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/_diag/clear-hints', function () {
+    $count = CaseQuestion::whereNotNull('hint')->count();
+    CaseQuestion::whereNotNull('hint')->update(['hint' => null]);
+
+    return response()->json(['cleared' => $count]);
+});
 
 // ── Auth ──────────────────────────────────────────────────────────
 Route::get('/', fn () => redirect()->route('login'));
