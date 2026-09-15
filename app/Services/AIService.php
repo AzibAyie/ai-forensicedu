@@ -110,7 +110,7 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
         return $this->request($prompt, 'report evaluation');
     }
 
-    private const MAX_ATTEMPTS = 4;
+    private const MAX_ATTEMPTS = 3;
 
     private function request(string $prompt, string $context): array
     {
@@ -123,6 +123,12 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
                 return $result['data'];
             }
 
+            if (($result['status'] ?? null) === 429) {
+                // Retrying immediately during a rate-limit window just burns more
+                // of the same limited budget without helping.
+                break;
+            }
+
             if ($attempt < self::MAX_ATTEMPTS) {
                 Log::warning("AI {$context}: attempt {$attempt} failed ({$this->lastError}), retrying");
                 usleep(500_000);
@@ -133,7 +139,7 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
     }
 
     /**
-     * @return array{data: array}
+     * @return array{data: array, status?: int}
      */
     private function callGroq(string $prompt, string $context, int $attempt): array
     {
@@ -147,13 +153,16 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
                     ['role' => 'user', 'content' => $prompt],
                 ],
                 'response_format' => ['type' => 'json_object'],
+                'reasoning_effort' => 'low',
             ]);
 
             $finishReason = $response->json('choices.0.finish_reason');
             $usage = $response->json('usage');
 
             if (! $response->successful()) {
-                $errorMessage = $response->json('error.message') ?? 'AI service request failed.';
+                $errorMessage = $response->status() === 429
+                    ? 'The AI service is briefly at capacity. Please wait a few seconds and try again.'
+                    : ($response->json('error.message') ?? 'AI service request failed.');
                 Log::error("AI {$context} failed", [
                     'attempt' => $attempt,
                     'status' => $response->status(),
@@ -163,7 +172,7 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
                 ]);
                 $this->lastError = $errorMessage;
 
-                return ['data' => []];
+                return ['data' => [], 'status' => $response->status()];
             }
 
             $text = $response->json('choices.0.message.content', '');
@@ -193,12 +202,12 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
             return ['data' => $decoded];
         } catch (ConnectionException $e) {
             Log::error("AI {$context}: connection error", ['attempt' => $attempt, 'message' => $e->getMessage()]);
-            $this->lastError = 'DEBUG connection error (attempt '.$attempt.'): '.$e->getMessage();
+            $this->lastError = 'Could not reach the AI service. Please try again.';
 
             return ['data' => []];
         } catch (\Exception $e) {
             Log::error("AI {$context}: unexpected error", ['attempt' => $attempt, 'message' => $e->getMessage()]);
-            $this->lastError = 'DEBUG unexpected error (attempt '.$attempt.'): '.get_class($e).': '.$e->getMessage();
+            $this->lastError = 'An unexpected error occurred while contacting the AI service.';
 
             return ['data' => []];
         }
