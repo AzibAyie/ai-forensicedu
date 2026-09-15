@@ -99,7 +99,7 @@
                     {{ auth()->user()->student_id ?? auth()->user()->staff_id ?? auth()->user()->email }}
                 </p>
                 @if($role === 'student')
-                <span class="seal seal-open mt-1.5 !text-[8px] !px-1.5 !py-0.5 !bg-fg/10 !text-fg !border-fg/25">{{ auth()->user()->investigatorRank()['label'] }}</span>
+                <span class="seal seal-open mt-1.5 !text-[8px] !px-1.5 !py-0.5 !bg-fg/10 !text-fg !border-fg/25">{{ auth()->user()->investigatorRank()['name'] }}</span>
                 @endif
             </div>
         </div>

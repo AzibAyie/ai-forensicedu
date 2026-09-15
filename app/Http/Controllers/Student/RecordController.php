@@ -1,9 +1,11 @@
 <?php
+
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\ForensicCase;
+use App\Support\Achievements;
 
 class RecordController extends Controller
 {
@@ -21,7 +23,7 @@ class RecordController extends Controller
         // Score history for the chart — normalised to a percentage so cases
         // with different total marks stay comparable.
         $scoreHistory = $graded->map(fn ($e) => [
-            'label' => 'C' . str_pad($e->forensicCase->id, 3, '0', STR_PAD_LEFT),
+            'label' => 'C'.str_pad($e->forensicCase->id, 3, '0', STR_PAD_LEFT),
             'score' => round(($e->report->marks / max($e->forensicCase->total_marks, 1)) * 100),
         ])->values()->all();
 
@@ -67,7 +69,7 @@ class RecordController extends Controller
         // Celebrate a milestone once per browser session, the first time it's seen earned.
         $celebrated = session('celebrated_milestones', []);
         $newlyEarned = collect($milestones)
-            ->filter(fn ($m) => $m['earned'] && !in_array($m['mark'], $celebrated))
+            ->filter(fn ($m) => $m['earned'] && ! in_array($m['mark'], $celebrated))
             ->values()->all();
         session(['celebrated_milestones' => array_unique(array_merge(
             $celebrated, collect($milestones)->where('earned', true)->pluck('mark')->all()
@@ -76,8 +78,13 @@ class RecordController extends Controller
         $recentActivity = ActivityLog::where('user_id', $user->id)
             ->latest()->limit(12)->get();
 
+        $achievements = Achievements::forUser($user);
+        $rank = $achievements['rank'];
+        $badges = $achievements['badges'];
+
         return view('student.record', compact(
-            'user', 'stats', 'scoreHistory', 'competency', 'milestones', 'recentActivity', 'newlyEarned'
+            'user', 'stats', 'scoreHistory', 'competency', 'milestones', 'recentActivity', 'newlyEarned',
+            'rank', 'badges'
         ));
     }
 
@@ -95,35 +102,35 @@ class RecordController extends Controller
                 'name' => 'First Case Closed',
                 'desc' => 'File your first forensic report.',
                 'earned' => $completed >= 1,
-                'progress' => $completed . '/1',
+                'progress' => $completed.'/1',
             ],
             [
                 'mark' => 'III',
                 'name' => 'Case Load',
                 'desc' => 'Close three separate investigations.',
                 'earned' => $completed >= 3,
-                'progress' => min($completed, 3) . '/3',
+                'progress' => min($completed, 3).'/3',
             ],
             [
                 'mark' => '△',
                 'name' => 'Full Spectrum',
                 'desc' => 'Investigate all three incident types.',
                 'earned' => $typesCovered >= 3,
-                'progress' => $typesCovered . '/3',
+                'progress' => $typesCovered.'/3',
             ],
             [
                 'mark' => '◈',
                 'name' => 'Distinction',
                 'desc' => 'Score 80% or higher on a report.',
                 'earned' => $highScores >= 1,
-                'progress' => $highScores . '/1',
+                'progress' => $highScores.'/1',
             ],
             [
                 'mark' => '⌕',
                 'name' => 'Thorough',
                 'desc' => 'Open 20 evidence panels across cases.',
                 'earned' => $evidenceViews >= 20,
-                'progress' => min($evidenceViews, 20) . '/20',
+                'progress' => min($evidenceViews, 20).'/20',
             ],
         ];
     }

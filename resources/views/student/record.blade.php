@@ -52,6 +52,53 @@
         </div>
     </section>
 
+    {{-- RANK --}}
+    <section class="relative bg-surface border border-edge rounded-2xl overflow-hidden">
+        <div class="px-6 py-5 flex items-center gap-5">
+            <div class="w-14 h-14 rounded-2xl bg-ai-soft flex items-center justify-center flex-shrink-0">
+                <i data-lucide="{{ $rank['icon'] }}" class="w-7 h-7 text-ai"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-baseline justify-between gap-3 mb-1.5">
+                    <div>
+                        <p class="eyebrow mb-0.5">Investigator rank</p>
+                        <h3 class="font-display text-[17px] font-semibold text-heading">{{ $rank['name'] }}</h3>
+                    </div>
+                    <p class="font-mono text-[10.5px] text-fg-3 flex-shrink-0 text-right">
+                        {{ $rank['xp'] }} XP
+                        @if($rank['next_name'])
+                            <br class="sm:hidden"> · {{ $rank['next_xp'] - $rank['xp'] }} XP to {{ $rank['next_name'] }}
+                        @else
+                            <br class="sm:hidden"> · Top rank reached
+                        @endif
+                    </p>
+                </div>
+                <div class="h-[5px] bg-base rounded-full overflow-hidden">
+                    <div class="h-full bg-ai rounded-full transition-all" style="width: {{ $rank['progress'] }}%"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- ACHIEVEMENTS --}}
+    <section>
+        <div class="flex items-baseline justify-between mb-4">
+            <h2 class="font-display text-[15px] font-semibold text-heading">Achievements</h2>
+            <p class="font-mono text-[10.5px] text-fg-3">{{ collect($badges)->where('unlocked', true)->count() }}/{{ count($badges) }} unlocked</p>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+            @foreach($badges as $b)
+            <div class="relative bg-surface border border-edge rounded-xl px-3 py-4 flex flex-col items-center text-center gap-2 {{ $b['unlocked'] ? '' : 'opacity-40 grayscale' }}"
+                title="{{ $b['label'] }} — {{ $b['description'] }}">
+                <div class="w-11 h-11 rounded-full flex items-center justify-center {{ $b['unlocked'] ? 'bg-ai-soft' : 'bg-base' }}">
+                    <i data-lucide="{{ $b['unlocked'] ? $b['icon'] : 'lock' }}" class="w-5 h-5 {{ $b['unlocked'] ? 'text-ai' : 'text-fg-3' }}"></i>
+                </div>
+                <p class="text-[11px] font-medium {{ $b['unlocked'] ? 'text-fg' : 'text-fg-3' }} leading-tight">{{ $b['label'] }}</p>
+            </div>
+            @endforeach
+        </div>
+    </section>
+
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
         {{-- SCORE TREND --}}
