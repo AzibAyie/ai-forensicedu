@@ -112,7 +112,13 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
 
     public function generateHint(string $question, string $caseScenario, string $evidenceOverview): array
     {
-        $prompt = "You are a digital forensics tutor helping a student who is stuck on one investigation question. Give them a short, helpful nudge in the right direction - NOT the answer itself. Point them toward which piece of evidence or type of analysis to look at, without stating what they'll find there or drawing the conclusion for them.
+        $prompt = "You are helping a first-year student who is stuck on one investigation question in a digital forensics exercise. Write a hint in VERY SIMPLE, PLAIN English - short sentences, everyday words, no jargon. Do not give the answer or say what they will find.
+
+Write the hint as exactly two short sentences:
+1. Where to look - name the specific evidence panel (e.g. \"audit logs\", \"network logs\", \"database records\", \"system info\") they should open.
+2. What to do there - one simple, concrete action, like \"count how many times X happens\" or \"compare the time on the first and last entry\" or \"find the row where X changes\".
+
+Avoid words like \"indicators\", \"correlate\", \"reconstruct\", \"vulnerabilities exploited\" - say it the way you'd explain it to a beginner.
 
 CASE SCENARIO:
 {$caseScenario}
@@ -125,7 +131,7 @@ QUESTION THE STUDENT IS STUCK ON:
 
 Respond ONLY with valid JSON (no markdown, no explanation) in this exact structure:
 {
-  \"hint\": \"One or two short sentences nudging the student toward the right evidence or approach, without giving away the answer.\"
+  \"hint\": \"Look at [evidence panel]. [One simple, concrete action to try there].\"
 }";
 
         return $this->request($prompt, 'hint generation');
