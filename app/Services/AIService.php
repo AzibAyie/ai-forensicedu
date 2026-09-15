@@ -110,7 +110,7 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
         return $this->request($prompt, 'report evaluation');
     }
 
-    private const MAX_ATTEMPTS = 3;
+    private const MAX_ATTEMPTS = 4;
 
     private function request(string $prompt, string $context): array
     {
@@ -125,7 +125,7 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
 
             if ($attempt < self::MAX_ATTEMPTS) {
                 Log::warning("AI {$context}: attempt {$attempt} failed ({$this->lastError}), retrying");
-                usleep(700_000);
+                usleep($attempt * 1_000_000);
             }
         }
 
