@@ -193,12 +193,12 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
             return ['data' => $decoded];
         } catch (ConnectionException $e) {
             Log::error("AI {$context}: connection error", ['attempt' => $attempt, 'message' => $e->getMessage()]);
-            $this->lastError = 'Could not reach the AI service. Please try again.';
+            $this->lastError = 'DEBUG connection error (attempt '.$attempt.'): '.$e->getMessage();
 
             return ['data' => []];
         } catch (\Exception $e) {
             Log::error("AI {$context}: unexpected error", ['attempt' => $attempt, 'message' => $e->getMessage()]);
-            $this->lastError = 'An unexpected error occurred while contacting the AI service.';
+            $this->lastError = 'DEBUG unexpected error (attempt '.$attempt.'): '.get_class($e).': '.$e->getMessage();
 
             return ['data' => []];
         }
