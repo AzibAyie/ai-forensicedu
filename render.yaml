@@ -68,7 +68,9 @@ services:
         value: log
       - key: FILESYSTEM_DISK
         value: local
-      - key: GROQ_API_KEY
+      - key: GROQ_PROXY_URL
+        sync: false
+      - key: GROQ_PROXY_SECRET
         sync: false
       - key: GROQ_MODEL
         value: openai/gpt-oss-120b

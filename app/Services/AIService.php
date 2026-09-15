@@ -8,17 +8,18 @@ use Illuminate\Support\Facades\Log;
 
 class AIService
 {
-    private string $apiKey;
+    private string $proxyUrl;
+
+    private string $proxySecret;
 
     private string $model;
-
-    private string $baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
     private ?string $lastError = null;
 
     public function __construct()
     {
-        $this->apiKey = config('services.groq.api_key', '');
+        $this->proxyUrl = config('services.groq.proxy_url', '');
+        $this->proxySecret = config('services.groq.proxy_secret', '');
         $this->model = config('services.groq.model', 'openai/gpt-oss-120b');
     }
 
@@ -138,9 +139,9 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
     {
         try {
             $response = Http::withHeaders([
-                'Authorization' => "Bearer {$this->apiKey}",
+                'X-Proxy-Secret' => $this->proxySecret,
                 'content-type' => 'application/json',
-            ])->timeout(90)->post($this->baseUrl, [
+            ])->timeout(90)->post($this->proxyUrl, [
                 'model' => $this->model,
                 'messages' => [
                     ['role' => 'user', 'content' => $prompt],

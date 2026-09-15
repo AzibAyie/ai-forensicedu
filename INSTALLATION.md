@@ -28,8 +28,9 @@ php artisan key:generate
 mysql -u root -p -e "CREATE DATABASE ai_forensicedu CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 # 4. Point .env at it — edit DB_USERNAME / DB_PASSWORD
-#    and add your key for the AI features (from https://console.groq.com/keys):
-#    GROQ_API_KEY=...
+#    and add your AI settings (see "AI setup" below):
+#    GROQ_PROXY_URL=...
+#    GROQ_PROXY_SECRET=...
 #    GROQ_MODEL=openai/gpt-oss-120b
 
 # 5. Tables + demo data
@@ -77,6 +78,30 @@ Case 2 ("The Phantom Raise") is password-locked: **forensic2024**
 | Gradebook | `/lecturer/gradebook` | Learner × case matrix, class grade, per-case averages, CSV export. |
 | Progress | `/lecturer/progress` | Live monitoring: who's active, who's stalled 5+ days, who hasn't started. Per-student drill-down. |
 | My Students | `/lecturer/students` | Assign students to yourself. **View as** any assigned student. |
+
+---
+
+## AI setup
+
+AI case generation and report evaluation call [Groq](https://console.groq.com)
+through a small Cloudflare Worker proxy rather than calling Groq directly.
+This is a deliberate workaround: Render's free-tier web services share a
+dynamic outbound IP pool with every other customer in the same region, and
+calls made directly from Render to Groq (and previously to Gemini) failed
+intermittently with authentication errors that had nothing to do with the
+key itself — most likely because some IP in that shared pool has been
+flagged by the provider's anti-abuse systems. Routing through a Cloudflare
+Worker sidesteps the problem entirely, since the Worker calls Groq from
+Cloudflare's network instead of Render's.
+
+The **real** Groq API key lives only in the Worker's own secret store
+(`wrangler secret put GROQ_API_KEY`), never in this app's `.env` or Render's
+environment variables. This app only holds a `GROQ_PROXY_SECRET` — a
+shared secret that authenticates requests to the Worker so a stranger who
+finds the Worker's URL can't spend your Groq quota.
+
+The Worker source lives in this repo at [`cloudflare-worker/`](cloudflare-worker/) —
+see its README for how to deploy or rotate it.
 
 ---
 
@@ -146,7 +171,7 @@ impersonate students assigned to them.
 
 | Symptom | Fix |
 |---|---|
-| AI buttons do nothing | Set `GROQ_API_KEY` in `.env`, then `php artisan config:clear` |
+| AI buttons do nothing | Set `GROQ_PROXY_URL` / `GROQ_PROXY_SECRET` in `.env`, then `php artisan config:clear` |
 | Uploads fail | Raise `upload_max_filesize` / `post_max_size` in php.ini |
 | Blank page after changes | `php artisan optimize:clear` |
 | Case not visible to students | Check it is published **and** inside its open/close window |

@@ -53,7 +53,8 @@ jobs:
           echo "DB_DATABASE=ai_forensicedu_test" >> .env
           echo "DB_USERNAME=root" >> .env
           echo "DB_PASSWORD=password" >> .env
-          echo "GROQ_API_KEY=test_key" >> .env
+          echo "GROQ_PROXY_URL=https://example.workers.dev" >> .env
+          echo "GROQ_PROXY_SECRET=test_secret" >> .env
           echo "GROQ_MODEL=openai/gpt-oss-120b" >> .env
 
       - name: Run database migrations
@@ -103,7 +104,8 @@ jobs:
           echo "DB_DATABASE=ai_forensicedu_dusk" >> .env
           echo "DB_USERNAME=root" >> .env
           echo "DB_PASSWORD=password" >> .env
-          echo "GROQ_API_KEY=test_key" >> .env
+          echo "GROQ_PROXY_URL=https://example.workers.dev" >> .env
+          echo "GROQ_PROXY_SECRET=test_secret" >> .env
           echo "GROQ_MODEL=openai/gpt-oss-120b" >> .env
       - run: php artisan migrate --force
       - run: php artisan db:seed --force

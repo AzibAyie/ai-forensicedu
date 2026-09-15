@@ -19,7 +19,8 @@ return [
     ],
 
     'groq' => [
-        'api_key' => env('GROQ_API_KEY', ''),
+        'proxy_url' => env('GROQ_PROXY_URL', ''),
+        'proxy_secret' => env('GROQ_PROXY_SECRET', ''),
         'model' => env('GROQ_MODEL', 'openai/gpt-oss-120b'),
     ],
 ];
