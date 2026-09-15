@@ -3,7 +3,37 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Lecturer;
 use App\Http\Controllers\Student;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/_diag/worker', function () {
+    $url = config('services.groq.proxy_url', '');
+    $secret = config('services.groq.proxy_secret', '');
+
+    try {
+        $response = Http::withHeaders([
+            'X-Proxy-Secret' => $secret,
+            'content-type' => 'application/json',
+        ])->timeout(30)->post($url, [
+            'model' => config('services.groq.model'),
+            'messages' => [['role' => 'user', 'content' => 'ping']],
+        ]);
+
+        return response()->json([
+            'url_present' => $url !== '',
+            'url' => $url,
+            'status' => $response->status(),
+            'body' => $response->json() ?? $response->body(),
+        ]);
+    } catch (Throwable $e) {
+        return response()->json([
+            'url_present' => $url !== '',
+            'url' => $url,
+            'exception_class' => get_class($e),
+            'exception_message' => $e->getMessage(),
+        ]);
+    }
+});
 
 // ── Auth ──────────────────────────────────────────────────────────
 Route::get('/', fn () => redirect()->route('login'));
