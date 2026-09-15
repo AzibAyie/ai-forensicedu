@@ -31,9 +31,9 @@ services:
       - key: APP_MAINTENANCE_DRIVER
         value: file
       - key: LOG_CHANNEL
-        value: stack
+        value: stderr
       - key: LOG_LEVEL
-        value: error
+        value: debug
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
