@@ -196,8 +196,20 @@
         <div class="bg-surface border border-edge p-6">
             <h3 class="font-display text-[14px] font-semibold text-fg mb-1 pb-2 border-b border-edge">Question sheet (PDF)</h3>
             <p class="text-[12px] text-fg-3 mb-3 mt-3">Optional. Students download this and upload their completed answers with the report.</p>
-            <input type="file" name="question_pdf" accept="application/pdf"
+            <input type="file" name="question_pdf" accept="application/pdf" x-ref="questionPdf"
                 class="fld file:mr-3 file:border-0 file:bg-blue file:text-base file:px-3 file:py-1.5 file:text-[12px] file:font-semibold file:cursor-pointer">
+
+            <div class="mt-4 pt-4 border-t border-edge">
+                <p class="text-[12px] text-fg-3 mb-2">
+                    If this PDF already contains a case scenario and investigation questions (just no evidence), AI can read it and generate matching simulated evidence to populate the form below.
+                </p>
+                <button type="button" @click="generateFromPdf()" :disabled="generatingFromPdf" class="btn-ai disabled:opacity-50">
+                    <span x-show="!generatingFromPdf">Generate Evidence from PDF</span>
+                    <span x-show="generatingFromPdf">Reading PDF and generating...</span>
+                </button>
+                <div x-show="pdfAiError" class="mt-2 text-red text-xs" x-text="pdfAiError"></div>
+                <div x-show="pdfAiSuccess" class="mt-2 text-fg-2 text-xs">Evidence generated from your PDF! Review and edit the fields below before saving.</div>
+            </div>
         </div>
 
         {{-- Scheduling --}}
@@ -257,6 +269,9 @@ function caseCreator() {
         aiContext: '',
         aiError: '',
         aiSuccess: false,
+        generatingFromPdf: false,
+        pdfAiError: '',
+        pdfAiSuccess: false,
         timeline: [{timestamp:'',event:''}],
         customLogs: [],
         form: {
@@ -343,6 +358,68 @@ function caseCreator() {
             }
 
             this.generating = false;
+        },
+
+        async attemptGenerateFromPdf(formData) {
+            const res = await fetch('{{ route('lecturer.case.generate-from-pdf') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                },
+                body: formData,
+            });
+            return res.json();
+        },
+
+        async generateFromPdf() {
+            const file = this.$refs.questionPdf.files[0];
+            if (!file) {
+                this.pdfAiError = 'Choose a PDF file above first.';
+                return;
+            }
+
+            this.generatingFromPdf = true;
+            this.pdfAiError = '';
+            this.pdfAiSuccess = false;
+
+            const formData = new FormData();
+            formData.append('document', file);
+
+            const maxAttempts = 2;
+            let data = null;
+            let lastException = null;
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    data = await this.attemptGenerateFromPdf(formData);
+                    lastException = null;
+                    if (data.success) break;
+                } catch (e) {
+                    lastException = e;
+                }
+                if (attempt < maxAttempts) {
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+            }
+
+            if (lastException) {
+                this.pdfAiError = 'Connection error. Please try again.';
+            } else if (data?.success && data.data) {
+                const d = data.data;
+                this.form.title = d.title || '';
+                this.form.description = d.description || '';
+                this.form.scenario = d.scenario || '';
+                this.form.learning_objectives = d.learning_objectives || '';
+                this.form.investigation_instructions = d.investigation_instructions || '';
+                if (d.questions?.length) {
+                    this.form.questions = d.questions.map(q => ({ question: q.question, marks: q.marks }));
+                }
+                this.pdfAiSuccess = true;
+            } else {
+                this.pdfAiError = data?.message || 'Could not generate evidence from that PDF. Please fill in manually.';
+            }
+
+            this.generatingFromPdf = false;
         }
     }
 }

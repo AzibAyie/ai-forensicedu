@@ -60,6 +60,7 @@ Route::middleware(['auth', 'role:lecturer'])->prefix('lecturer')->name('lecturer
     Route::get('/case/create', [Lecturer\CaseController::class, 'create'])->name('case.create');
     Route::post('/case', [Lecturer\CaseController::class, 'store'])->name('case.store');
     Route::post('/case/generate-ai', [Lecturer\CaseController::class, 'generateAI'])->name('case.generate-ai');
+    Route::post('/case/generate-from-pdf', [Lecturer\CaseController::class, 'generateFromPdf'])->name('case.generate-from-pdf');
     Route::get('/case/{forensicCase}/edit', [Lecturer\CaseController::class, 'edit'])->name('case.edit');
     Route::put('/case/{forensicCase}', [Lecturer\CaseController::class, 'update'])->name('case.update');
     Route::delete('/case/{forensicCase}', [Lecturer\CaseController::class, 'destroy'])->name('case.destroy');

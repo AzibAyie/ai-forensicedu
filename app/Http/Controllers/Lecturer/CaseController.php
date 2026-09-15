@@ -9,6 +9,7 @@ use App\Models\ForensicCase;
 use App\Services\AIService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Smalot\PdfParser\Parser;
 
 class CaseController extends Controller
 {
@@ -188,6 +189,35 @@ class CaseController extends Controller
 
         $ai = new AIService;
         $generated = $ai->generateCase($request->incident_type, $request->difficulty, $request->context ?? '');
+
+        if (empty($generated)) {
+            $message = $ai->getLastError() ?? 'AI generation failed. Please fill in manually.';
+
+            return response()->json(['success' => false, 'message' => $message], 422);
+        }
+
+        return response()->json(['success' => true, 'data' => $generated]);
+    }
+
+    public function generateFromPdf(Request $request)
+    {
+        $request->validate([
+            'document' => 'required|file|mimes:pdf|max:10240',
+        ]);
+
+        $parser = new Parser;
+        try {
+            $text = trim($parser->parseFile($request->file('document')->getRealPath())->getText());
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Could not read that PDF. Please make sure it contains selectable text, not just scanned images.'], 422);
+        }
+
+        if (mb_strlen($text) < 50) {
+            return response()->json(['success' => false, 'message' => 'Could not find enough readable text in that PDF. Please make sure it contains selectable text, not just scanned images.'], 422);
+        }
+
+        $ai = new AIService;
+        $generated = $ai->generateEvidenceFromDocument($text);
 
         if (empty($generated)) {
             $message = $ai->getLastError() ?? 'AI generation failed. Please fill in manually.';
