@@ -110,6 +110,27 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
         return $this->request($prompt, 'report evaluation');
     }
 
+    public function generateHint(string $question, string $caseScenario, string $evidenceOverview): array
+    {
+        $prompt = "You are a digital forensics tutor helping a student who is stuck on one investigation question. Give them a short, helpful nudge in the right direction - NOT the answer itself. Point them toward which piece of evidence or type of analysis to look at, without stating what they'll find there or drawing the conclusion for them.
+
+CASE SCENARIO:
+{$caseScenario}
+
+AVAILABLE EVIDENCE OVERVIEW:
+{$evidenceOverview}
+
+QUESTION THE STUDENT IS STUCK ON:
+{$question}
+
+Respond ONLY with valid JSON (no markdown, no explanation) in this exact structure:
+{
+  \"hint\": \"One or two short sentences nudging the student toward the right evidence or approach, without giving away the answer.\"
+}";
+
+        return $this->request($prompt, 'hint generation');
+    }
+
     public function generateEvidenceFromDocument(string $documentText): array
     {
         $documentText = mb_substr($documentText, 0, 6000);

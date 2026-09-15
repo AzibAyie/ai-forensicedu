@@ -335,7 +335,21 @@
                             x-data
                             x-init="$el.value = `{{ addslashes($answers[$question->id] ?? '') }}`"
                         ></textarea>
-                        <p class="text-xs text-fg-3 mt-1">Auto-saved when you click away</p>
+                        <div class="flex items-center justify-between mt-1">
+                            <p class="text-xs text-fg-3">Auto-saved when you click away</p>
+                            <button type="button" @click="getHint({{ $question->id }})"
+                                x-show="!hints[{{ $question->id }}]"
+                                :disabled="hintLoading[{{ $question->id }}]"
+                                class="text-xs text-blue hover:underline disabled:opacity-50">
+                                <span x-show="!hintLoading[{{ $question->id }}]">💡 Get a hint</span>
+                                <span x-show="hintLoading[{{ $question->id }}]">Thinking...</span>
+                            </button>
+                        </div>
+                        <div x-show="hints[{{ $question->id }}]" x-cloak
+                            class="mt-2 bg-blue-soft border border-edge px-3 py-2 text-xs text-fg">
+                            💡 <span x-text="hints[{{ $question->id }}]"></span>
+                        </div>
+                        <p x-show="hintError[{{ $question->id }}]" x-cloak class="mt-1 text-xs text-red" x-text="hintError[{{ $question->id }}]"></p>
                     </div>
                     @endforeach
                 </div>
@@ -563,6 +577,9 @@ function caseInvestigation() {
         justSaved: false,
         externalPasteWarning: false,
         externalPasteFlags: {},
+        hints: {},
+        hintLoading: {},
+        hintError: {},
 
         init() {
             this.logActivity('CASE_VIEWED', 'Started investigation session');
@@ -605,6 +622,31 @@ function caseInvestigation() {
                 }
             } catch(e) { console.error(e); }
             this.saving[questionId] = false;
+        },
+
+        async getHint(questionId) {
+            if (this.hints[questionId] || this.hintLoading[questionId]) return;
+            this.hintLoading[questionId] = true;
+            this.hintError[questionId] = '';
+            try {
+                const url = '{{ route('student.case.hint', [$forensicCase, '__QID__']) }}'.replace('__QID__', questionId);
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                    },
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.hints[questionId] = data.hint;
+                } else {
+                    this.hintError[questionId] = data.message || 'Could not get a hint right now.';
+                }
+            } catch(e) {
+                this.hintError[questionId] = 'Connection error. Please try again.';
+            }
+            this.hintLoading[questionId] = false;
         },
 
         async logActivity(action, description) {

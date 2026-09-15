@@ -1,11 +1,14 @@
 <?php
+
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\CaseAnswer;
 use App\Models\CaseEnrollment;
+use App\Models\CaseQuestion;
 use App\Models\ForensicCase;
+use App\Services\AIService;
 use Illuminate\Http\Request;
 
 class CaseController extends Controller
@@ -67,10 +70,46 @@ class CaseController extends Controller
         return response()->json(['success' => true, 'progress' => $progress]);
     }
 
+    public function hint(ForensicCase $forensicCase, CaseQuestion $question)
+    {
+        $user = auth()->user();
+        CaseEnrollment::where('forensic_case_id', $forensicCase->id)
+            ->where('student_id', $user->id)
+            ->firstOrFail();
+
+        abort_unless($question->forensic_case_id === $forensicCase->id, 404);
+
+        // Hints are cached per question - identical for every student, so we
+        // only ever generate one per question instead of once per click.
+        if ($question->hint) {
+            return response()->json(['success' => true, 'hint' => $question->hint]);
+        }
+
+        $ai = new AIService;
+        $result = $ai->generateHint(
+            $question->question,
+            $forensicCase->scenario,
+            $forensicCase->simulated_evidence['overview'] ?? ''
+        );
+
+        if (empty($result['hint'])) {
+            $message = $ai->getLastError() ?? 'Could not generate a hint right now. Please try again.';
+
+            return response()->json(['success' => false, 'message' => $message], 422);
+        }
+
+        $question->update(['hint' => $result['hint']]);
+
+        ActivityLog::record('HINT_VIEWED', "Viewed hint for question #{$question->id}", $forensicCase->id);
+
+        return response()->json(['success' => true, 'hint' => $question->hint]);
+    }
+
     public function logActivity(Request $request, ForensicCase $forensicCase)
     {
         $request->validate(['action' => 'required|string', 'description' => 'nullable|string']);
         ActivityLog::record($request->action, $request->description ?? '', $forensicCase->id);
+
         return response()->json(['success' => true]);
     }
 
@@ -100,7 +139,7 @@ class CaseController extends Controller
 
         ActivityLog::record(
             'SUSPECT_ACCUSED',
-            "Accused {$picked['name']} ({$picked['role']}) — " . ($correct ? 'correct' : 'incorrect'),
+            "Accused {$picked['name']} ({$picked['role']}) — ".($correct ? 'correct' : 'incorrect'),
             $forensicCase->id
         );
 
