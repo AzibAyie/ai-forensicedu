@@ -5,20 +5,6 @@ use App\Http\Controllers\Lecturer;
 use App\Http\Controllers\Student;
 use Illuminate\Support\Facades\Route;
 
-// TEMP DIAGNOSTIC — remove after confirming GROQ_PROXY_URL/SECRET on Render.
-Route::get('/_diag/ai-config', function () {
-    $url = config('services.groq.proxy_url', '');
-
-    return response()->json([
-        'proxy_url_set' => $url !== '',
-        'proxy_url_host' => $url !== '' ? (parse_url($url, PHP_URL_HOST) ?: 'UNPARSEABLE') : null,
-        'proxy_secret_set' => config('services.groq.proxy_secret', '') !== '',
-        'model' => config('services.groq.model'),
-        'app_url' => config('app.url'),
-        'server_time' => now()->toISOString(),
-    ]);
-});
-
 // ── Auth ──────────────────────────────────────────────────────────
 Route::get('/', fn () => redirect()->route('login'));
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
