@@ -19,7 +19,7 @@ services:
       - key: APP_KEY
         sync: false
       - key: APP_DEBUG
-        value: false
+        value: true
       - key: APP_URL
         sync: false
       - key: APP_TIMEZONE
