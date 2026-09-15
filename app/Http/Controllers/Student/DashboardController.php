@@ -47,16 +47,10 @@ class DashboardController extends Controller
         $recentActivity = ActivityLog::where('user_id', $user->id)
             ->latest()->limit(5)->get();
 
-        $xp = Achievements::xp($completedEnrollments);
-        $rank = Achievements::rank($xp);
-
-        $boardCleared = Achievements::boardCleared($user, $completedEnrollments, $hasActiveCase);
-        $badges = Achievements::badges($user, $completedEnrollments, $streak, $boardCleared);
-
         return view('student.dashboard.index', compact(
             'currentEnrollment', 'hasActiveCase',
             'availableCases', 'completedEnrollments',
-            'stats', 'recentActivity', 'rank', 'badges'
+            'stats', 'recentActivity'
         ));
     }
 
