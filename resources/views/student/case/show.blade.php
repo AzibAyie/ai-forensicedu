@@ -322,7 +322,9 @@
                         <div class="flex items-start justify-between mb-3">
                             <div class="flex items-center gap-2">
                                 <span class="w-7 h-7 rounded-full bg-blue-soft text-blue text-xs font-bold flex items-center justify-center">{{ $i + 1 }}</span>
-                                <p class="text-sm font-medium text-fg">{{ $question->question }}</p>
+                                <p class="text-sm font-medium text-fg select-none"
+                                    @copy.prevent @cut.prevent @contextmenu.prevent @dragstart.prevent @selectstart.prevent
+                                >{{ $question->question }}</p>
                             </div>
                             <span class="text-xs text-fg-3 bg-base px-2 py-1  ml-2 flex-shrink-0">{{ $question->marks }} marks</span>
                         </div>
