@@ -50,6 +50,7 @@
     {{-- Case Form --}}
     <form method="POST" action="{{ route('lecturer.case.store') }}" class="space-y-5" enctype="multipart/form-data">
         @csrf
+        <input type="hidden" name="simulated_evidence" :value="form.simulated_evidence ? JSON.stringify(form.simulated_evidence) : ''">
 
         {{-- Basic Info --}}
         <div class="bg-surface  border border-edge  p-6">
@@ -283,6 +284,7 @@ function caseCreator() {
             scenario: '',
             learning_objectives: '',
             investigation_instructions: '',
+            simulated_evidence: null,
             questions: [
                 { question: '', marks: 20 },
                 { question: '', marks: 20 },
@@ -349,6 +351,7 @@ function caseCreator() {
                 this.form.scenario = d.scenario || '';
                 this.form.learning_objectives = d.learning_objectives || '';
                 this.form.investigation_instructions = d.investigation_instructions || '';
+                this.form.simulated_evidence = d.simulated_evidence || null;
                 if (d.questions?.length) {
                     this.form.questions = d.questions.map(q => ({ question: q.question, marks: q.marks }));
                 }
@@ -411,6 +414,7 @@ function caseCreator() {
                 this.form.scenario = d.scenario || '';
                 this.form.learning_objectives = d.learning_objectives || '';
                 this.form.investigation_instructions = d.investigation_instructions || '';
+                this.form.simulated_evidence = d.simulated_evidence || null;
                 if (d.questions?.length) {
                     this.form.questions = d.questions.map(q => ({ question: q.question, marks: q.marks }));
                 }

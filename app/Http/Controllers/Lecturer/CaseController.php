@@ -40,9 +40,23 @@ class CaseController extends Controller
             'questions' => 'required|array|min:1',
             'questions.*.question' => 'required|string',
             'questions.*.marks' => 'required|integer|min:1',
+            'simulated_evidence' => 'nullable|string',
         ]);
 
-        $evidenceData = $this->buildSimulatedEvidence($request->incident_type);
+        // AI-generated evidence (from "Generate with AI" or "Generate Evidence
+        // from PDF") is carried through as a hidden JSON field so the case
+        // that gets saved actually matches what the lecturer reviewed -
+        // falls back to a generic template only for fully manual cases.
+        $aiEvidence = null;
+        if ($request->filled('simulated_evidence')) {
+            $decoded = json_decode($request->input('simulated_evidence'), true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $aiEvidence = $decoded;
+            }
+        }
+
+        $evidenceData = $aiEvidence ?? $this->buildSimulatedEvidence($request->incident_type);
+        $evidenceData['audit_logs'] ??= [];
 
         // Lecturer-authored audit log lines are appended to the generated set.
         if ($request->filled('custom_logs')) {
