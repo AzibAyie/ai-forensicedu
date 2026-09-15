@@ -3,36 +3,22 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Lecturer;
 use App\Http\Controllers\Student;
-use Illuminate\Support\Facades\Http;
+use App\Services\AIService;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/_diag/worker', function () {
     $url = config('services.groq.proxy_url', '');
-    $secret = config('services.groq.proxy_secret', '');
 
-    try {
-        $response = Http::withHeaders([
-            'X-Proxy-Secret' => $secret,
-            'content-type' => 'application/json',
-        ])->timeout(30)->post($url, [
-            'model' => config('services.groq.model'),
-            'messages' => [['role' => 'user', 'content' => 'ping']],
-        ]);
+    $ai = new AIService;
+    $result = $ai->generateCase('brute_force', 'beginner', 'diagnostic via AIService');
 
-        return response()->json([
-            'url_present' => $url !== '',
-            'url' => $url,
-            'status' => $response->status(),
-            'body' => $response->json() ?? $response->body(),
-        ]);
-    } catch (Throwable $e) {
-        return response()->json([
-            'url_present' => $url !== '',
-            'url' => $url,
-            'exception_class' => get_class($e),
-            'exception_message' => $e->getMessage(),
-        ]);
-    }
+    return response()->json([
+        'url_present' => $url !== '',
+        'url' => $url,
+        'result_empty' => empty($result),
+        'last_error' => $ai->getLastError(),
+        'result_title' => $result['title'] ?? null,
+    ]);
 });
 
 // ── Auth ──────────────────────────────────────────────────────────
