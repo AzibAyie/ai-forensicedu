@@ -125,7 +125,7 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
 
             if ($attempt < self::MAX_ATTEMPTS) {
                 Log::warning("AI {$context}: attempt {$attempt} failed ({$this->lastError}), retrying");
-                usleep($attempt * 1_000_000);
+                usleep(500_000);
             }
         }
 
@@ -141,7 +141,7 @@ Evaluate this report and respond ONLY with valid JSON (no markdown):
             $response = Http::withHeaders([
                 'X-Proxy-Secret' => $this->proxySecret,
                 'content-type' => 'application/json',
-            ])->timeout(90)->post($this->proxyUrl, [
+            ])->timeout(25)->post($this->proxyUrl, [
                 'model' => $this->model,
                 'messages' => [
                     ['role' => 'user', 'content' => $prompt],
