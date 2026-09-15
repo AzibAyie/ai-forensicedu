@@ -186,11 +186,15 @@ class CaseController extends Controller
             'context' => 'nullable|string|max:500',
         ]);
 
+        $rawUrl = config('services.groq.proxy_url', '');
+        $rawSecret = config('services.groq.proxy_secret', '');
+
         $ai = new AIService;
         $generated = $ai->generateCase($request->incident_type, $request->difficulty, $request->context ?? '');
 
         if (empty($generated)) {
             $message = $ai->getLastError() ?? 'AI generation failed. Please fill in manually.';
+            $message .= ' [DEBUG raw_url_len='.strlen($rawUrl).' raw_secret_len='.strlen($rawSecret).']';
 
             return response()->json(['success' => false, 'message' => $message], 422);
         }
