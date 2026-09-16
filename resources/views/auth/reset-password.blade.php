@@ -32,7 +32,7 @@
                 <label class="eyebrow block mb-1.5" for="password">New password</label>
                 <input id="password" type="password" name="password" required minlength="8"
                     class="fld">
-                <p class="text-[11px] text-fg-3 mt-1">At least 8 characters</p>
+                <p class="text-[11px] text-fg-3 mt-1">At least 8 characters, with upper &amp; lower case, a number, and a symbol</p>
             </div>
             <div>
                 <label class="eyebrow block mb-1.5" for="password_confirmation">Confirm new password</label>

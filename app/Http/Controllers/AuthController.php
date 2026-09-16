@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class AuthController extends Controller
 {
@@ -63,7 +64,7 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
-            'password' => 'required|min:8|confirmed',
+            'password' => ['required', 'confirmed', $this->passwordRules()],
             'role' => 'required|in:student,lecturer',
             'student_id' => 'nullable|string|unique:users',
             'staff_id' => 'nullable|string|unique:users',
@@ -133,7 +134,7 @@ class AuthController extends Controller
         $request->validate([
             'token' => 'required',
             'email' => 'required|email',
-            'password' => 'required|min:8|confirmed',
+            'password' => ['required', 'confirmed', $this->passwordRules()],
         ]);
 
         $status = Password::reset(
@@ -165,5 +166,16 @@ class AuthController extends Controller
             'lecturer' => '/lecturer/dashboard',
             default => '/student/dashboard',
         };
+    }
+
+    /**
+     * Applies to every newly-set password (registration and reset) — never
+     * re-checked against passwords already stored, so the seeded demo
+     * accounts (lecturer@forensicedu.test / student@forensicedu.test,
+     * password "password") keep working untouched.
+     */
+    private function passwordRules(): PasswordRule
+    {
+        return PasswordRule::min(8)->mixedCase()->numbers()->symbols();
     }
 }
