@@ -61,6 +61,35 @@
         </form>
     </section>
 
+    <section class="bg-surface border border-edge">
+        <div class="px-6 py-4 border-b border-edge">
+            <h3 class="font-display text-[14px] font-semibold text-fg">Your class</h3>
+            <p class="text-[12px] text-fg-2 mt-0.5">You can only see and attempt cases published by your assigned lecturer.</p>
+        </div>
+        <div class="px-6 py-5">
+            @if($user->lecturer)
+                <p class="text-[13px] text-fg mb-4">
+                    Currently enrolled with <strong>{{ $user->lecturer->name }}</strong>.
+                </p>
+            @else
+                <p class="text-[13px] text-fg-2 mb-4">
+                    You're not enrolled with a lecturer yet — enter a class code to see their cases.
+                </p>
+            @endif
+            <form method="POST" action="{{ route('student.join-class') }}" class="flex gap-2 max-w-sm">
+                @csrf
+                <input type="text" name="class_code" required maxlength="8" placeholder="e.g. 7K2PXQ"
+                    class="fld font-mono uppercase" style="letter-spacing:0.15em">
+                <button type="submit" class="btn-primary text-[13px] px-4 flex-shrink-0">
+                    {{ $user->lecturer ? 'Switch' : 'Join' }}
+                </button>
+            </form>
+            @if($user->lecturer)
+                <p class="text-[11px] text-fg-3 mt-2">Entering a new code switches you to that lecturer's class instead.</p>
+            @endif
+        </div>
+    </section>
+
     <p class="text-[12.5px] text-fg-2">
         Looking for your scores and case history?
         <a href="{{ route('student.record') }}" class="text-blue font-medium hover:underline">Open your record →</a>

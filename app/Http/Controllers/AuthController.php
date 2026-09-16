@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
@@ -68,7 +69,21 @@ class AuthController extends Controller
             'staff_id' => 'nullable|string|unique:users',
             'faculty' => 'nullable|string|max:255',
             'program' => 'nullable|string|max:255',
+            'class_code' => 'required_if:role,student|nullable|string',
         ]);
+
+        $lecturer = null;
+        if ($request->role === 'student') {
+            $lecturer = User::where('role', 'lecturer')
+                ->whereRaw('UPPER(class_code) = ?', [strtoupper($request->class_code)])
+                ->first();
+
+            if (! $lecturer) {
+                return back()->withErrors([
+                    'class_code' => 'That class code was not recognised. Check it with your lecturer and try again.',
+                ])->withInput();
+            }
+        }
 
         $user = User::create([
             'name' => $request->name,
@@ -79,12 +94,59 @@ class AuthController extends Controller
             'staff_id' => $request->staff_id,
             'faculty' => $request->faculty,
             'program' => $request->program,
+            'lecturer_id' => $lecturer?->id,
+            'class_code' => $request->role === 'lecturer' ? User::generateClassCode() : null,
         ]);
 
         Auth::login($user);
         ActivityLog::record('REGISTER', 'New account registered');
 
         return redirect($this->redirectPath($user->role));
+    }
+
+    public function showForgotPassword()
+    {
+        return view('auth.forgot-password');
+    }
+
+    public function sendResetLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        Password::sendResetLink($request->only('email'));
+
+        // Deliberately the same message whether or not the email exists,
+        // so the form can't be used to check which addresses are registered.
+        return back()->with('success', 'If that email is registered, a password reset link has been sent to it.');
+    }
+
+    public function showResetPassword(Request $request, string $token)
+    {
+        return view('auth.reset-password', [
+            'token' => $token,
+            'email' => $request->query('email'),
+        ]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill(['password' => Hash::make($password)])->save();
+                ActivityLog::record('PASSWORD_RESET', 'Password reset via email link', null, [], $user->id);
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('success', 'Your password has been reset. You can now sign in.')
+            : back()->withErrors(['email' => __($status)])->withInput($request->only('email'));
     }
 
     public function logout(Request $request)

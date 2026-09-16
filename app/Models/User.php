@@ -14,7 +14,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'email', 'password', 'role',
         'student_id', 'staff_id', 'faculty',
-        'program', 'phone', 'avatar', 'is_active', 'lecturer_id',
+        'program', 'phone', 'avatar', 'is_active', 'lecturer_id', 'class_code',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -89,5 +89,22 @@ class User extends Authenticatable
         return Achievements::rank(
             Achievements::xp(Achievements::completedEnrollments($this))
         );
+    }
+
+    /**
+     * A short, human-friendly class code students use to join this lecturer's
+     * cohort. Avoids visually ambiguous characters (0/O, 1/I/L).
+     */
+    public static function generateClassCode(): string
+    {
+        $alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+        do {
+            $code = collect(range(1, 6))
+                ->map(fn () => $alphabet[random_int(0, strlen($alphabet) - 1)])
+                ->implode('');
+        } while (static::where('class_code', $code)->exists());
+
+        return $code;
     }
 }

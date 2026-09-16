@@ -13,6 +13,11 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
+Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
 // Leaving/switching impersonation must be reachable while authenticated as the student.
 Route::post('/impersonate/stop', [Lecturer\ImpersonationController::class, 'stop'])
     ->name('impersonate.stop')->middleware('auth');
@@ -26,6 +31,7 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('/dashboard', [Student\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [Student\DashboardController::class, 'profile'])->name('profile');
     Route::patch('/profile', [Student\DashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/join-class', [Student\DashboardController::class, 'joinClass'])->name('join-class');
     Route::get('/record', [Student\RecordController::class, 'index'])->name('record');
 
     Route::post('/case/{forensicCase}/unlock', [Student\DashboardController::class, 'unlockCase'])->name('case.unlock');
@@ -46,6 +52,7 @@ Route::middleware(['auth', 'role:lecturer'])->prefix('lecturer')->name('lecturer
     Route::get('/dashboard', [Lecturer\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [Lecturer\DashboardController::class, 'profile'])->name('profile');
     Route::patch('/profile', [Lecturer\DashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/regenerate-class-code', [Lecturer\DashboardController::class, 'regenerateClassCode'])->name('profile.regenerate-class-code');
 
     Route::get('/students', [Lecturer\DashboardController::class, 'students'])->name('students');
     Route::patch('/students/{student}/assign', [Lecturer\DashboardController::class, 'assignStudent'])->name('students.assign');

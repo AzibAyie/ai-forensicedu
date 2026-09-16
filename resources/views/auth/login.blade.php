@@ -36,6 +36,11 @@
             <p class="eyebrow mb-2">Access</p>
             <h1 class="font-display text-[26px] font-semibold text-fg mb-7">Sign in</h1>
 
+            @if(session('success'))
+                <div class="bg-blue-soft border-l-2 border-blue px-4 py-3 mb-5">
+                    <p class="text-[13px] text-blue">{{ session('success') }}</p>
+                </div>
+            @endif
             @if($errors->any())
                 <div class="bg-red-soft border-l-2 border-red px-4 py-3 mb-5">
                     <p class="text-[13px] text-red">{{ $errors->first() }}</p>
@@ -50,7 +55,10 @@
                         class="fld">
                 </div>
                 <div>
-                    <label class="eyebrow block mb-1.5" for="password">Password</label>
+                    <div class="flex items-baseline justify-between mb-1.5">
+                        <label class="eyebrow" for="password">Password</label>
+                        <a href="{{ route('password.request') }}" class="text-[11.5px] text-blue hover:underline">Forgot password?</a>
+                    </div>
                     <input id="password" type="password" name="password" required
                         class="fld">
                 </div>

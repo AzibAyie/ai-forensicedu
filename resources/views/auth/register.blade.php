@@ -89,6 +89,13 @@
                     <input type="text" name="program" value="{{ old('program') }}" placeholder="Bachelor of Cybersecurity"
                         class="fld">
                 </div>
+                <div x-show="role === 'student'" class="col-span-2">
+                    <label class="eyebrow block mb-1.5">Class code</label>
+                    <input type="text" name="class_code" value="{{ old('class_code') }}" :required="role === 'student'"
+                        maxlength="8" placeholder="e.g. 7K2PXQ"
+                        class="fld font-mono uppercase" style="letter-spacing:0.15em">
+                    <p class="text-[11px] text-fg-3 mt-1">Ask your lecturer for their class code — it's how you get access to their cases.</p>
+                </div>
             </div>
 
             <button type="submit" class="btn-primary w-full">

@@ -37,5 +37,18 @@
             <button type="submit" class="btn-primary">Update Profile</button>
         </form>
     </div>
+
+    <div class="bg-surface border border-edge shadow-sm p-6 mt-5">
+        <h3 class="text-sm font-semibold text-fg mb-1">Your class code</h3>
+        <p class="text-xs text-fg-2 mb-4">Share this code with your students — they enter it when they register (or from their own profile) to be enrolled with you. Only students with this code see the cases you publish.</p>
+        <div class="flex items-center gap-3">
+            <span class="font-mono text-2xl font-bold tracking-[0.3em] text-blue bg-blue-soft px-4 py-2 rounded-lg">{{ $user->class_code }}</span>
+            <form method="POST" action="{{ route('lecturer.profile.regenerate-class-code') }}"
+                onsubmit="return confirm('Generate a new code? Students still using the old code won\'t be able to join with it anymore.')">
+                @csrf
+                <button type="submit" class="btn-ghost text-xs">Regenerate</button>
+            </form>
+        </div>
+    </div>
 </div>
 @endsection

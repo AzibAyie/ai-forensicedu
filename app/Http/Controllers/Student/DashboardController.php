@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\CaseEnrollment;
 use App\Models\ForensicCase;
+use App\Models\User;
 use App\Support\Achievements;
 use Illuminate\Http\Request;
 
@@ -24,11 +25,16 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
-        $availableCases = ForensicCase::available()
-            ->whereNotIn('id', $user->enrollments()->pluck('forensic_case_id'))
-            ->with('lecturer')
-            ->latest()
-            ->get();
+        // Scoped to the student's own assigned lecturer — a student never sees
+        // another lecturer's cases, even if that lecturer has published some.
+        $availableCases = $user->lecturer_id
+            ? ForensicCase::available()
+                ->where('lecturer_id', $user->lecturer_id)
+                ->whereNotIn('id', $user->enrollments()->pluck('forensic_case_id'))
+                ->with('lecturer')
+                ->latest()
+                ->get()
+            : collect();
 
         $streak = Achievements::streak($user);
 
@@ -57,6 +63,12 @@ class DashboardController extends Controller
     public function unlockCase(Request $request, ForensicCase $forensicCase)
     {
         $user = auth()->user();
+
+        // Belt-and-braces: even though the case board only lists cases from the
+        // student's own lecturer, this blocks unlocking one directly by URL too.
+        if ($forensicCase->lecturer_id !== $user->lecturer_id) {
+            abort(404);
+        }
 
         if ($user->hasActiveCase()) {
             return back()->withErrors(['case' => 'You must submit your current case before starting a new one.']);
@@ -110,5 +122,25 @@ class DashboardController extends Controller
         $user->update($request->only('name', 'phone', 'faculty', 'program'));
 
         return back()->with('success', 'Profile updated successfully.');
+    }
+
+    public function joinClass(Request $request)
+    {
+        $request->validate(['class_code' => 'required|string']);
+
+        $user = auth()->user();
+
+        $lecturer = User::where('role', 'lecturer')
+            ->whereRaw('UPPER(class_code) = ?', [strtoupper($request->class_code)])
+            ->first();
+
+        if (! $lecturer) {
+            return back()->withErrors(['class_code' => 'That class code was not recognised. Check it with your lecturer and try again.']);
+        }
+
+        $user->update(['lecturer_id' => $lecturer->id]);
+        ActivityLog::record('CLASS_JOINED', "Joined {$lecturer->name}'s class");
+
+        return back()->with('success', "You're now enrolled with {$lecturer->name}.");
     }
 }

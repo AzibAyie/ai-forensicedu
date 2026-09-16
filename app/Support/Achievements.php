@@ -64,7 +64,8 @@ class Achievements
 
     public static function boardCleared(User $user, Collection $completedEnrollments, bool $hasActiveCase): bool
     {
-        $availableCasesEmpty = ForensicCase::available()
+        $availableCasesEmpty = ! $user->lecturer_id || ForensicCase::available()
+            ->where('lecturer_id', $user->lecturer_id)
             ->whereNotIn('id', $user->enrollments()->pluck('forensic_case_id'))
             ->doesntExist();
 
