@@ -6,6 +6,10 @@
      $classStatus, so it fires immediately on whichever page the student took
      the action from, not just the next time they visit the Case Board. --}}
 @php
+    // Pages that already have their own class-code form on screen (the profile
+    // page's "Your class" section) pass showForm=false so we don't render a
+    // second, redundant copy of the same input inside the modal.
+    $showForm = $showForm ?? true;
     $notice = match(true) {
         $classStatus['state'] === 'pending' => 'pending',
         $classStatus['state'] === 'rejected' => 'rejected',
@@ -69,12 +73,17 @@
                 @if($errors->has('class_code'))
                     <p class="text-[12.5px] text-red mb-3">{{ $errors->first('class_code') }}</p>
                 @endif
+                @if($showForm)
                 <form method="POST" action="{{ route('student.join-class') }}" class="flex gap-2">
                     @csrf
                     <input type="text" name="class_code" required maxlength="8" placeholder="e.g. 7K2PXQ"
                         class="fld font-mono uppercase" style="letter-spacing:0.15em">
                     <button type="submit" class="btn-primary text-[13px] px-4 flex-shrink-0">Send request</button>
                 </form>
+                @else
+                <button @click="show = false; localStorage.setItem('classStatusSeen', '{{ $noticeSig }}')"
+                    class="btn-primary w-full text-[13px]">Got it — I'll enter a new code below</button>
+                @endif
 
             @else
                 <div class="w-11 h-11 rounded-xl {{ $notice === 'rejected' ? 'bg-red-soft' : 'bg-blue-soft' }} flex items-center justify-center mb-4">
@@ -96,12 +105,17 @@
                 @if($errors->has('class_code'))
                     <p class="text-[12.5px] text-red mb-3">{{ $errors->first('class_code') }}</p>
                 @endif
+                @if($showForm)
                 <form method="POST" action="{{ route('student.join-class') }}" class="flex gap-2">
                     @csrf
                     <input type="text" name="class_code" required maxlength="8" placeholder="e.g. 7K2PXQ"
                         class="fld font-mono uppercase" style="letter-spacing:0.15em">
                     <button type="submit" class="btn-primary text-[13px] px-4 flex-shrink-0">Send request</button>
                 </form>
+                @else
+                <button @click="show = false; localStorage.setItem('classStatusSeen', '{{ $noticeSig }}')"
+                    class="btn-primary w-full text-[13px]">Got it — I'll enter a new code below</button>
+                @endif
             @endif
         </div>
     </div>

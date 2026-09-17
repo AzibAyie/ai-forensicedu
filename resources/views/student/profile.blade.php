@@ -5,7 +5,7 @@
 
 @section('content')
 
-@include('partials.class-status-notice')
+@include('partials.class-status-notice', ['showForm' => false])
 
 <div class="pt-6 max-w-2xl mx-auto space-y-6">
 
