@@ -64,28 +64,54 @@
     <section class="bg-surface border border-edge">
         <div class="px-6 py-4 border-b border-edge">
             <h3 class="font-display text-[14px] font-semibold text-fg">Your class</h3>
-            <p class="text-[12px] text-fg-2 mt-0.5">You can only see and attempt cases published by your assigned lecturer.</p>
+            <p class="text-[12px] text-fg-2 mt-0.5">You can only see and attempt cases published by your assigned lecturer, and joining needs their approval.</p>
         </div>
         <div class="px-6 py-5">
-            @if($user->lecturer)
+            @if($classStatus['state'] === 'approved')
                 <p class="text-[13px] text-fg mb-4">
-                    Currently enrolled with <strong>{{ $user->lecturer->name }}</strong>.
+                    Currently enrolled with <strong>{{ $classStatus['lecturer']->name }}</strong>.
                 </p>
+                @if($classStatus['switch_request'])
+                <div class="bg-warning-soft border-l-2 border-warning px-4 py-3 mb-4 flex items-start gap-2.5">
+                    <span class="seal seal-open mt-0.5">Pending</span>
+                    <p class="text-[13px] text-warning leading-relaxed">
+                        Your request to switch to <strong>{{ $classStatus['switch_request']->lecturer->name }}</strong> is waiting for their approval.
+                        You'll keep your access to {{ $classStatus['lecturer']->name }} until then.
+                    </p>
+                </div>
+                @endif
+            @elseif($classStatus['state'] === 'pending')
+                <div class="bg-warning-soft border-l-2 border-warning px-4 py-3 mb-4 flex items-start gap-2.5">
+                    <span class="seal seal-open mt-0.5">Pending</span>
+                    <p class="text-[13px] text-warning leading-relaxed">
+                        Your request to join <strong>{{ $classStatus['lecturer']->name }}</strong>'s class is waiting for their approval.
+                    </p>
+                </div>
+            @elseif($classStatus['state'] === 'rejected')
+                <div class="bg-red-soft border-l-2 border-red px-4 py-3 mb-4 flex items-start gap-2.5">
+                    <span class="seal seal-alert mt-0.5">Declined</span>
+                    <p class="text-[13px] text-red leading-relaxed">
+                        Your request to join <strong>{{ $classStatus['lecturer']->name }}</strong>'s class was declined. Try another code below.
+                    </p>
+                </div>
             @else
                 <p class="text-[13px] text-fg-2 mb-4">
-                    You're not enrolled with a lecturer yet — enter a class code to see their cases.
+                    You're not enrolled with a lecturer yet — enter their class code below and wait for them to accept your request.
                 </p>
             @endif
+
+            @if($classStatus['state'] !== 'pending' && ! $classStatus['switch_request'])
             <form method="POST" action="{{ route('student.join-class') }}" class="flex gap-2 max-w-sm">
                 @csrf
                 <input type="text" name="class_code" required maxlength="8" placeholder="e.g. 7K2PXQ"
                     class="fld font-mono uppercase" style="letter-spacing:0.15em">
                 <button type="submit" class="btn-primary text-[13px] px-4 flex-shrink-0">
-                    {{ $user->lecturer ? 'Switch' : 'Join' }}
+                    {{ $classStatus['state'] === 'approved' ? 'Request switch' : 'Send request' }}
                 </button>
             </form>
-            @if($user->lecturer)
-                <p class="text-[11px] text-fg-3 mt-2">Entering a new code switches you to that lecturer's class instead.</p>
+            @if($classStatus['state'] === 'approved')
+                <p class="text-[11px] text-fg-3 mt-2">Entering a new code sends a switch request — you'll keep access to {{ $classStatus['lecturer']->name }} until the new lecturer approves it.</p>
+            @endif
             @endif
         </div>
     </section>

@@ -34,6 +34,10 @@
             </a>
             <a href="{{ route('student.profile') }}" class="nav-link {{ request()->routeIs('student.profile') ? 'active' : '' }}">
                 <i data-lucide="user"></i> Profile
+                @php $sidebarClassStatus = auth()->user()->classStatus(); @endphp
+                @if(in_array($sidebarClassStatus['state'], ['pending', 'rejected']))
+                <span class="ml-auto w-2 h-2 rounded-full bg-{{ $sidebarClassStatus['state'] === 'pending' ? 'warning' : 'red' }}"></span>
+                @endif
             </a>
 
         @elseif($role === 'lecturer')
@@ -54,6 +58,13 @@
             </a>
             <a href="{{ route('lecturer.students') }}" class="nav-link {{ request()->routeIs('lecturer.students') ? 'active' : '' }}">
                 <i data-lucide="users"></i> My Students
+            </a>
+            @php $sidebarPendingRequests = \App\Models\ClassJoinRequest::where('lecturer_id', auth()->id())->pending()->count(); @endphp
+            <a href="{{ route('lecturer.requests') }}" class="nav-link {{ request()->routeIs('lecturer.requests*') ? 'active' : '' }}">
+                <i data-lucide="user-plus"></i> Join Requests
+                @if($sidebarPendingRequests)
+                <span class="ml-auto bg-red text-white text-[10px] font-semibold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">{{ $sidebarPendingRequests }}</span>
+                @endif
             </a>
 
             <p class="eyebrow px-5 mb-1.5 mt-5">Account</p>
@@ -83,6 +94,14 @@
                 </div>
                 <p class="text-[12.5px] text-fg-2"><span class="font-semibold text-fg">{{ $sidebarAwaitingReview }}</span> Awaiting Review</p>
             </div>
+            @if($sidebarPendingRequests)
+            <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-red-soft flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="user-plus" class="w-3.5 h-3.5 text-red"></i>
+                </div>
+                <p class="text-[12.5px] text-fg-2"><span class="font-semibold text-fg">{{ $sidebarPendingRequests }}</span> Join {{ $sidebarPendingRequests === 1 ? 'Request' : 'Requests' }}</p>
+            </div>
+            @endif
         </div>
         <a href="{{ route('lecturer.gradebook') }}" class="btn-ghost !rounded-full !text-[12px] !py-1.5 block text-center">Open Gradebook</a>
     </div>

@@ -5,6 +5,69 @@
 @section('page-subtitle', 'Pick up an active investigation or open a new case from the registry.')
 
 @section('content')
+
+    {{-- CLASS-PERMISSION POP-UP — fires whenever the student isn't approved into a
+         lecturer's class yet, or the last thing that happened to their request
+         hasn't been acknowledged. Re-appears if the state changes (new pending
+         request, a rejection, a fresh validation error). --}}
+    @if($classStatus['state'] !== 'approved')
+    <div x-data="{ show: false }"
+         x-init="
+            const sig = '{{ $classStatus['state'] }}:{{ $classStatus['request']?->id }}';
+            if (localStorage.getItem('classStatusSeen') !== sig || {{ $errors->has('class_code') ? 'true' : 'false' }}) { show = true; }
+         ">
+        <div x-show="show" x-cloak x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgb(0 0 0 / 0.6);">
+            <div @click.outside="show = false; localStorage.setItem('classStatusSeen', '{{ $classStatus['state'] }}:{{ $classStatus['request']?->id }}')"
+                 x-transition class="bg-surface border border-edge rounded-2xl max-w-md w-full p-6 relative shadow-2xl">
+                <button @click="show = false; localStorage.setItem('classStatusSeen', '{{ $classStatus['state'] }}:{{ $classStatus['request']?->id }}')"
+                    class="absolute top-4 right-4 text-fg-3 hover:text-fg">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+
+                @if($classStatus['state'] === 'pending')
+                    <div class="w-11 h-11 rounded-xl bg-warning-soft flex items-center justify-center mb-4">
+                        <i data-lucide="clock" class="w-5 h-5 text-warning"></i>
+                    </div>
+                    <h3 class="font-display text-[17px] font-semibold text-heading mb-2">Waiting for approval</h3>
+                    <p class="text-[13.5px] text-fg-2 leading-relaxed mb-5">
+                        You need permission from your lecturer before you can see their cases. Your request to join
+                        <strong class="text-fg">{{ $classStatus['lecturer']->name }}</strong>'s class has been sent —
+                        you'll get access as soon as they approve it.
+                    </p>
+                    <button @click="show = false; localStorage.setItem('classStatusSeen', 'pending:{{ $classStatus['request']?->id }}')"
+                        class="btn-primary w-full text-[13px]">Got it</button>
+                @else
+                    <div class="w-11 h-11 rounded-xl {{ $classStatus['state'] === 'rejected' ? 'bg-red-soft' : 'bg-blue-soft' }} flex items-center justify-center mb-4">
+                        <i data-lucide="{{ $classStatus['state'] === 'rejected' ? 'x-circle' : 'key-round' }}" class="w-5 h-5 {{ $classStatus['state'] === 'rejected' ? 'text-red' : 'text-blue' }}"></i>
+                    </div>
+                    @if($classStatus['state'] === 'rejected')
+                        <h3 class="font-display text-[17px] font-semibold text-heading mb-2">Request declined</h3>
+                        <p class="text-[13.5px] text-fg-2 leading-relaxed mb-5">
+                            Your request to join <strong class="text-fg">{{ $classStatus['lecturer']->name }}</strong>'s class
+                            wasn't approved. Check the class code with your lecturer, or try a different one below.
+                        </p>
+                    @else
+                        <h3 class="font-display text-[17px] font-semibold text-heading mb-2">You need permission to join a class</h3>
+                        <p class="text-[13.5px] text-fg-2 leading-relaxed mb-5">
+                            Cases are only visible to students their lecturer has approved. Enter the class code your
+                            lecturer gave you — they'll need to accept your request before you can start investigating.
+                        </p>
+                    @endif
+                    @if($errors->has('class_code'))
+                        <p class="text-[12.5px] text-red mb-3">{{ $errors->first('class_code') }}</p>
+                    @endif
+                    <form method="POST" action="{{ route('student.join-class') }}" class="flex gap-2">
+                        @csrf
+                        <input type="text" name="class_code" required maxlength="8" placeholder="e.g. 7K2PXQ"
+                            class="fld font-mono uppercase" style="letter-spacing:0.15em">
+                        <button type="submit" class="btn-primary text-[13px] px-4 flex-shrink-0">Send request</button>
+                    </form>
+                @endif
+            </div>
+        </div>
+    </div>
+    @endif
+
 <div class="pt-6 space-y-8">
 
     {{-- ACTIVE CASE — the hero. Only shows when there is one. --}}
@@ -93,8 +156,23 @@
 
         @if($availableCases->isEmpty())
             <div class="bg-surface border border-edge px-6 py-14 text-center">
-                <p class="font-display text-[15px] font-semibold text-fg">Registry is empty</p>
-                <p class="text-[13px] text-fg-2 mt-1.5">No cases have been published yet. Your lecturer assigns them.</p>
+                @if($classStatus['state'] === 'pending')
+                    <p class="font-display text-[15px] font-semibold text-fg">Waiting for {{ $classStatus['lecturer']->name }} to approve you</p>
+                    <p class="text-[13px] text-fg-2 mt-1.5">Cases will appear here as soon as your join request is accepted.</p>
+                @elseif($classStatus['state'] === 'rejected')
+                    <p class="font-display text-[15px] font-semibold text-fg">Your last request was declined</p>
+                    <p class="text-[13px] text-fg-2 mt-1.5">
+                        <a href="{{ route('student.profile') }}" class="text-blue hover:underline">Try another class code from your profile →</a>
+                    </p>
+                @elseif($classStatus['state'] === 'none')
+                    <p class="font-display text-[15px] font-semibold text-fg">You haven't joined a class yet</p>
+                    <p class="text-[13px] text-fg-2 mt-1.5">
+                        <a href="{{ route('student.profile') }}" class="text-blue hover:underline">Enter your lecturer's class code from your profile →</a>
+                    </p>
+                @else
+                    <p class="font-display text-[15px] font-semibold text-fg">Registry is empty</p>
+                    <p class="text-[13px] text-fg-2 mt-1.5">No cases have been published yet. Your lecturer assigns them.</p>
+                @endif
             </div>
         @else
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

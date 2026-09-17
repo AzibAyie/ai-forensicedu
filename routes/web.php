@@ -57,6 +57,10 @@ Route::middleware(['auth', 'role:lecturer'])->prefix('lecturer')->name('lecturer
     Route::get('/students', [Lecturer\DashboardController::class, 'students'])->name('students');
     Route::patch('/students/{student}/assign', [Lecturer\DashboardController::class, 'assignStudent'])->name('students.assign');
     Route::delete('/students/{student}/assign', [Lecturer\DashboardController::class, 'unassignStudent'])->name('students.unassign');
+
+    Route::get('/requests', [Lecturer\ClassRequestController::class, 'index'])->name('requests');
+    Route::post('/requests/{joinRequest}/accept', [Lecturer\ClassRequestController::class, 'accept'])->name('requests.accept');
+    Route::post('/requests/{joinRequest}/reject', [Lecturer\ClassRequestController::class, 'reject'])->name('requests.reject');
     Route::get('/gradebook', [Lecturer\GradebookController::class, 'index'])->name('gradebook');
     Route::get('/gradebook/export', [Lecturer\GradebookController::class, 'export'])->name('gradebook.export');
 

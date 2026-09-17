@@ -94,7 +94,7 @@
                     <input type="text" name="class_code" value="{{ old('class_code') }}" :required="role === 'student'"
                         maxlength="8" placeholder="e.g. 7K2PXQ"
                         class="fld font-mono uppercase" style="letter-spacing:0.15em">
-                    <p class="text-[11px] text-fg-3 mt-1">Ask your lecturer for their class code — it's how you get access to their cases.</p>
+                    <p class="text-[11px] text-fg-3 mt-1">Ask your lecturer for their class code. They'll need to approve your request before you can see their cases.</p>
                 </div>
             </div>
 

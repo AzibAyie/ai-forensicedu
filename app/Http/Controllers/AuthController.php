@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use App\Models\ClassJoinRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -95,14 +96,27 @@ class AuthController extends Controller
             'staff_id' => $request->staff_id,
             'faculty' => $request->faculty,
             'program' => $request->program,
-            'lecturer_id' => $lecturer?->id,
+            // lecturer_id is intentionally left unset here — a student only gets
+            // it once the lecturer approves their join request below.
             'class_code' => $request->role === 'lecturer' ? User::generateClassCode() : null,
         ]);
 
         Auth::login($user);
         ActivityLog::record('REGISTER', 'New account registered');
 
-        return redirect($this->redirectPath($user->role));
+        if ($lecturer) {
+            ClassJoinRequest::create([
+                'student_id' => $user->id,
+                'lecturer_id' => $lecturer->id,
+                'status' => 'pending',
+            ]);
+            ActivityLog::record('CLASS_JOIN_REQUESTED', "Requested to join {$lecturer->name}'s class");
+        }
+
+        return redirect($this->redirectPath($user->role))
+            ->with('success', $lecturer
+                ? "Account created. Your request to join {$lecturer->name}'s class is now waiting for their approval."
+                : 'Account created.');
     }
 
     public function showForgotPassword()

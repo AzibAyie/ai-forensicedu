@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\CaseEnrollment;
+use App\Models\ClassJoinRequest;
 use App\Models\ForensicCase;
 use App\Models\User;
 use App\Support\Achievements;
@@ -53,10 +54,12 @@ class DashboardController extends Controller
         $recentActivity = ActivityLog::where('user_id', $user->id)
             ->latest()->limit(5)->get();
 
+        $classStatus = $user->classStatus();
+
         return view('student.dashboard.index', compact(
             'currentEnrollment', 'hasActiveCase',
             'availableCases', 'completedEnrollments',
-            'stats', 'recentActivity'
+            'stats', 'recentActivity', 'classStatus'
         ));
     }
 
@@ -107,7 +110,12 @@ class DashboardController extends Controller
 
     public function profile()
     {
-        return view('student.profile', ['user' => auth()->user()]);
+        $user = auth()->user();
+
+        return view('student.profile', [
+            'user' => $user,
+            'classStatus' => $user->classStatus(),
+        ]);
     }
 
     public function updateProfile(Request $request)
@@ -138,9 +146,22 @@ class DashboardController extends Controller
             return back()->withErrors(['class_code' => 'That class code was not recognised. Check it with your lecturer and try again.']);
         }
 
-        $user->update(['lecturer_id' => $lecturer->id]);
-        ActivityLog::record('CLASS_JOINED', "Joined {$lecturer->name}'s class");
+        if ($user->lecturer_id === $lecturer->id) {
+            return back()->withErrors(['class_code' => "You're already enrolled with {$lecturer->name}."]);
+        }
 
-        return back()->with('success', "You're now enrolled with {$lecturer->name}.");
+        // A student can only have one request outstanding at a time — submitting
+        // a new code supersedes whatever was pending before, rather than piling up.
+        $user->classJoinRequests()->pending()->delete();
+
+        ClassJoinRequest::create([
+            'student_id' => $user->id,
+            'lecturer_id' => $lecturer->id,
+            'status' => 'pending',
+        ]);
+
+        ActivityLog::record('CLASS_JOIN_REQUESTED', "Requested to join {$lecturer->name}'s class");
+
+        return back()->with('success', "Request sent. You'll get access to {$lecturer->name}'s cases once they approve it.");
     }
 }

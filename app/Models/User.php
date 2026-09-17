@@ -57,6 +57,47 @@ class User extends Authenticatable
         return $this->hasMany(User::class, 'lecturer_id')->where('role', 'student');
     }
 
+    /** Class-join requests this student has made (any status, most recent first is caller's job). */
+    public function classJoinRequests()
+    {
+        return $this->hasMany(ClassJoinRequest::class, 'student_id');
+    }
+
+    /** Class-join requests students have made to this lecturer. */
+    public function receivedJoinRequests()
+    {
+        return $this->hasMany(ClassJoinRequest::class, 'lecturer_id');
+    }
+
+    /**
+     * Where a student stands on getting into a lecturer's class: already
+     * approved (lecturer_id set), waiting on a pending request, declined
+     * last time round, or never asked. Nothing here mutates state — it just
+     * reads it — so it's safe to call from any view.
+     */
+    public function classStatus(): array
+    {
+        $pending = $this->classJoinRequests()->pending()->with('lecturer')->latest()->first();
+
+        if ($this->lecturer_id) {
+            // Already approved into a class. A pending row here means they've
+            // since asked to switch to someone else — they keep their current
+            // access until that switch is decided.
+            return ['state' => 'approved', 'lecturer' => $this->lecturer, 'request' => null, 'switch_request' => $pending];
+        }
+
+        if ($pending) {
+            return ['state' => 'pending', 'lecturer' => $pending->lecturer, 'request' => $pending, 'switch_request' => null];
+        }
+
+        $latest = $this->classJoinRequests()->with('lecturer')->latest()->first();
+        if ($latest && $latest->status === 'rejected') {
+            return ['state' => 'rejected', 'lecturer' => $latest->lecturer, 'request' => $latest, 'switch_request' => null];
+        }
+
+        return ['state' => 'none', 'lecturer' => null, 'request' => null, 'switch_request' => null];
+    }
+
     public function activityLogs()
     {
         return $this->hasMany(ActivityLog::class);
