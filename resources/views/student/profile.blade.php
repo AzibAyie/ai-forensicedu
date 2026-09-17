@@ -4,6 +4,9 @@
 @section('page-title', 'Profile')
 
 @section('content')
+
+@include('partials.class-status-notice')
+
 <div class="pt-6 max-w-2xl mx-auto space-y-6">
 
     <section class="bg-black text-white px-6 py-5 flex items-center gap-4 rounded-2xl">
