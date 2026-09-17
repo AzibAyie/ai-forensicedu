@@ -18,6 +18,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'resend' => [
+        'key' => env('RESEND_KEY'),
+    ],
+
     'groq' => [
         'proxy_url' => env('GROQ_PROXY_URL', ''),
         'proxy_secret' => env('GROQ_PROXY_SECRET', ''),
