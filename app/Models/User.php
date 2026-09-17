@@ -82,20 +82,36 @@ class User extends Authenticatable
         if ($this->lecturer_id) {
             // Already approved into a class. A pending row here means they've
             // since asked to switch to someone else — they keep their current
-            // access until that switch is decided.
-            return ['state' => 'approved', 'lecturer' => $this->lecturer, 'request' => null, 'switch_request' => $pending];
+            // access until that switch is decided. If the most recent decided
+            // request pointed at a *different* lecturer than the one they're
+            // actually with, it was a switch attempt that got turned down —
+            // surface that too, otherwise a rejected switch is invisible.
+            $switchDecision = $this->classJoinRequests()
+                ->where('status', 'rejected')
+                ->where('lecturer_id', '!=', $this->lecturer_id)
+                ->with('lecturer')
+                ->latest('decided_at')
+                ->first();
+
+            return [
+                'state' => 'approved',
+                'lecturer' => $this->lecturer,
+                'request' => null,
+                'switch_request' => $pending,
+                'switch_decision' => $switchDecision,
+            ];
         }
 
         if ($pending) {
-            return ['state' => 'pending', 'lecturer' => $pending->lecturer, 'request' => $pending, 'switch_request' => null];
+            return ['state' => 'pending', 'lecturer' => $pending->lecturer, 'request' => $pending, 'switch_request' => null, 'switch_decision' => null];
         }
 
         $latest = $this->classJoinRequests()->with('lecturer')->latest()->first();
         if ($latest && $latest->status === 'rejected') {
-            return ['state' => 'rejected', 'lecturer' => $latest->lecturer, 'request' => $latest, 'switch_request' => null];
+            return ['state' => 'rejected', 'lecturer' => $latest->lecturer, 'request' => $latest, 'switch_request' => null, 'switch_decision' => null];
         }
 
-        return ['state' => 'none', 'lecturer' => null, 'request' => null, 'switch_request' => null];
+        return ['state' => 'none', 'lecturer' => null, 'request' => null, 'switch_request' => null, 'switch_decision' => null];
     }
 
     public function activityLogs()

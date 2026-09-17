@@ -79,6 +79,14 @@
                         You'll keep your access to {{ $classStatus['lecturer']->name }} until then.
                     </p>
                 </div>
+                @elseif($classStatus['switch_decision'])
+                <div class="bg-red-soft border-l-2 border-red px-4 py-3 mb-4 flex items-start gap-2.5">
+                    <span class="seal seal-alert mt-0.5">Declined</span>
+                    <p class="text-[13px] text-red leading-relaxed">
+                        Your request to switch to <strong>{{ $classStatus['switch_decision']->lecturer->name }}</strong> was declined.
+                        You're still enrolled with {{ $classStatus['lecturer']->name }} — try another code below if you'd like to switch again.
+                    </p>
+                </div>
                 @endif
             @elseif($classStatus['state'] === 'pending')
                 <div class="bg-warning-soft border-l-2 border-warning px-4 py-3 mb-4 flex items-start gap-2.5">
