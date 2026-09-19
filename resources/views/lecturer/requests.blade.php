@@ -1,6 +1,5 @@
 @extends('layouts.app')
 @section('title', 'Join Requests')
-@section('eyebrow', 'Cohort')
 @section('page-title', 'Join Requests')
 @section('page-subtitle', 'Students who entered your class code are held here until you approve them.')
 

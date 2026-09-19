@@ -1,6 +1,5 @@
 @extends('layouts.app')
 @section('title', 'Gradebook')
-@section('eyebrow', 'Cohort')
 @section('page-title', 'Gradebook')
 
 @push('styles')

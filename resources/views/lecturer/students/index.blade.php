@@ -1,6 +1,5 @@
 @extends('layouts.app')
 @section('title', 'My Students')
-@section('eyebrow', 'Cohort')
 @section('page-title', 'My Students')
 
 @section('content')
