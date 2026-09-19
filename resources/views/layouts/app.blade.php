@@ -222,6 +222,20 @@
         .fld::placeholder { color: rgb(var(--color-fg) / 0.4); }
         select.fld option { background: rgb(var(--color-input)); color: rgb(var(--color-fg)); }
 
+        /* Native date/time picker icon — dark by default, invisible on our
+           dark inputs, so invert it; light theme keeps the browser default. */
+        input[type=date]::-webkit-calendar-picker-indicator,
+        input[type=datetime-local]::-webkit-calendar-picker-indicator,
+        input[type=time]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+        :root[data-theme="light"] input[type=date]::-webkit-calendar-picker-indicator,
+        :root[data-theme="light"] input[type=datetime-local]::-webkit-calendar-picker-indicator,
+        :root[data-theme="light"] input[type=time]::-webkit-calendar-picker-indicator {
+            filter: none;
+        }
+
         /* Raw (non-.fld) text inputs/selects/textareas used in a few older forms —
            round them too so every field in the app looks consistent. */
         input:not([type=checkbox]):not([type=radio]):not([type=file]), select, textarea {
