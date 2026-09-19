@@ -439,7 +439,7 @@
                 'url'   => route('lecturer.report.show', [$e->forensicCase, $e]),
             ]);
     } elseif ($headerUser->role === 'student') {
-        $headerNotifications = \App\Models\CaseEnrollment::where('student_id', $headerUser->id)
+        $gradedNotifications = \App\Models\CaseEnrollment::where('student_id', $headerUser->id)
             ->where('status', 'graded')
             ->with(['forensicCase', 'report'])
             ->latest('updated_at')
@@ -451,6 +451,26 @@
                 'time'  => $e->updated_at,
                 'url'   => route('student.report.show', $e->forensicCase),
             ]);
+
+        $newCaseNotifications = $headerUser->lecturer_id
+            ? \App\Models\ForensicCase::available()
+                ->where('lecturer_id', $headerUser->lecturer_id)
+                ->whereNotIn('id', $headerUser->enrollments()->pluck('forensic_case_id'))
+                ->latest()
+                ->take(6)
+                ->get()
+                ->map(fn($c) => [
+                    'title' => 'New case published: ' . $c->title,
+                    'sub'   => collect([$c->incident_label, ucfirst($c->difficulty)])->filter()->implode(' · ') ?: null,
+                    'time'  => $c->created_at,
+                    'url'   => route('student.dashboard'),
+                ])
+            : collect();
+
+        $headerNotifications = $gradedNotifications->concat($newCaseNotifications)
+            ->sortByDesc('time')
+            ->take(6)
+            ->values();
     }
 @endphp
 
