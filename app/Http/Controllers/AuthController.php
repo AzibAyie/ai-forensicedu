@@ -8,7 +8,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 
@@ -129,24 +128,7 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        // TEMPORARY diagnostic logging — the user-facing message stays the
-        // same regardless (still an anti-enumeration measure), but we log
-        // what Laravel actually did server-side, since that's invisible
-        // from outside while debugging why Resend never receives anything.
-        try {
-            $status = Password::sendResetLink($request->only('email'));
-            Log::info('PASSWORD_RESET_DEBUG: broker returned', [
-                'status' => $status,
-                'mailer' => config('mail.default'),
-                'resend_key_present' => filled(config('services.resend.key')),
-                'from_address' => config('mail.from.address'),
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('PASSWORD_RESET_DEBUG: threw', [
-                'class' => get_class($e),
-                'message' => $e->getMessage(),
-            ]);
-        }
+        Password::sendResetLink($request->only('email'));
 
         // Deliberately the same message whether or not the email exists,
         // so the form can't be used to check which addresses are registered.
