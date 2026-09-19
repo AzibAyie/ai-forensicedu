@@ -59,8 +59,11 @@
                         <label class="eyebrow" for="password">Password</label>
                         <a href="{{ route('password.request') }}" class="text-[11.5px] text-blue hover:underline">Forgot password?</a>
                     </div>
-                    <input id="password" type="password" name="password" required
-                        class="fld">
+                    @include('partials.password-input', [
+                        'name' => 'password',
+                        'required' => true,
+                        'autocomplete' => 'current-password',
+                    ])
                 </div>
                 <label class="flex items-center gap-2 cursor-pointer pt-1">
                     <input type="checkbox" name="remember" class="accent-blue">

@@ -4,7 +4,7 @@
     <label class="eyebrow block mb-1.5">{{ $label }}</label>
     @endif
     <div class="relative">
-        <input :type="show ? 'text' : 'password'" name="{{ $name }}"
+        <input :type="show ? 'text' : 'password'" name="{{ $name }}" id="{{ $id ?? $name }}"
             @if($required ?? false) required @endif
             @if(! empty($minlength)) minlength="{{ $minlength }}" @endif
             autocomplete="{{ $autocomplete ?? 'new-password' }}"
