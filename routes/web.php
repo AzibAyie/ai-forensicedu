@@ -18,23 +18,6 @@ Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name(
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
-// TEMPORARY — one-off demo trigger for the inactive-student prune job, so a
-// real PRUNE_INACTIVE_STUDENT log line exists to show. Removed right after use.
-Route::get('/__demo-prune-trigger-x7q9', function () {
-    $email = 'demo-inactive-'.time().'@student.uptm.edu.my';
-    $student = \App\Models\User::create([
-        'name' => 'Demo Inactive Student',
-        'email' => $email,
-        'password' => bcrypt('Str0ng!Pass99'),
-        'role' => 'student',
-    ]);
-    \Illuminate\Support\Facades\DB::table('users')->where('id', $student->id)->update(['created_at' => now()->subMonths(5)]);
-    \Illuminate\Support\Facades\Cache::forget('inactive-students-pruned-today');
-    \Illuminate\Support\Facades\Artisan::call('students:prune-inactive');
-
-    return 'Demo email: '.$email.' | '.trim(\Illuminate\Support\Facades\Artisan::output());
-});
-
 // Leaving/switching impersonation must be reachable while authenticated as the student.
 Route::post('/impersonate/stop', [Lecturer\ImpersonationController::class, 'stop'])
     ->name('impersonate.stop')->middleware('auth');
