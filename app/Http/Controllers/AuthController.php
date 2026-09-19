@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Console\Commands\PruneInactiveStudents;
 use App\Models\ActivityLog;
 use App\Models\ClassJoinRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -15,6 +17,16 @@ class AuthController extends Controller
 {
     public function showLogin()
     {
+        // Render's free tier has no persistent process to run Laravel's
+        // scheduler, so the inactive-student prune (routes/console.php)
+        // is also triggered opportunistically here, throttled to once a
+        // day — the login page is the one route guaranteed regular traffic.
+        Cache::remember('inactive-students-pruned-today', now()->addDay(), function () {
+            app(PruneInactiveStudents::class)->handle();
+
+            return true;
+        });
+
         if (Auth::check()) {
             return redirect($this->redirectPath(Auth::user()->role));
         }
