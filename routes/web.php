@@ -18,22 +18,6 @@ Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name(
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
-// TEMPORARY — one-off migration of existing seeded students' IDs to the new
-// AM + 10-digit format. Removed right after use.
-Route::get('/__demo-fix-student-ids-k3p8', function () {
-    $changed = [];
-    \App\Models\User::where('role', 'student')->get()
-        ->filter(fn ($s) => ! $s->student_id || ! preg_match('/^AM\d{10}$/', $s->student_id))
-        ->each(function ($student) use (&$changed) {
-            $old = $student->student_id;
-            $new = sprintf('AM24%08d', $student->id);
-            $student->forceFill(['student_id' => $new])->save();
-            $changed[] = "{$student->name}: ".($old ?: '(none)')." -> {$new}";
-        });
-
-    return implode('<br>', $changed) ?: 'No students needed updating.';
-});
-
 // Leaving/switching impersonation must be reachable while authenticated as the student.
 Route::post('/impersonate/stop', [Lecturer\ImpersonationController::class, 'stop'])
     ->name('impersonate.stop')->middleware('auth');
