@@ -49,8 +49,7 @@
                 <i data-lucide="plus"></i> Build Case
             </a>
 
-            <p class="eyebrow px-5 mb-1.5 mt-5">Cohort</p>
-            <a href="{{ route('lecturer.progress') }}" class="nav-link {{ request()->routeIs('lecturer.progress*') ? 'active' : '' }}">
+            <a href="{{ route('lecturer.progress') }}" class="nav-link mt-5 {{ request()->routeIs('lecturer.progress*') ? 'active' : '' }}">
                 <i data-lucide="chart-no-axes-column"></i> Progress
             </a>
             <a href="{{ route('lecturer.gradebook') }}" class="nav-link {{ request()->routeIs('lecturer.gradebook') ? 'active' : '' }}">
