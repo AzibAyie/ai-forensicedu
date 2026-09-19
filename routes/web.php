@@ -31,6 +31,7 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('/dashboard', [Student\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [Student\DashboardController::class, 'profile'])->name('profile');
     Route::patch('/profile', [Student\DashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::patch('/profile/password', [Student\DashboardController::class, 'updatePassword'])->name('profile.password');
     Route::post('/join-class', [Student\DashboardController::class, 'joinClass'])->name('join-class');
     Route::get('/record', [Student\RecordController::class, 'index'])->name('record');
 
@@ -52,6 +53,7 @@ Route::middleware(['auth', 'role:lecturer'])->prefix('lecturer')->name('lecturer
     Route::get('/dashboard', [Lecturer\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [Lecturer\DashboardController::class, 'profile'])->name('profile');
     Route::patch('/profile', [Lecturer\DashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::patch('/profile/password', [Lecturer\DashboardController::class, 'updatePassword'])->name('profile.password');
     Route::post('/profile/regenerate-class-code', [Lecturer\DashboardController::class, 'regenerateClassCode'])->name('profile.regenerate-class-code');
 
     Route::get('/students', [Lecturer\DashboardController::class, 'students'])->name('students');

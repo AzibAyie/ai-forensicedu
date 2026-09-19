@@ -39,6 +39,42 @@
     </div>
 
     <div class="bg-surface border border-edge shadow-sm p-6 mt-5">
+        <h3 class="text-sm font-semibold text-fg mb-1">Change password</h3>
+        <p class="text-xs text-fg-2 mb-4">Use a strong password you don't use anywhere else.</p>
+
+        <form method="POST" action="{{ route('lecturer.profile.password') }}" class="space-y-4">
+            @csrf @method('PATCH')
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    @include('partials.password-input', [
+                        'name' => 'current_password',
+                        'label' => 'Current password',
+                        'required' => true,
+                        'autocomplete' => 'current-password',
+                    ])
+                </div>
+                <div>
+                    @include('partials.password-input', [
+                        'name' => 'password',
+                        'label' => 'New password',
+                        'required' => true,
+                        'minlength' => 8,
+                        'hint' => 'At least 8 characters, with upper & lower case, a number, and a symbol',
+                    ])
+                </div>
+                <div>
+                    @include('partials.password-input', [
+                        'name' => 'password_confirmation',
+                        'label' => 'Confirm new password',
+                        'required' => true,
+                    ])
+                </div>
+            </div>
+            <button type="submit" class="btn-primary">Update password</button>
+        </form>
+    </div>
+
+    <div class="bg-surface border border-edge shadow-sm p-6 mt-5">
         <h3 class="text-sm font-semibold text-fg mb-1">Your class code</h3>
         <p class="text-xs text-fg-2 mb-4">Share this code with your students — they enter it when they register (or from their own profile) to be enrolled with you. Only students with this code see the cases you publish.</p>
         <div class="flex items-center gap-3">

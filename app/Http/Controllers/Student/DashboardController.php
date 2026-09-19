@@ -10,6 +10,8 @@ use App\Models\ForensicCase;
 use App\Models\User;
 use App\Support\Achievements;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class DashboardController extends Controller
 {
@@ -130,6 +132,24 @@ class DashboardController extends Controller
         $user->update($request->only('name', 'phone', 'faculty', 'program'));
 
         return back()->with('success', 'Profile updated successfully.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $user = auth()->user();
+        $request->validate([
+            'current_password' => 'required|string',
+            'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
+        ]);
+
+        if (! Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Your current password is incorrect.']);
+        }
+
+        $user->forceFill(['password' => Hash::make($request->password)])->save();
+        ActivityLog::record('PASSWORD_CHANGED', 'Password changed from profile settings');
+
+        return back()->with('success', 'Password updated successfully.');
     }
 
     public function joinClass(Request $request)

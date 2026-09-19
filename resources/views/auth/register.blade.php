@@ -58,15 +58,20 @@
                         class="fld">
                 </div>
                 <div>
-                    <label class="eyebrow block mb-1.5">Password</label>
-                    <input type="password" name="password" required minlength="8"
-                        class="fld">
-                    <p class="text-[11px] text-fg-3 mt-1">At least 8 characters, with upper &amp; lower case, a number, and a symbol</p>
+                    @include('partials.password-input', [
+                        'name' => 'password',
+                        'label' => 'Password',
+                        'required' => true,
+                        'minlength' => 8,
+                        'hint' => 'At least 8 characters, with upper & lower case, a number, and a symbol',
+                    ])
                 </div>
                 <div>
-                    <label class="eyebrow block mb-1.5">Confirm password</label>
-                    <input type="password" name="password_confirmation" required
-                        class="fld">
+                    @include('partials.password-input', [
+                        'name' => 'password_confirmation',
+                        'label' => 'Confirm password',
+                        'required' => true,
+                    ])
                 </div>
 
                 <div x-show="role === 'student'">

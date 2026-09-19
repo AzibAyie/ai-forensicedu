@@ -66,6 +66,48 @@
 
     <section class="bg-surface border border-edge">
         <div class="px-6 py-4 border-b border-edge">
+            <h3 class="font-display text-[14px] font-semibold text-fg">Change password</h3>
+            <p class="text-[12px] text-fg-2 mt-0.5">Use a strong password you don't use anywhere else.</p>
+        </div>
+
+        <form method="POST" action="{{ route('student.profile.password') }}" class="px-6 py-5 space-y-4">
+            @csrf @method('PATCH')
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    @include('partials.password-input', [
+                        'name' => 'current_password',
+                        'label' => 'Current password',
+                        'required' => true,
+                        'autocomplete' => 'current-password',
+                    ])
+                </div>
+                <div>
+                    @include('partials.password-input', [
+                        'name' => 'password',
+                        'label' => 'New password',
+                        'required' => true,
+                        'minlength' => 8,
+                        'hint' => 'At least 8 characters, with upper & lower case, a number, and a symbol',
+                    ])
+                </div>
+                <div>
+                    @include('partials.password-input', [
+                        'name' => 'password_confirmation',
+                        'label' => 'Confirm new password',
+                        'required' => true,
+                    ])
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary text-[13px]">
+                Update password
+            </button>
+        </form>
+    </section>
+
+    <section class="bg-surface border border-edge">
+        <div class="px-6 py-4 border-b border-edge">
             <h3 class="font-display text-[14px] font-semibold text-fg">Your class</h3>
             <p class="text-[12px] text-fg-2 mt-0.5">You can only see and attempt cases published by your assigned lecturer, and joining needs their approval.</p>
         </div>
