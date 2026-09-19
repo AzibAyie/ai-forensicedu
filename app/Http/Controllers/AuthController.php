@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Console\Commands\PruneInactiveStudents;
 use App\Models\ActivityLog;
 use App\Models\ClassJoinRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -21,8 +21,11 @@ class AuthController extends Controller
         // scheduler, so the inactive-student prune (routes/console.php)
         // is also triggered opportunistically here, throttled to once a
         // day — the login page is the one route guaranteed regular traffic.
+        // Must go through Artisan::call() rather than instantiating the
+        // command directly: a Command's I/O helpers (e.g. $this->info())
+        // are only wired up when run through the console kernel.
         Cache::remember('inactive-students-pruned-today', now()->addDay(), function () {
-            app(PruneInactiveStudents::class)->handle();
+            Artisan::call('students:prune-inactive');
 
             return true;
         });
