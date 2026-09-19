@@ -82,11 +82,14 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users',
             'password' => ['required', 'confirmed', $this->passwordRules()],
             'role' => 'required|in:student,lecturer',
-            'student_id' => 'nullable|string|unique:users',
-            'staff_id' => 'nullable|string|unique:users',
+            'student_id' => ['required_if:role,student', 'nullable', 'string', 'unique:users', 'regex:/^AM\d{10}$/'],
+            'staff_id' => ['required_if:role,lecturer', 'nullable', 'string', 'unique:users', 'regex:/^L0\d{5}$/'],
             'faculty' => 'nullable|string|max:255',
             'program' => 'nullable|string|max:255',
             'class_code' => 'required_if:role,student|nullable|string',
+        ], [
+            'student_id.regex' => 'Student ID must start with AM followed by exactly 10 digits, e.g. AM2412018392.',
+            'staff_id.regex' => 'Staff ID must start with L0 followed by exactly 5 digits, e.g. L001234.',
         ]);
 
         $lecturer = null;

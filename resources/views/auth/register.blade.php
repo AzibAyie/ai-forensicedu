@@ -76,13 +76,17 @@
 
                 <div x-show="role === 'student'">
                     <label class="eyebrow block mb-1.5">Student ID</label>
-                    <input type="text" name="student_id" value="{{ old('student_id') }}" placeholder="A21EC0001"
+                    <input type="text" name="student_id" value="{{ old('student_id') }}" placeholder="AM2412018392"
+                        pattern="AM[0-9]{10}" title="AM followed by exactly 10 digits" :required="role === 'student'"
                         class="w-full bg-surface border border-edge px-3.5 py-2.5 text-[13.5px] font-mono focus:outline-none focus:border-blue transition">
+                    <p class="text-[11px] text-fg-3 mt-1">Format: AM followed by 10 digits, e.g. AM2412018392.</p>
                 </div>
                 <div x-show="role === 'lecturer'" x-cloak>
                     <label class="eyebrow block mb-1.5">Staff ID</label>
                     <input type="text" name="staff_id" value="{{ old('staff_id') }}" placeholder="L001234"
+                        pattern="L0[0-9]{5}" title="L0 followed by exactly 5 digits" :required="role === 'lecturer'"
                         class="w-full bg-surface border border-edge px-3.5 py-2.5 text-[13.5px] font-mono focus:outline-none focus:border-blue transition">
+                    <p class="text-[11px] text-fg-3 mt-1">Format: L0 followed by 5 digits, e.g. L001234.</p>
                 </div>
                 <div>
                     <label class="eyebrow block mb-1.5">Faculty</label>
