@@ -146,10 +146,20 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        Password::sendResetLink($request->only('email'));
+        // The mail provider (Resend free tier) can reject a send — e.g. a
+        // recipient outside its verified-domain allowance — and that must
+        // never surface as a 500. Log it and still show the same generic
+        // message, so the form can't be used to check which addresses are
+        // registered, and a provider hiccup can't break the page.
+        try {
+            Password::sendResetLink($request->only('email'));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('PASSWORD_RESET_EMAIL_FAILED', [
+                'email' => $request->input('email'),
+                'error' => $e->getMessage(),
+            ]);
+        }
 
-        // Deliberately the same message whether or not the email exists,
-        // so the form can't be used to check which addresses are registered.
         return back()->with('success', 'If that email is registered, a password reset link has been sent to it.');
     }
 
