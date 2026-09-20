@@ -78,25 +78,6 @@
                 Need an account?
                 <a href="{{ route('register') }}" class="text-blue font-medium hover:underline">Register</a>
             </p>
-
-            {{-- Demo credentials --}}
-            <div class="mt-9 border-t border-edge pt-5">
-                <p class="eyebrow mb-3">Demo accounts</p>
-                <div class="space-y-2 font-mono text-[11px]">
-                    <div class="flex justify-between gap-3">
-                        <span class="text-fg-3">Lecturer</span>
-                        <span class="text-fg">lecturer@forensicedu.test</span>
-                    </div>
-                    <div class="flex justify-between gap-3">
-                        <span class="text-fg-3">Student</span>
-                        <span class="text-fg">student@forensicedu.test</span>
-                    </div>
-                    <div class="flex justify-between gap-3 pt-1.5 border-t border-edge">
-                        <span class="text-fg-3">Password</span>
-                        <span class="text-fg">password</span>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
