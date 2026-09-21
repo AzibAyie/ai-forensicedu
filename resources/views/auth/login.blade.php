@@ -7,7 +7,7 @@
     {{-- Left: brand panel --}}
     <div class="relative hidden lg:flex lg:w-[46%] bg-black flex-col justify-between p-12 overflow-hidden">
         <img src="{{ asset('images/logo-icon.png') }}" alt="" class="pointer-events-none absolute -right-10 -top-14 w-72 h-72 object-contain opacity-[0.08]">
-        <img src="{{ asset('images/logo.png') }}" alt="AI-ForensicEDU" class="relative h-11 w-auto object-contain object-left">
+        <img src="{{ asset('images/logo.png') }}" alt="AI-ForensicEDU" class="relative h-16 w-auto object-contain object-left">
 
         <div class="relative">
             <p class="eyebrow text-blue mb-4">Digital forensics · case-based learning</p>
@@ -30,7 +30,7 @@
         <div class="w-full max-w-[380px]">
 
             <div class="lg:hidden mb-9">
-                <img src="{{ asset('images/logo.png') }}" alt="AI-ForensicEDU" class="h-9 w-auto object-contain object-left">
+                <img src="{{ asset('images/logo.png') }}" alt="AI-ForensicEDU" class="h-12 w-auto object-contain object-left">
             </div>
 
             <p class="eyebrow mb-2">Access</p>
