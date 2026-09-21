@@ -73,7 +73,21 @@
                     @php $evidence = $forensicCase->simulated_evidence ?? []; @endphp
                     @if(!empty($evidence))
                     <div class="p-4 bg-base border-b border-edge">
-                        <p class="text-xs font-semibold text-fg-2">{{ $evidence['overview'] ?? 'Simulated evidence for this case.' }}</p>
+                        <p class="text-xs font-semibold text-fg-2 mb-2">{{ $evidence['overview'] ?? 'Simulated evidence for this case.' }}</p>
+                        @if($forensicCase->evidence_hash)
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-[10px] font-mono text-fg-3">SHA-256:</span>
+                            <span class="text-[10px] font-mono text-fg-2 break-all">{{ $forensicCase->evidence_hash }}</span>
+                            <button type="button" @click="verifyHash()" :disabled="hashChecking"
+                                class="text-[10.5px] font-medium px-2.5 py-1 rounded border border-edge hover:bg-surface transition disabled:opacity-50">
+                                <span x-show="!hashChecking">Verify Integrity</span>
+                                <span x-show="hashChecking" x-cloak>Checking…</span>
+                            </button>
+                            <span x-show="hashResult && hashResult.verified" x-cloak class="text-[10.5px] font-semibold text-green-600">✓ Evidence intact — hash matches</span>
+                            <span x-show="hashResult && hashResult.success === false" x-cloak class="text-[10.5px] font-semibold text-red-600">Could not verify — try again</span>
+                            <span x-show="hashResult && hashResult.success && !hashResult.verified" x-cloak class="text-[10.5px] font-semibold text-red-600">⚠ Hash mismatch — evidence may have been altered</span>
+                        </div>
+                        @endif
                     </div>
 
                     {{-- Sub-tabs for evidence types --}}
@@ -582,6 +596,8 @@ function caseInvestigation() {
         hints: {},
         hintLoading: {},
         hintError: {},
+        hashChecking: false,
+        hashResult: null,
 
         init() {
             this.logActivity('CASE_VIEWED', 'Started investigation session');
@@ -674,6 +690,41 @@ function caseInvestigation() {
                     log.insertAdjacentHTML('afterbegin', row);
                 }
             } catch(e) {}
+        },
+
+        async verifyHash() {
+            if (this.hashChecking) return;
+            this.hashChecking = true;
+            this.hashResult = null;
+            try {
+                const res = await fetch('{{ route('student.case.verify-hash', $forensicCase) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                    },
+                });
+                const data = await res.json();
+                this.hashResult = data;
+                // The server already writes the activity-log row for this check;
+                // just mirror it into the on-page log for immediate feedback
+                // instead of calling logActivity() again (which would write a
+                // second, duplicate row).
+                const log = document.getElementById('activity-log');
+                if (log) {
+                    const now = new Date().toTimeString().slice(0,8);
+                    const desc = data.verified ? 'Evidence integrity verified — hash matched.' : 'Evidence integrity check FAILED — hash mismatch.';
+                    log.insertAdjacentHTML('afterbegin', `<div class="px-4 py-2.5 border-b border-edge">
+                        <div class="flex items-start gap-2">
+                            <span class="text-xs text-fg-3 font-mono w-14 flex-shrink-0">${now}</span>
+                            <div><p class="text-xs font-medium text-fg">EVIDENCE_HASH_VERIFIED</p>
+                            <p class="text-xs text-fg-3 mt-0.5">${desc}</p></div>
+                        </div></div>`);
+                }
+            } catch(e) {
+                this.hashResult = { success: false };
+            }
+            this.hashChecking = false;
         }
     }
 }

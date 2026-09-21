@@ -40,6 +40,7 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::post('/case/{forensicCase}/answer', [Student\CaseController::class, 'saveAnswer'])->name('case.save-answer');
     Route::post('/case/{forensicCase}/question/{question}/hint', [Student\CaseController::class, 'hint'])->name('case.hint');
     Route::post('/case/{forensicCase}/log', [Student\CaseController::class, 'logActivity'])->name('case.log');
+    Route::post('/case/{forensicCase}/verify-hash', [Student\CaseController::class, 'verifyHash'])->name('case.verify-hash');
     Route::post('/case/{forensicCase}/accuse', [Student\CaseController::class, 'accuseSuspect'])->name('case.accuse');
     Route::get('/case/{forensicCase}/questions.pdf', [Student\ReportController::class, 'downloadQuestions'])->name('case.questions');
 

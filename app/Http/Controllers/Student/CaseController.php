@@ -105,6 +105,30 @@ class CaseController extends Controller
         return response()->json(['success' => true, 'hint' => $question->hint]);
     }
 
+    public function verifyHash(ForensicCase $forensicCase)
+    {
+        $user = auth()->user();
+        CaseEnrollment::where('forensic_case_id', $forensicCase->id)
+            ->where('student_id', $user->id)
+            ->firstOrFail();
+
+        $recomputed = ForensicCase::hashEvidence($forensicCase->simulated_evidence ?? []);
+        $verified = $forensicCase->evidence_hash === $recomputed;
+
+        ActivityLog::record(
+            'EVIDENCE_HASH_VERIFIED',
+            $verified ? 'Evidence integrity verified — hash matches.' : 'Evidence integrity check FAILED — hash mismatch.',
+            $forensicCase->id
+        );
+
+        return response()->json([
+            'success' => true,
+            'verified' => $verified,
+            'stored_hash' => $forensicCase->evidence_hash,
+            'recomputed_hash' => $recomputed,
+        ]);
+    }
+
     public function logActivity(Request $request, ForensicCase $forensicCase)
     {
         $request->validate(['action' => 'required|string', 'description' => 'nullable|string']);

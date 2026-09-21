@@ -17,6 +17,31 @@ class ForensicCase extends Model
         'expected_duration', 'total_marks', 'ai_generated',
     ];
 
+    protected static function booted(): void
+    {
+        // A SHA-256 fingerprint of the evidence exactly as it stood when the
+        // case was authored — a tamper-evidence baseline, the same idea as
+        // hashing a real forensic image at acquisition time. Recomputed
+        // automatically whenever the evidence itself changes, never set by
+        // hand, so it can't be edited to match altered evidence.
+        static::saving(function (self $case) {
+            if ($case->isDirty('simulated_evidence')) {
+                $case->evidence_hash = static::hashEvidence($case->simulated_evidence ?? []);
+            }
+        });
+    }
+
+    public static function hashEvidence(?array $evidence): string
+    {
+        return hash('sha256', json_encode($evidence ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+    }
+
+    /** Recomputes the hash from the evidence as it stands right now and compares it to the stored baseline. */
+    public function verifyEvidenceIntegrity(): bool
+    {
+        return $this->evidence_hash === static::hashEvidence($this->simulated_evidence ?? []);
+    }
+
     protected $casts = [
         'simulated_evidence' => 'array',
         'timeline_events' => 'array',
