@@ -14,6 +14,9 @@
             <h2 class="font-display text-[34px] font-semibold text-white leading-[1.15] mb-5">
                 Read the logs.<br>Build the timeline.<br>Name the intrusion.
             </h2>
+            <p class="text-[14px] text-white/70 leading-relaxed max-w-sm">
+                Investigate simulated breaches using real audit trails, database records, and network captures, then file a report your lecturer grades.
+            </p>
         </div>
 
         <div class="relative font-mono text-[10px] text-white/50 uppercase tracking-[0.14em] space-y-1.5">
