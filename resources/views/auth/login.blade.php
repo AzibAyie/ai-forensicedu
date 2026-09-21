@@ -10,7 +10,7 @@
         <img src="{{ asset('images/logo.png') }}" alt="AI-ForensicEDU" class="relative h-16 w-auto object-contain object-left">
 
         <div class="relative">
-            <p class="font-display text-[17px] font-semibold uppercase tracking-[0.06em] text-blue mb-4">AI-ForensicEDU</p>
+            <p class="font-display text-[17px] font-semibold uppercase tracking-[0.06em] text-blue mb-4">AI-ForensicEDU System</p>
             <h2 class="font-display text-[34px] font-semibold text-white leading-[1.15] mb-5">
                 Read the logs.<br>Build the timeline.<br>Name the intrusion.
             </h2>
