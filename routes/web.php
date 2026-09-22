@@ -8,20 +8,6 @@ use Illuminate\Support\Facades\Route;
 // ── Auth ──────────────────────────────────────────────────────────
 Route::get('/', fn () => redirect()->route('login'));
 
-// TEMP: one-off cleanup of a confirmed, exact whitelist of leftover
-// QA/test student accounts. Deletes only these specific student_id
-// values; returns a count only, no personal data. Removed after use.
-Route::middleware(['auth', 'role:lecturer'])->post('/__cleanup-students-k7m3', function () {
-    $ids = [
-        'AM2412018392', 'AM2400000022', 'AM2400000021', 'AM2400000023',
-        'AM2400000015', 'AM2400000018', 'AM2400000016', 'AM2400000012',
-        'AM2400000020', 'AM2400000013',
-    ];
-    $count = \App\Models\User::where('role', 'student')->whereIn('student_id', $ids)->count();
-    \App\Models\User::where('role', 'student')->whereIn('student_id', $ids)->delete();
-
-    return response()->json(['deleted' => $count]);
-});
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
