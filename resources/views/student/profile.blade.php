@@ -169,6 +169,31 @@
         </div>
     </section>
 
+    <section class="bg-surface border border-red/40">
+        <div class="px-6 py-4 border-b border-red/40">
+            <h3 class="font-display text-[14px] font-semibold text-red">Danger zone</h3>
+            <p class="text-[12px] text-fg-2 mt-0.5">Permanently delete your account. This removes your enrolments, answers, reports, and activity log — it cannot be undone.</p>
+        </div>
+
+        <form method="POST" action="{{ route('student.profile.destroy') }}" class="px-6 py-5 space-y-4"
+            onsubmit="return confirm('Delete your account permanently? All your cases, answers, and reports will be deleted too. This cannot be undone.')">
+            @csrf @method('DELETE')
+
+            <div class="max-w-sm">
+                @include('partials.password-input', [
+                    'name' => 'password',
+                    'label' => 'Confirm your password',
+                    'required' => true,
+                    'autocomplete' => 'current-password',
+                ])
+            </div>
+
+            <button type="submit" class="btn-danger text-[13px]">
+                Delete my account
+            </button>
+        </form>
+    </section>
+
     <p class="text-[12.5px] text-fg-2">
         Looking for your scores and case history?
         <a href="{{ route('student.record') }}" class="text-blue font-medium hover:underline">Open your record →</a>

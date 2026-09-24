@@ -152,6 +152,25 @@ class DashboardController extends Controller
         return back()->with('success', 'Password updated successfully.');
     }
 
+    public function deleteAccount(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate(['password' => 'required|string']);
+
+        if (! Hash::check($request->password, $user->password)) {
+            return back()->withErrors(['password' => 'Incorrect password.'])->withInput();
+        }
+
+        auth()->logout();
+        $user->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')->with('success', 'Your account and all associated data have been deleted.');
+    }
+
     public function joinClass(Request $request)
     {
         $request->validate(['class_code' => 'required|string']);

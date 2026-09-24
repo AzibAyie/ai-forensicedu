@@ -33,6 +33,7 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('/profile', [Student\DashboardController::class, 'profile'])->name('profile');
     Route::patch('/profile', [Student\DashboardController::class, 'updateProfile'])->name('profile.update');
     Route::patch('/profile/password', [Student\DashboardController::class, 'updatePassword'])->name('profile.password');
+    Route::delete('/profile', [Student\DashboardController::class, 'deleteAccount'])->name('profile.destroy');
     Route::post('/join-class', [Student\DashboardController::class, 'joinClass'])->name('join-class');
     Route::get('/record', [Student\RecordController::class, 'index'])->name('record');
 
