@@ -363,7 +363,7 @@
                         </div>
                         <div x-show="hints[{{ $question->id }}]" x-cloak
                             class="mt-2 bg-blue-soft border border-edge px-3 py-2 text-xs text-fg">
-                            💡 <span x-text="hints[{{ $question->id }}]"></span>
+                            💡 <span class="break-words" x-text="hints[{{ $question->id }}]"></span>
                         </div>
                         <p x-show="hintError[{{ $question->id }}]" x-cloak class="mt-1 text-xs text-red" x-text="hintError[{{ $question->id }}]"></p>
                     </div>

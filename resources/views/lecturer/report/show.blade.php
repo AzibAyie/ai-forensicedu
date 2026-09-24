@@ -114,13 +114,13 @@
                 </div>
                 <p class="text-xs text-fg-2 mb-2 font-medium">Strengths:</p>
                 <ul class="text-xs text-fg-2 space-y-1 mb-3">
-                    <template x-for="s in aiResult?.strengths || []"><li class="flex gap-1"><span class="text-success">✓</span><span x-text="s"></span></li></template>
+                    <template x-for="s in aiResult?.strengths || []"><li class="flex gap-1"><span class="text-success flex-shrink-0">✓</span><span class="break-words min-w-0" x-text="s"></span></li></template>
                 </ul>
                 <p class="text-xs text-fg-2 mb-2 font-medium">Areas to improve:</p>
                 <ul class="text-xs text-fg-2 space-y-1 mb-3">
-                    <template x-for="w in aiResult?.weaknesses || []"><li class="flex gap-1"><span class="text-red">!</span><span x-text="w"></span></li></template>
+                    <template x-for="w in aiResult?.weaknesses || []"><li class="flex gap-1"><span class="text-red flex-shrink-0">!</span><span class="break-words min-w-0" x-text="w"></span></li></template>
                 </ul>
-                <p class="text-xs text-fg-2 leading-relaxed" x-text="aiResult?.detailed_feedback"></p>
+                <p class="text-xs text-fg-2 leading-relaxed break-words" x-text="aiResult?.detailed_feedback"></p>
                 <button @click="applyAIScore()" class="mt-3 w-full text-xs bg-ai text-white py-1.5  hover:bg-ai-hover transition rounded-lg">
                     Apply AI Score ({{ '' }}<span x-text="aiResult?.overall_score"></span>%)
                 </button>
@@ -132,7 +132,7 @@
                 @if($report->ai_suggested_marks !== null)
                 <p class="text-sm text-ai font-bold mb-2">Suggested: {{ $report->ai_suggested_marks }}/{{ $forensicCase->total_marks }}</p>
                 @endif
-                <p class="text-xs text-fg-2 leading-relaxed">{{ $report->ai_feedback }}</p>
+                <p class="text-xs text-fg-2 leading-relaxed break-words">{{ $report->ai_feedback }}</p>
             </div>
             @endif
 
