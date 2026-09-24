@@ -160,7 +160,7 @@ Respond ONLY with valid JSON (no markdown, no explanation) in this exact structu
 2. Extract or summarize a 2-3 sentence description of the incident.
 3. Extract the full scenario narrative as written in the document (clean up formatting, keep the substance).
 4. Extract the investigation questions as written in the document, preserving their wording and order, but strip out any inline marks/points text (e.g. \"(20 marks)\") from the question wording itself - put that value in the separate \"marks\" field instead. If marks aren't stated for a question, split marks evenly across all questions so they total 100.
-5. Extract or write learning objectives and investigation instructions if the document doesn't already state them.
+5. Extract or write learning objectives and investigation instructions. Even if the document already states them, reformat them as a clean numbered list with a real line break before each numbered item (1. / 2. / 3.) - do not return them as one run-on paragraph, even if that is how the source document's text extraction flattened them.
 6. Generate NEW simulated evidence (audit logs, database records, network logs, system info) that a student could actually use to answer the extracted questions. The evidence must be internally consistent with the scenario and specific enough to support each question.
 
 DOCUMENT:

@@ -61,8 +61,8 @@
                     <div>
                         <p class="text-xs font-semibold text-fg-2 uppercase tracking-wide mb-2">Learning Objectives</p>
                         <div class="text-sm text-fg space-y-1 leading-relaxed">
-                            @foreach(explode("\n", $forensicCase->learning_objectives) as $obj)
-                                @if(trim($obj))<p>{{ trim($obj) }}</p>@endif
+                            @foreach(\App\Models\ForensicCase::splitListField($forensicCase->learning_objectives) as $obj)
+                                <p>{{ $obj }}</p>
                             @endforeach
                         </div>
                     </div>
@@ -249,10 +249,8 @@
                 {{-- Instructions Tab --}}
                 <div x-show="activeTab === 'instructions'" x-transition.opacity.duration.200ms class="p-5">
                     <div class="prose prose-sm max-w-none text-fg">
-                        @foreach(explode("\n", $forensicCase->investigation_instructions) as $line)
-                            @if(trim($line))
-                                <p class="mb-2 leading-relaxed">{{ trim($line) }}</p>
-                            @endif
+                        @foreach(\App\Models\ForensicCase::splitListField($forensicCase->investigation_instructions) as $line)
+                            <p class="mb-2 leading-relaxed">{{ $line }}</p>
                         @endforeach
                     </div>
                 </div>

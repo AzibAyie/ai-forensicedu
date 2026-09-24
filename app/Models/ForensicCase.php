@@ -123,6 +123,27 @@ class ForensicCase extends Model
         return $this->password && $input === $this->password;
     }
 
+    /**
+     * Split a numbered-list field (learning_objectives, investigation_instructions)
+     * into one entry per item. AI-generated text normally has a real newline before
+     * each "1. / 2. / 3." item, but text extracted from an uploaded PDF often arrives
+     * as one flattened paragraph with no newlines at all (PDF text extraction drops
+     * the list's original line breaks). Falling back to splitting on the numbering
+     * itself keeps both cases readable instead of rendering one run-on block.
+     */
+    public static function splitListField(?string $text): array {
+        $text = trim((string) $text);
+        if ($text === '') return [];
+
+        $lines = array_values(array_filter(array_map('trim', preg_split('/\r?\n+/', $text))));
+
+        if (count($lines) <= 1 && preg_match_all('/(?<!\d)\d{1,2}\.\s+/', $text) > 1) {
+            $lines = array_values(array_filter(array_map('trim', preg_split('/(?=(?<!\d)\d{1,2}\.\s)/', $text))));
+        }
+
+        return $lines;
+    }
+
     public function submittedCount(): int {
         return $this->enrollments()->where('status', 'submitted')->orWhere('status', 'graded')->count();
     }
