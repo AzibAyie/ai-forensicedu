@@ -154,45 +154,6 @@
             </p>
         </div>
 
-        {{-- Timeline & audit log authoring --}}
-        <div class="bg-surface border border-edge p-6">
-            <div class="flex items-center justify-between mb-4 pb-2 border-b border-edge">
-                <div>
-                    <h3 class="font-display text-[14px] font-semibold text-fg">Timeline &amp; simulated events</h3>
-                    <p class="text-[12px] text-fg-3 mt-0.5">Optional. Adds your own entries on top of the generated evidence for this incident type.</p>
-                </div>
-            </div>
-
-            <p class="eyebrow mb-2">Incident timeline</p>
-            <div class="space-y-2 mb-5">
-                <template x-for="(t, i) in timeline" :key="'t'+i">
-                    <div class="flex gap-2">
-                        <input type="text" :name="`timeline_events[${i}][timestamp]`" x-model="t.timestamp"
-                            placeholder="2024-03-15 02:14" class="fld font-mono" style="max-width:190px">
-                        <input type="text" :name="`timeline_events[${i}][event]`" x-model="t.event"
-                            placeholder="Attacker authenticated after 47 attempts" class="fld">
-                        <button type="button" @click="timeline.splice(i,1)" class="btn-danger px-3">×</button>
-                    </div>
-                </template>
-            </div>
-            <button type="button" @click="timeline.push({timestamp:'',event:''})" class="btn-ghost px-3 py-2 mb-6">+ Timeline entry</button>
-
-            <p class="eyebrow mb-2">Additional audit log lines</p>
-            <div class="space-y-2 mb-4">
-                <template x-for="(l, i) in customLogs" :key="'l'+i">
-                    <div class="grid grid-cols-12 gap-2">
-                        <input type="text" :name="`custom_logs[${i}][timestamp]`" x-model="l.timestamp" placeholder="timestamp" class="fld font-mono col-span-3">
-                        <input type="text" :name="`custom_logs[${i}][user]`" x-model="l.user" placeholder="user" class="fld font-mono col-span-2">
-                        <input type="text" :name="`custom_logs[${i}][action]`" x-model="l.action" placeholder="ACTION" class="fld font-mono col-span-2">
-                        <input type="text" :name="`custom_logs[${i}][ip]`" x-model="l.ip" placeholder="IP" class="fld font-mono col-span-2">
-                        <input type="text" :name="`custom_logs[${i}][details]`" x-model="l.details" placeholder="details" class="fld col-span-2">
-                        <button type="button" @click="customLogs.splice(i,1)" class="btn-danger px-2 col-span-1">×</button>
-                    </div>
-                </template>
-            </div>
-            <button type="button" @click="customLogs.push({timestamp:'',user:'',action:'',ip:'',details:''})" class="btn-ghost px-3 py-2">+ Log line</button>
-        </div>
-
         {{-- Question sheet --}}
         <div class="bg-surface border border-edge p-6">
             <h3 class="font-display text-[14px] font-semibold text-fg mb-1 pb-2 border-b border-edge">Question sheet (PDF)</h3>
@@ -273,8 +234,6 @@ function caseCreator() {
         generatingFromPdf: false,
         pdfAiError: '',
         pdfAiSuccess: false,
-        timeline: [{timestamp:'',event:''}],
-        customLogs: [],
         form: {
             title: '',
             incident_type: '',
